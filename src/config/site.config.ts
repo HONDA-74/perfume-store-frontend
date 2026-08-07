@@ -8,7 +8,7 @@ import { env } from '@/config/env';
  */
 export const siteConfig = {
   name: env.appName,
-  description: 'A high-end e-commerce platform for bespoke, luxury fragrances.',
+  description: 'Discover rare, exclusive fragrances curated for discerning collectors.',
   locale: 'en-US',
   direction: 'ltr',
   containers: {

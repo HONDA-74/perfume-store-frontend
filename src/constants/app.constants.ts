@@ -19,3 +19,9 @@ export const PAGINATION_DEFAULTS = {
   limit: 10,
   maxLimit: 50,
 } as const;
+
+/** Application metadata */
+export const APP_META = {
+  name: 'KENZ',
+  tagline: 'Discover the world\'s fragrance treasures.',
+} as const;

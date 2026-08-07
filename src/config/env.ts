@@ -12,7 +12,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   VITE_API_BASE_URL: z.string().url(),
   VITE_API_TIMEOUT_MS: z.coerce.number().positive().default(15000),
-  VITE_APP_NAME: z.string().default('Luxury Perfume Store'),
+  VITE_APP_NAME: z.string().default('KENZ'),
   VITE_APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
   VITE_DEV_SERVER_PORT: z.coerce.number().positive().default(5173),
 });

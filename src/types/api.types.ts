@@ -1,6 +1,6 @@
 /**
  * Structural types mirroring the backend's standardized response envelope
- * (Luxury Perfume Store API — AI_RULES.md §19 / API_BLUEPRINT.md §1.2-1.3).
+ * (KENZ API — AI_RULES.md §19 / API_BLUEPRINT.md §1.2-1.3).
  * These are shape contracts only — no fetching logic lives here.
  */
 

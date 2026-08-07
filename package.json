@@ -1,8 +1,8 @@
 {
-  "name": "luxury-perfume-store-web",
+  "name": "kenz-web",
   "version": "0.1.0",
   "private": true,
-  "description": "Frontend scaffold for the Luxury Perfume Store — React 19 + TypeScript + Vite.",
+  "description": "Frontend for KENZ — React 19 + TypeScript + Vite.",
   "type": "module",
   "engines": {
     "node": ">=20.0.0"

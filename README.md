@@ -1,6 +1,6 @@
-# Luxury Perfume Store — Frontend
+# KENZ — Frontend
 
-React 19 + TypeScript + Vite frontend for the Luxury Perfume Store.
+React 19 + TypeScript + Vite frontend for KENZ.
 
 > **Status: Architecture scaffold only.** No pages, features, business logic,
 > API integration, or authentication are implemented yet. This repository
