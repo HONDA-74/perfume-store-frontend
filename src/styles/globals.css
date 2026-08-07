@@ -99,15 +99,48 @@
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+  --shadow-inner: var(--shadow-inner);
   --shadow-gold: var(--shadow-gold);
+
+  /* Elevation */
+  --elevation-0: var(--elevation-0);
+  --elevation-1: var(--elevation-1);
+  --elevation-2: var(--elevation-2);
+  --elevation-3: var(--elevation-3);
+  --elevation-4: var(--elevation-4);
+
+  /* Border Width */
+  --border-width-default: var(--border-width-default);
+  --border-width-medium: var(--border-width-medium);
+  --border-width-thick: var(--border-width-thick);
+  --border-width-none: var(--border-width-none);
 
   /* Motion */
   --ease-standard: var(--ease-standard);
   --ease-enter: var(--ease-enter);
   --ease-exit: var(--ease-exit);
+  --ease-bounce: var(--ease-bounce);
   --duration-fast: var(--duration-fast);
   --duration-normal: var(--duration-normal);
   --duration-slow: var(--duration-slow);
+  --duration-slower: var(--duration-slower);
+
+  /* Animations */
+  --animation-spin: var(--animation-spin);
+  --animation-ping: var(--animation-ping);
+  --animation-pulse: var(--animation-pulse);
+  --animation-bounce: var(--animation-bounce);
+  --animation-fade-in: var(--animation-fade-in);
+  --animation-fade-out: var(--animation-fade-out);
+  --animation-slide-in-from-top: var(--animation-slide-in-from-top);
+  --animation-slide-in-from-bottom: var(--animation-slide-in-from-bottom);
+  --animation-slide-in-from-left: var(--animation-slide-in-from-left);
+  --animation-slide-in-from-right: var(--animation-slide-in-from-right);
+  --animation-slide-out-to-top: var(--animation-slide-out-to-top);
+  --animation-slide-out-to-bottom: var(--animation-slide-out-to-bottom);
+  --animation-slide-out-to-left: var(--animation-slide-out-to-left);
+  --animation-slide-out-to-right: var(--animation-slide-out-to-right);
 
   /* Z-index */
   --z-deep: var(--z-deep);
@@ -171,6 +204,147 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+
+  /* Keyframe Animations */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes ping {
+    75%,
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateY(-25%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+      transform: none;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes slide-in-from-top {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-from-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-in-from-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-out-to-top {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes slide-out-to-bottom {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes slide-out-to-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes slide-out-to-right {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
     }
   }
 }

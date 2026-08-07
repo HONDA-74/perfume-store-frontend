@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react';
 import { QueryProvider } from './query-provider';
+import { ThemeProvider } from './theme-provider';
 
 /**
  * Single composition root for every app-wide provider. `main.tsx` wraps the
@@ -8,5 +9,9 @@ import { QueryProvider } from './query-provider';
  * auth session provider) are added here, in one place, once they exist.
  */
 export function AppProviders({ children }: PropsWithChildren) {
-  return <QueryProvider>{children}</QueryProvider>;
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="luxury-perfume-store-theme">
+      <QueryProvider>{children}</QueryProvider>
+    </ThemeProvider>
+  );
 }
