@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router';
 import { ROUTES } from '@/constants';
 import { RootLayout, RouteErrorBoundary } from '@/components/layouts';
 import { RoutePlaceholder } from './route-placeholder';
+import { HomePage } from './home';
 
 /**
  * Route tree definition, consumed by `src/routes/router.tsx`.
@@ -23,7 +24,7 @@ export const routeConfig: RouteObject[] = [
     element: <RootLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { index: true, element: <RoutePlaceholder label="Home" /> },
+      { index: true, element: <HomePage /> },
       { path: ROUTES.shop.slice(1), element: <RoutePlaceholder label="Shop / Catalog" /> },
       {
         path: ROUTES.productDetail.slice(1),

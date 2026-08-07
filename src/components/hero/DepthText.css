@@ -1,0 +1,36 @@
+.depth-text {
+  display: inline-block;
+  perspective: var(--depth-text-perspective);
+  perspective-origin: 50% 48%;
+  isolation: isolate;
+}
+
+.depth-text__stage {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  transform-style: preserve-3d;
+  transform: rotateX(-2.4deg) rotateY(3.15deg);
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.depth-text__layer,
+.depth-text__face {
+  grid-area: 1 / 1;
+  display: inline-block;
+  font-size: var(--depth-text-font-size);
+  font-weight: var(--depth-text-font-weight);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  user-select: none;
+  filter: drop-shadow(var(--depth-text-shadow));
+}
+
+.depth-text__face {
+  color: var(--depth-text-face-color);
+  position: relative;
+  z-index: 1;
+  filter: none;
+}
