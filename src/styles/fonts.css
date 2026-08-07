@@ -1,0 +1,33 @@
+/**
+ * Font loading layer.
+ *
+ * The actual font files are currently loaded via the Google Fonts <link>
+ * tags in index.html (preconnect + stylesheet), which is sufficient for
+ * this scaffold. When licensed brand font files are available, self-host
+ * them by:
+ *
+ *   1. Placing woff2 files in `src/assets/fonts/`
+ *   2. Adding @font-face declarations here (see commented example)
+ *   3. Removing the Google Fonts <link> tags from index.html
+ *
+ * This file is imported once, from src/styles/globals.css, so the swap
+ * point stays centralized.
+ */
+
+/*
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('@/assets/fonts/playfair-display-variable.woff2') format('woff2-variations');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('@/assets/fonts/plus-jakarta-sans-variable.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+*/

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0F0F11" />
+    <meta
+      name="description"
+      content="Luxury Perfume Store — a premium fragrance e-commerce experience."
+    />
+    <title>Luxury Perfume Store</title>
+
+    <!--
+      Font loading strategy (Design_System.md §1.2 / ARCHITECTURE.md §5):
+        Display/Headings — Playfair Display (serif)
+        Body/Interface   — Plus Jakarta Sans (sans-serif)
+      Preconnect first for faster handshake, then load only the weights the
+      type scale in Design_System.md actually uses. Swap into src/styles/fonts.css
+      for a self-hosted setup once real brand font files are licensed — this
+      Google Fonts link is a placeholder wired end-to-end so the scaffold
+      renders correctly out of the box.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

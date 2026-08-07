@@ -1,0 +1,176 @@
+@import 'tailwindcss';
+
+@import './tokens.css';
+@import './fonts.css';
+
+/**
+ * Tailwind v4 is CSS-first: `@theme` maps our design tokens (tokens.css)
+ * into Tailwind's utility namespace, so `bg-primary-500`, `text-neutral-900`,
+ * `font-serif`, `shadow-gold`, `rounded-lg`, `duration-normal`, `z-modal`,
+ * etc. all become available utilities generated from the SAME variables
+ * consumed anywhere else via `var(--color-primary-500)`.
+ *
+ * The `hsl(var(--x) / <alpha-value>)` pattern (Design_System.md §2.2) lets
+ * Tailwind opacity modifiers (`bg-primary-500/50`) work correctly against
+ * HSL channel-triplet variables.
+ */
+@theme {
+  /* Colors */
+  --color-primary-50: hsl(var(--color-primary-50) / <alpha-value>);
+  --color-primary-100: hsl(var(--color-primary-100) / <alpha-value>);
+  --color-primary-200: hsl(var(--color-primary-200) / <alpha-value>);
+  --color-primary-300: hsl(var(--color-primary-300) / <alpha-value>);
+  --color-primary-400: hsl(var(--color-primary-400) / <alpha-value>);
+  --color-primary-500: hsl(var(--color-primary-500) / <alpha-value>);
+  --color-primary-600: hsl(var(--color-primary-600) / <alpha-value>);
+  --color-primary-700: hsl(var(--color-primary-700) / <alpha-value>);
+  --color-primary-800: hsl(var(--color-primary-800) / <alpha-value>);
+  --color-primary-900: hsl(var(--color-primary-900) / <alpha-value>);
+
+  --color-neutral-0: hsl(var(--color-neutral-0) / <alpha-value>);
+  --color-neutral-50: hsl(var(--color-neutral-50) / <alpha-value>);
+  --color-neutral-100: hsl(var(--color-neutral-100) / <alpha-value>);
+  --color-neutral-200: hsl(var(--color-neutral-200) / <alpha-value>);
+  --color-neutral-300: hsl(var(--color-neutral-300) / <alpha-value>);
+  --color-neutral-400: hsl(var(--color-neutral-400) / <alpha-value>);
+  --color-neutral-500: hsl(var(--color-neutral-500) / <alpha-value>);
+  --color-neutral-600: hsl(var(--color-neutral-600) / <alpha-value>);
+  --color-neutral-700: hsl(var(--color-neutral-700) / <alpha-value>);
+  --color-neutral-800: hsl(var(--color-neutral-800) / <alpha-value>);
+  --color-neutral-900: hsl(var(--color-neutral-900) / <alpha-value>);
+
+  --color-success-50: hsl(var(--color-success-50) / <alpha-value>);
+  --color-success-500: hsl(var(--color-success-500) / <alpha-value>);
+  --color-success-700: hsl(var(--color-success-700) / <alpha-value>);
+
+  --color-warning-50: hsl(var(--color-warning-50) / <alpha-value>);
+  --color-warning-500: hsl(var(--color-warning-500) / <alpha-value>);
+  --color-warning-700: hsl(var(--color-warning-700) / <alpha-value>);
+
+  --color-error-50: hsl(var(--color-error-50) / <alpha-value>);
+  --color-error-500: hsl(var(--color-error-500) / <alpha-value>);
+  --color-error-700: hsl(var(--color-error-700) / <alpha-value>);
+
+  --color-info-50: hsl(var(--color-info-50) / <alpha-value>);
+  --color-info-500: hsl(var(--color-info-500) / <alpha-value>);
+  --color-info-700: hsl(var(--color-info-700) / <alpha-value>);
+
+  /* Typography */
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* Type scale — Design_System.md §1.2 */
+  --text-display: 3.75rem;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.02em;
+  --text-h1: 3rem;
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: 2.25rem;
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: 1.75rem;
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h4: 1.375rem;
+  --text-h4--line-height: 1.3;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.6;
+  --text-body-md: 1rem;
+  --text-body-md--line-height: 1.5;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.4;
+  --text-body-sm--letter-spacing: 0.01em;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.33;
+  --text-caption--letter-spacing: 0.02em;
+
+  /* Radius */
+  --radius-none: var(--radius-none);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+
+  /* Shadow */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-gold: var(--shadow-gold);
+
+  /* Motion */
+  --ease-standard: var(--ease-standard);
+  --ease-enter: var(--ease-enter);
+  --ease-exit: var(--ease-exit);
+  --duration-fast: var(--duration-fast);
+  --duration-normal: var(--duration-normal);
+  --duration-slow: var(--duration-slow);
+
+  /* Z-index */
+  --z-deep: var(--z-deep);
+  --z-base: var(--z-base);
+  --z-sticky: var(--z-sticky);
+  --z-dropdown: var(--z-dropdown);
+  --z-navbar: var(--z-navbar);
+  --z-drawer: var(--z-drawer);
+  --z-modal: var(--z-modal);
+  --z-popover: var(--z-popover);
+  --z-toast: var(--z-toast);
+  --z-tooltip: var(--z-tooltip);
+
+  /* Container max-widths — Design_System.md §4.1 */
+  --container-2xl: 1440px;
+}
+
+/**
+ * Base layer — resets and defaults only. No component styling here
+ * (Design_System.md §6.3: shared components live under src/components/ui/,
+ * built with cva, not global CSS).
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: theme(--color-neutral-200);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-neutral-50 text-neutral-700 antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
+  }
+
+  /* Design_System.md §9 / UX_FLOW.md §10 — visible keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid theme(--color-primary-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Design_System.md §5.2 — mandatory reduced-motion compliance. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
