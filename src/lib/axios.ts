@@ -1,45 +1,143 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosError } from 'axios';
 import { env } from '@/config/env';
+import { handleApiError } from './api-error-handler';
+import { tokenStorage } from '@/stores/auth.store';
 
 /**
- * Single shared Axios instance for the whole app. Feature-level API modules
- * (under `src/services/` or a feature's own `services/` folder) should
- * import this instance rather than calling `axios` directly — this is the
- * one place base URL, timeout, and cross-cutting interceptors are defined
- * (mirrors the backend's "one shared axios instance" convention referenced
- * in Design_System.md §10 "API Integration Layer").
- *
- * Intentionally NOT wired up yet:
- *  - Authorization header injection (no auth implemented in this scaffold)
- *  - 401/refresh-token retry flow
- *  - Toast/error-notification side effects
- * Those are feature/business concerns, added when Auth and API integration
- * are actually implemented — this file only establishes the transport layer.
+ * Single shared Axios instance for the whole app.
+ * 
+ * Per backend API structure:
+ * - Base URL: VITE_API_BASE_URL (e.g., http://localhost:3000/api/v1)
+ * - Timeout: VITE_API_TIMEOUT_MS
+ * - JWT auth via Bearer token
+ * - Token refresh on 401
+ * 
+ * Token management is handled by auth.store.ts via tokenStorage adapter.
  */
 export const apiClient: AxiosInstance = axios.create({
   baseURL: env.apiBaseUrl,
   timeout: env.apiTimeoutMs,
   headers: {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
 });
 
 /**
- * Request interceptor placeholder. Left as an explicit pass-through (not
- * omitted) so the extension point is obvious — e.g. attaching a Bearer
- * token once Auth exists.
+ * Track if a token refresh is in progress to prevent multiple simultaneous refreshes.
  */
-apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  return config;
-});
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason: unknown) => void;
+}> = [];
+
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
 
 /**
- * Response interceptor placeholder. Left as an explicit pass-through/reject
- * so the standardized backend envelope (`{ success, message, data, meta }`
- * per the API's AI_RULES.md §19) has one obvious place to be unwrapped once
- * real API integration begins.
+ * Request interceptor for authentication.
+ * Injects Bearer token if available.
+ */
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = tokenStorage.getAccessToken();
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+/**
+ * Response interceptor for standardized error handling and token refresh.
  */
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    // Normalize error
+    const normalizedError = handleApiError(error);
+
+    // Handle 401 Unauthorized - attempt token refresh
+    if (normalizedError.status === 401 && originalRequest && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Wait for the ongoing refresh to complete
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = tokenStorage.getRefreshToken();
+
+      if (!refreshToken) {
+        // No refresh token available - clear tokens and reject
+        tokenStorage.clearTokens();
+        processQueue(new Error('No refresh token available'), null);
+        isRefreshing = false;
+        return Promise.reject(normalizedError);
+      }
+
+      try {
+        // Attempt to refresh the token
+        const { data } = await axios.post(
+          `${env.apiBaseUrl}/auth/refresh`,
+          { refreshToken },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        const { accessToken, refreshToken: newRefreshToken } = data.data;
+
+        // Store new tokens
+        tokenStorage.setTokens(accessToken, newRefreshToken);
+
+        // Update authorization header
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+
+        // Process queued requests
+        processQueue(null, accessToken);
+        isRefreshing = false;
+
+        // Retry the original request
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed - clear tokens and reject all queued requests
+        tokenStorage.clearTokens();
+        processQueue(refreshError instanceof Error ? refreshError : new Error('Token refresh failed'), null);
+        isRefreshing = false;
+        return Promise.reject(normalizedError);
+      }
+    }
+
+    return Promise.reject(normalizedError);
+  }
 );

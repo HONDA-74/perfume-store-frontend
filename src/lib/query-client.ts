@@ -1,20 +1,59 @@
 import { QueryClient } from '@tanstack/react-query';
 
 /**
- * Shared QueryClient instance. Consumed by `src/providers/query-provider.tsx`.
- * Defaults are conservative and generic — feature-specific `staleTime`/
- * `retry` overrides belong on individual `useQuery` calls inside
- * `src/features/*`, not here.
+ * Shared QueryClient instance for TanStack React Query.
+ * 
+ * Configuration is tailored for e-commerce applications:
+ * - Longer stale times for catalog data (products, categories, brands)
+ * - Shorter stale times for user-specific data (cart, wishlist, orders)
+ * - Conservative retry behavior
+ * - No automatic refetch on window focus
+ * 
+ * Feature-specific overrides belong in individual useQuery calls.
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // 1 minute
-      gcTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
+      // Default stale time: 2 minutes
+      // Catalog data (products, categories) often override this with longer times
+      staleTime: 2 * 60 * 1000,
+      
+      // Garbage collection time: 10 minutes
+      // Keep unused data in cache for potential reuse
+      gcTime: 10 * 60 * 1000,
+      
+      // Retry once for network/timeout errors
+      // Don't retry auth errors (401/403) or client errors (400/422)
+      retry: (failureCount, error: any) => {
+        // Don't retry on auth errors
+        if (error?.status === 401 || error?.status === 403) {
+          return false;
+        }
+        
+        // Don't retry on client errors
+        if (error?.status >= 400 && error?.status < 500) {
+          return false;
+        }
+        
+        // Retry once for server/network errors
+        return failureCount < 1;
+      },
+      
+      // Don't refetch on window focus
+      // E-commerce data doesn't need aggressive refetching
       refetchOnWindowFocus: false,
+      
+      // Don't refetch on reconnect by default
+      // Let user trigger refresh if needed
+      refetchOnReconnect: false,
+      
+      // Don't refetch on mount if data is fresh
+      refetchOnMount: true,
     },
+    
     mutations: {
+      // Never retry mutations automatically
+      // User should explicitly retry failed actions
       retry: 0,
     },
   },

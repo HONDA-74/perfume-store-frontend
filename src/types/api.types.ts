@@ -14,7 +14,7 @@ export interface ApiSuccessResponse<T> {
 export interface ApiErrorResponse {
   success: false;
   message: string;
-  errors: unknown[];
+  errors?: unknown[];
 }
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
@@ -29,4 +29,34 @@ export interface PaginationMeta {
 export interface PaginatedData<T> {
   items: T[];
   meta: PaginationMeta;
+}
+
+/**
+ * Common query parameters for list endpoints.
+ */
+export interface BaseQueryParams {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
+}
+
+/**
+ * Search query parameters.
+ */
+export interface SearchQueryParams extends BaseQueryParams {
+  q: string;
+  filters?: Record<string, string | number | boolean>;
+}
+
+/**
+ * File upload response.
+ */
+export interface UploadResponse {
+  url: string;
+  publicId: string;
+  format: string;
+  width?: number;
+  height?: number;
+  bytes?: number;
 }
