@@ -12,13 +12,40 @@ import { BlurText } from '@/components/hero/BlurText';
 import { PerfumeScene } from '@/components/3d/perfume';
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * CONSTANTS
+ * CONSTANTS — 5-scene narrative structure
  * ═════════════════════════════════════════════════════════════════════════ */
 
-const STATEMENTS = [
-  { line: 'It begins with a note.', scene: 1 },
-  { line: 'Becomes a feeling.',     scene: 2 },
-  { line: 'Becomes a memory.',      scene: 3 },
+const STORY_SCENES = [
+  {
+    eyebrow: 'THE FIRST NOTE',
+    headline: 'It begins with a single note.',
+    supporting: 'Carefully chosen to draw you closer, before you even know why.',
+    scene: 1,
+  },
+  {
+    eyebrow: 'THE OPENING',
+    headline: 'First impressions become instinct.',
+    supporting: 'Bright, unexpected, fleeting — the opening is the first glimpse of what lies beneath.',
+    scene: 2,
+  },
+  {
+    eyebrow: 'THE HEART',
+    headline: 'Then, the fragrance unfolds.',
+    supporting: 'Layer by layer, its character emerges, becoming something felt rather than simply remembered.',
+    scene: 3,
+  },
+  {
+    eyebrow: 'YOUR SIGNATURE',
+    headline: 'Some scents begin to feel like you.',
+    supporting: 'Shaped by your taste, your mood, and the moments that make the fragrance unmistakably yours.',
+    scene: 4,
+  },
+  {
+    eyebrow: 'WHAT REMAINS',
+    headline: 'And eventually, it becomes a memory.',
+    supporting: 'A quiet trace that lingers beyond the moment — connected to who you are.',
+    scene: 5,
+  },
 ] as const;
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -106,29 +133,39 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * STORY STATEMENT — scroll-driven single text line
+ * STORY SCENE CARD — scroll-driven scene with eyebrow, headline & supporting text
  * ═════════════════════════════════════════════════════════════════════════ */
 
-interface StoryStatementProps {
-  text: string;
+interface StorySceneCardProps {
+  eyebrow: string;
+  headline: string;
+  supporting: string;
   scrollProgress: MotionValue<number>;
   enter: number;
   peak: number;
   exit: number;
 }
 
-function StoryStatement({ text, scrollProgress, enter, peak, exit }: StoryStatementProps) {
+function StorySceneCard({
+  eyebrow,
+  headline,
+  supporting,
+  scrollProgress,
+  enter,
+  peak,
+  exit,
+}: StorySceneCardProps) {
   const opacity = useTransform(
     scrollProgress,
-    [enter, peak, exit - 0.05, exit],
-    [0,     1,    1,            0],
+    [enter, peak, exit - 0.06, exit],
+    [0, 1, 1, 0],
   );
   const blurPx = useTransform(
     scrollProgress,
-    [enter, peak, exit - 0.05, exit],
-    [14,    0,    0,            12],
+    [enter, peak, exit - 0.06, exit],
+    [10, 0, 0, 8],
   );
-  const y = useTransform(scrollProgress, [enter, peak], [28, 0]);
+  const y = useTransform(scrollProgress, [enter, peak], [20, 0]);
   const blurFilter = useTransform(blurPx, (v) => `blur(${v}px)`);
 
   return (
@@ -136,19 +173,54 @@ function StoryStatement({ text, scrollProgress, enter, peak, exit }: StoryStatem
       style={{ opacity, y }}
       className="absolute inset-0 flex items-center justify-center px-6"
     >
-      <motion.span style={{ filter: blurFilter }}>
-        <span
-          className="block font-serif font-bold uppercase text-center"
+      <motion.div
+        style={{ filter: blurFilter }}
+        className="text-center"
+      >
+        {/* Eyebrow */}
+        <div style={{ marginBottom: 'clamp(1rem, 2vw, 1.5rem)' }}>
+          <span
+            className="inline-block font-sans uppercase"
+            style={{
+              fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)',
+              letterSpacing: '0.2em',
+              color: 'hsl(43 82% 68% / 0.7)',
+              fontWeight: 500,
+            }}
+          >
+            {eyebrow}
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h3
+          className="font-serif"
           style={{
-            fontSize: 'clamp(1.75rem, 5vw, 4rem)',
+            fontSize: 'clamp(1.5rem, 3.5vw, 2.5rem)',
+            fontWeight: 700,
+            lineHeight: 1.2,
+            letterSpacing: '-0.015em',
             color: 'hsl(0 0% 97%)',
-            letterSpacing: '0.08em',
-            lineHeight: 1.08,
+            marginBottom: 'clamp(0.875rem, 1.8vw, 1.25rem)',
           }}
         >
-          {text}
-        </span>
-      </motion.span>
+          {headline}
+        </h3>
+
+        {/* Supporting text */}
+        <p
+          className="font-sans mx-auto"
+          style={{
+            fontSize: 'clamp(0.9rem, 1.5vw, 1.05rem)',
+            lineHeight: 1.65,
+            letterSpacing: '0.01em',
+            color: 'hsl(0 0% 82% / 0.65)',
+            maxWidth: '42ch',
+          }}
+        >
+          {supporting}
+        </p>
+      </motion.div>
     </motion.div>
   );
 }
@@ -190,38 +262,91 @@ function StoryDot({ progress }: { progress: MotionValue<number> }) {
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
-  // Opacity — full for scenes 1-2, gently fades in scene 3
-  const bottleOpacity = useTransform(scrollProgress, [0, 0.05, 0.78, 1], [0, 1, 1, 0.35]);
+  // Opacity — fade in after brief moment, stay visible throughout
+  const bottleOpacity = useTransform(scrollProgress, [0, 0.03, 0.85, 1], [0, 1, 1, 0.35]);
 
   // Ambient glow intensity that evolves with scroll
-  const glowOpacity = useTransform(scrollProgress, [0, 0.33, 0.67, 1], [0.25, 0.4, 0.35, 0.2]);
+  const glowOpacity = useTransform(scrollProgress, [0, 0.25, 0.5, 0.75, 1], [0.35, 0.4, 0.38, 0.35, 0.25]);
+
+  // Position transition: centered (intro) → right side (storytelling)
+  // Desktop positioning
+  const bottleX = useTransform(
+    scrollProgress,
+    [0, 0.2, 0.3, 1],
+    ['50%', '50%', '70%', '70%'] // Center during intro, move to right after
+  );
+
+  // Mobile: always centered
+  const bottleXMobile = '50%';
+
+  // Container width transition: wide when centered, narrower when on right
+  const containerWidth = useTransform(
+    scrollProgress,
+    [0, 0.2, 0.3, 1],
+    ['min(600px, 85vw)', 'min(600px, 85vw)', 'min(500px, 45vw)', 'min(500px, 45vw)']
+  );
 
   return (
     <motion.div
       style={{ opacity: bottleOpacity }}
-      className="relative flex items-center justify-center w-full"
+      className="absolute inset-0 flex items-center pointer-events-none"
       aria-hidden="true"
     >
-      {/* Atmospheric glow beneath bottle */}
+      {/* Desktop: animated horizontal position */}
       <motion.div
-        className="absolute inset-0 -z-10"
         style={{
-          opacity: glowOpacity,
-          background: 'radial-gradient(ellipse 65% 80% at 50% 60%, hsl(43 60% 30% / 0.18) 0%, transparent 70%)',
-          filter: 'blur(40px)',
+          x: '-50%', // Offset for centered transform origin
+          left: bottleX,
+          width: containerWidth,
         }}
-      />
-
-      {/* The interactive 3D bottle */}
-      <div 
-        className="relative block select-none"
-        style={{
-          width: '100%',
-          height: '70vh', // Provides a tall canvas for the bottle
-          maxWidth: '500px'
-        }}
+        className="relative hidden lg:block"
       >
-        <PerfumeScene scrollProgress={scrollProgress} />
+        {/* Atmospheric glow beneath bottle */}
+        <motion.div
+          className="absolute inset-0 -z-10"
+          style={{
+            opacity: glowOpacity,
+            background:
+              'radial-gradient(ellipse 65% 80% at 50% 60%, hsl(43 60% 30% / 0.20) 0%, transparent 70%)',
+            filter: 'blur(45px)',
+          }}
+        />
+
+        {/* The interactive 3D bottle */}
+        <div
+          className="relative block select-none"
+          style={{
+            width: '100%',
+            height: '70vh', // Provides a tall canvas for the bottle
+          }}
+        >
+          <PerfumeScene scrollProgress={scrollProgress} />
+        </div>
+      </motion.div>
+
+      {/* Mobile: always centered, simpler */}
+      <div className="relative block lg:hidden mx-auto" style={{ width: 'min(85vw, 450px)' }}>
+        {/* Atmospheric glow beneath bottle */}
+        <motion.div
+          className="absolute inset-0 -z-10"
+          style={{
+            opacity: glowOpacity,
+            background:
+              'radial-gradient(ellipse 65% 80% at 50% 60%, hsl(43 60% 30% / 0.20) 0%, transparent 70%)',
+            filter: 'blur(45px)',
+          }}
+        />
+
+        {/* The interactive 3D bottle */}
+        <div
+          className="relative block select-none"
+          style={{
+            width: '100%',
+            height: '65vh',
+          }}
+        >
+          <PerfumeScene scrollProgress={scrollProgress} />
+        </div>
       </div>
     </motion.div>
   );
@@ -229,13 +354,24 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * SCENE ATMOSPHERE — full-screen background that evolves with scroll
+ * Transitions through 5 scenes with subtle color and lighting shifts
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
-  // Scene 1 → 2: cool blue-grey → warm amber
-  const atm1Opacity = useTransform(scrollProgress, [0, 0.25, 0.5], [1, 1, 0]);
-  const atm2Opacity = useTransform(scrollProgress, [0.2, 0.4, 0.65, 0.8], [0, 1, 1, 0]);
-  const atm3Opacity = useTransform(scrollProgress, [0.6, 0.8, 1], [0, 1, 1]);
+  // Scene 1 (0-0.2): cool blue-grey, crisp opening
+  const atm1Opacity = useTransform(scrollProgress, [0, 0.15, 0.25], [1, 1, 0]);
+
+  // Scene 2 (0.2-0.4): warm amber, first impression
+  const atm2Opacity = useTransform(scrollProgress, [0.15, 0.25, 0.4, 0.5], [0, 1, 1, 0]);
+
+  // Scene 3 (0.4-0.6): deeper warmth, emotional heart
+  const atm3Opacity = useTransform(scrollProgress, [0.35, 0.45, 0.6, 0.7], [0, 1, 1, 0]);
+
+  // Scene 4 (0.6-0.8): personal connection, soft violet
+  const atm4Opacity = useTransform(scrollProgress, [0.55, 0.65, 0.8, 0.9], [0, 1, 1, 0]);
+
+  // Scene 5 (0.8-1.0): lasting memory, deep intimate
+  const atm5Opacity = useTransform(scrollProgress, [0.75, 0.85, 1], [0, 1, 1]);
 
   return (
     <>
@@ -247,20 +383,25 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 60% 70% at 65% 50%, hsl(220 25% 8% / 0.8) 0%, transparent 65%)',
+            background:
+              'radial-gradient(ellipse 60% 70% at 65% 50%, hsl(220 25% 8% / 0.8) 0%, transparent 65%)',
           }}
         />
         <div
           className="absolute"
           style={{
-            top: '20%', right: '5%', width: '35%', height: '60%',
-            background: 'radial-gradient(ellipse at 50% 40%, hsl(200 30% 15% / 0.25) 0%, transparent 70%)',
+            top: '20%',
+            right: '5%',
+            width: '35%',
+            height: '60%',
+            background:
+              'radial-gradient(ellipse at 50% 40%, hsl(200 30% 15% / 0.25) 0%, transparent 70%)',
             filter: 'blur(60px)',
           }}
         />
       </motion.div>
 
-      {/* Scene 2 atmosphere — warm, amber */}
+      {/* Scene 2 atmosphere — warm, amber opening */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
         style={{ opacity: atm2Opacity }}
@@ -268,20 +409,25 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 65% 70% at 62% 48%, hsl(25 30% 8% / 0.85) 0%, transparent 65%)',
+            background:
+              'radial-gradient(ellipse 65% 70% at 62% 48%, hsl(25 30% 8% / 0.85) 0%, transparent 65%)',
           }}
         />
         <div
           className="absolute"
           style={{
-            top: '15%', right: '8%', width: '38%', height: '65%',
-            background: 'radial-gradient(ellipse at 50% 45%, hsl(43 50% 18% / 0.2) 0%, transparent 70%)',
+            top: '15%',
+            right: '8%',
+            width: '38%',
+            height: '65%',
+            background:
+              'radial-gradient(ellipse at 50% 45%, hsl(43 50% 18% / 0.2) 0%, transparent 70%)',
             filter: 'blur(70px)',
           }}
         />
       </motion.div>
 
-      {/* Scene 3 atmosphere — deep violet, intimate */}
+      {/* Scene 3 atmosphere — deeper warmth, heart */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
         style={{ opacity: atm3Opacity }}
@@ -289,14 +435,71 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
         <div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(ellipse 65% 70% at 60% 52%, hsl(270 20% 6% / 0.9) 0%, transparent 65%)',
+            background:
+              'radial-gradient(ellipse 62% 68% at 58% 50%, hsl(30 28% 7% / 0.88) 0%, transparent 65%)',
           }}
         />
         <div
           className="absolute"
           style={{
-            top: '10%', right: '6%', width: '40%', height: '70%',
-            background: 'radial-gradient(ellipse at 50% 50%, hsl(280 30% 12% / 0.18) 0%, transparent 70%)',
+            top: '18%',
+            right: '10%',
+            width: '36%',
+            height: '62%',
+            background:
+              'radial-gradient(ellipse at 48% 50%, hsl(35 45% 16% / 0.22) 0%, transparent 70%)',
+            filter: 'blur(65px)',
+          }}
+        />
+      </motion.div>
+
+      {/* Scene 4 atmosphere — personal connection, soft violet */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ opacity: atm4Opacity }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 64% 70% at 60% 50%, hsl(260 18% 7% / 0.87) 0%, transparent 65%)',
+          }}
+        />
+        <div
+          className="absolute"
+          style={{
+            top: '12%',
+            right: '7%',
+            width: '38%',
+            height: '68%',
+            background:
+              'radial-gradient(ellipse at 50% 48%, hsl(270 35% 14% / 0.18) 0%, transparent 70%)',
+            filter: 'blur(75px)',
+          }}
+        />
+      </motion.div>
+
+      {/* Scene 5 atmosphere — deep violet, intimate memory */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ opacity: atm5Opacity }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 65% 70% at 60% 52%, hsl(270 20% 6% / 0.9) 0%, transparent 65%)',
+          }}
+        />
+        <div
+          className="absolute"
+          style={{
+            top: '10%',
+            right: '6%',
+            width: '40%',
+            height: '70%',
+            background:
+              'radial-gradient(ellipse at 50% 50%, hsl(280 30% 12% / 0.18) 0%, transparent 70%)',
             filter: 'blur(80px)',
           }}
         />
@@ -306,12 +509,79 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * SCROLL STORY SEQUENCE
+ * BOTTLE INTRO — cinematic centered bottle reveal before storytelling
+ * Single 3D bottle instance, different viewing angle, hero presentation
+ * Progress 0-0.15: Intro state
+ * Progress 0.15-0.25: Transition to right side
+ * Progress 0.25-1.0: Storytelling scenes
+ * ═════════════════════════════════════════════════════════════════════════ */
+
+function BottleIntroScreen({ overallProgress }: { overallProgress: MotionValue<number> }) {
+  // Fade out intro content as we transition to storytelling
+  const opacity = useTransform(overallProgress, [0, 0.12, 0.2], [1, 1, 0]);
+
+  return (
+    <motion.div
+      style={{ opacity }}
+      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+    >
+      {/* Centered bottle container - PerfumeScene handled by parent */}
+      <div
+        className="relative"
+        style={{
+          width: '100%',
+          maxWidth: 'min(600px, 85vw)',
+          height: '80vh',
+        }}
+      >
+        {/* Atmospheric glow beneath bottle */}
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            opacity: 0.4,
+            background:
+              'radial-gradient(ellipse 60% 75% at 50% 55%, hsl(43 55% 25% / 0.28) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+          }}
+        />
+      </div>
+
+      {/* Scroll indicator */}
+      <div
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        aria-hidden="true"
+      >
+        <span
+          className="font-sans uppercase"
+          style={{
+            fontSize: '0.6rem',
+            letterSpacing: '0.2em',
+            color: 'hsl(0 0% 74% / 0.4)',
+          }}
+        >
+          Scroll
+        </span>
+        <div
+          style={{
+            width: '1px',
+            height: '2.5rem',
+            background: 'linear-gradient(to bottom, hsl(43 82% 52% / 0.5), transparent)',
+            animation: 'story-scroll-pulse 2.2s cubic-bezier(0.4,0,0.6,1) infinite',
+          }}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * UNIFIED STORY SEQUENCE — intro + transition + storytelling scenes
  *
- * Outer wrapper: 400vh (≈ 1.33 screens per statement = comfortable pacing)
+ * Outer wrapper: 750vh total
+ *   - 100vh intro (centered bottle)
+ *   - 50vh transition (bottle moves center → right)
+ *   - 600vh storytelling (existing wheel/scenes)
  * Sticky inner: 100svh — one cinema frame
- * Layout on desktop: bottle right, text left-center
- * Layout on mobile: stacked — text top-center, bottle below
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function ScrollStorySequence() {
@@ -322,29 +592,35 @@ function ScrollStorySequence() {
     offset: ['start start', 'end end'],
   });
 
-  const seg = 1 / STATEMENTS.length;
-  const overlap = 0.055;
+  // Map storytelling scenes to the range 0.25-1.0 (after intro + transition)
+  // Remap scrollYProgress for storytelling content only
+  const storyProgress = useTransform(scrollYProgress, [0.25, 1], [0, 1]);
 
-  const progressValues = STATEMENTS.map((_, i) => ({
+  const seg = 1 / STORY_SCENES.length;
+  const overlap = 0.045;
+
+  const progressValues = STORY_SCENES.map((_, i) => ({
     enter: Math.max(0, i * seg - overlap),
-    peak:  i * seg + seg * 0.1,
-    exit:  Math.min(1, (i + 1) * seg + overlap),
+    peak: i * seg + seg * 0.15,
+    exit: Math.min(1, (i + 1) * seg + overlap),
   }));
 
-  // Individual normalised progress for each statement (0→1 within its window)
-  const p0 = useTransform(scrollYProgress, [progressValues[0].enter, progressValues[0].exit], [0, 1]);
-  const p1 = useTransform(scrollYProgress, [progressValues[1].enter, progressValues[1].exit], [0, 1]);
-  const p2 = useTransform(scrollYProgress, [progressValues[2].enter, progressValues[2].exit], [0, 1]);
-  const progressArr = [p0, p1, p2];
+  // Individual normalised progress for each scene (0→1 within its window)
+  const sceneProgress = STORY_SCENES.map((_, i) =>
+    useTransform(storyProgress, [progressValues[i].enter, progressValues[i].exit], [0, 1])
+  );
 
-  // Progress bar
-  const lineScaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  // Progress bar (only shows during storytelling, not intro)
+  const lineScaleX = useTransform(storyProgress, [0, 1], [0, 1]);
+
+  // Text and storytelling UI opacity - fade in after transition
+  const storyUIOpacity = useTransform(scrollYProgress, [0.2, 0.28], [0, 1]);
 
   return (
     <div
       ref={containerRef}
       className="relative"
-      style={{ height: '400vh' }}
+      style={{ height: '750vh' }} // Increased: 100vh intro + 50vh transition + 600vh storytelling
       aria-label="Story sequence"
     >
       {/* ── Sticky cinema frame ─────────────────────────────────────── */}
@@ -371,71 +647,93 @@ function ScrollStorySequence() {
           }}
         />
 
-        {/* Gold progress line */}
-        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'hsl(43 82% 52% / 0.12)' }} />
-        <motion.div
-          className="absolute top-0 left-0 h-px origin-left"
-          style={{ scaleX: lineScaleX, background: 'hsl(43 82% 60%)', right: 0 }}
-        />
+        {/* ── INTRO STATE: Centered bottle ─────────────────────────── */}
+        <BottleIntroScreen overallProgress={scrollYProgress} />
 
-        {/* ── Main composition ─────────────────────────────────────── */}
-        <div className="relative h-full flex items-center">
+        {/* ── STORYTELLING STATE: Text + bottle on right ─────────────── */}
+        <motion.div style={{ opacity: storyUIOpacity }} className="absolute inset-0">
+          {/* Gold progress line */}
+          <div
+            className="absolute top-0 left-0 right-0 h-px"
+            style={{ background: 'hsl(43 82% 52% / 0.12)' }}
+          />
+          <motion.div
+            className="absolute top-0 left-0 h-px origin-left"
+            style={{ scaleX: lineScaleX, background: 'hsl(43 82% 60%)', right: 0 }}
+          />
 
-          {/* Desktop: two-column. Mobile: stacked (bottle below text). */}
-          <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-0 lg:justify-between">
+          {/* ── Main composition ─────────────────────────────────────── */}
+          <div className="relative h-full flex items-center">
+            {/* Desktop: two-column. Mobile: stacked (text above bottle). */}
+            <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-0 lg:justify-between">
+              {/* ── LEFT — text scenes ─────────────────────────── */}
+              <div
+                className="relative order-1 lg:order-1 lg:w-[45%]"
+                style={{
+                  height: 'clamp(16rem, 35vh, 22rem)',
+                  maxWidth: '32rem',
+                }}
+              >
+                {STORY_SCENES.map((scene, i) => (
+                  <StorySceneCard
+                    key={scene.scene}
+                    eyebrow={scene.eyebrow}
+                    headline={scene.headline}
+                    supporting={scene.supporting}
+                    scrollProgress={sceneProgress[i]}
+                    enter={progressValues[i].enter}
+                    peak={progressValues[i].peak}
+                    exit={progressValues[i].exit}
+                  />
+                ))}
+              </div>
 
-            {/* ── LEFT — text statements ─────────────────────────── */}
+              {/* ── RIGHT — animated bottle (placeholder, actual bottle is absolute) ─────────────────────────── */}
+              <div className="order-2 lg:order-2 lg:w-[55%] flex items-center justify-center">
+                {/* Bottle is rendered absolutely to allow smooth transition from center */}
+              </div>
+            </div>
+
+            {/* Progress dots — centered bottom */}
             <div
-              className="relative lg:w-1/2"
-              style={{ height: 'clamp(8rem, 20vw, 14rem)' }}
+              className="absolute bottom-9 left-1/2 -translate-x-1/2 flex gap-2.5"
+              aria-hidden="true"
             >
-              {STATEMENTS.map(({ line }, i) => (
-                <StoryStatement
-                  key={line}
-                  text={line}
-                  scrollProgress={progressArr[i]}
-                  enter={progressValues[i].enter}
-                  peak={progressValues[i].peak}
-                  exit={progressValues[i].exit}
-                />
+              {sceneProgress.map((p, i) => (
+                <StoryDot key={i} progress={p} />
               ))}
             </div>
 
-            {/* ── RIGHT — animated bottle ─────────────────────────── */}
-            <div className="lg:w-1/2 flex items-center justify-center">
-              <BottleVisual scrollProgress={scrollYProgress} />
+            {/* Scroll hint — visible before first scene peaks */}
+            <div
+              className="absolute bottom-8 right-8 hidden lg:flex flex-col items-center gap-2"
+              aria-hidden="true"
+            >
+              <span
+                className="font-sans uppercase"
+                style={{
+                  fontSize: '0.575rem',
+                  letterSpacing: '0.2em',
+                  color: 'hsl(0 0% 55% / 0.5)',
+                  writingMode: 'vertical-rl',
+                }}
+              >
+                Scroll
+              </span>
+              <div
+                style={{
+                  width: '1px',
+                  height: '2rem',
+                  background: 'linear-gradient(to bottom, hsl(43 82% 52% / 0.4), transparent)',
+                }}
+              />
             </div>
           </div>
+        </motion.div>
 
-          {/* Progress dots — centered bottom */}
-          <div
-            className="absolute bottom-9 left-1/2 -translate-x-1/2 flex gap-2.5"
-            aria-hidden="true"
-          >
-            {progressArr.map((p, i) => (
-              <StoryDot key={i} progress={p} />
-            ))}
-          </div>
-
-          {/* Scroll hint — visible before first statement peaks */}
-          <div
-            className="absolute bottom-8 right-8 hidden lg:flex flex-col items-center gap-2"
-            aria-hidden="true"
-          >
-            <span
-              className="font-sans uppercase"
-              style={{ fontSize: '0.575rem', letterSpacing: '0.2em', color: 'hsl(0 0% 55% / 0.5)', writingMode: 'vertical-rl' }}
-            >
-              Scroll
-            </span>
-            <div
-              style={{
-                width: '1px',
-                height: '2rem',
-                background: 'linear-gradient(to bottom, hsl(43 82% 52% / 0.4), transparent)',
-              }}
-            />
-          </div>
+        {/* ── SINGLE BOTTLE INSTANCE — transitions from center to right ─────────────── */}
+        <div className="absolute inset-0 pointer-events-none">
+          <BottleVisual scrollProgress={scrollYProgress} />
         </div>
       </div>
     </div>

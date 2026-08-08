@@ -59,20 +59,42 @@ export function PerfumeBottle({ scrollProgress }: PerfumeBottleProps) {
     // Read the current normalized scroll progress (0 to 1 over the sequence)
     const p = scrollProgress.get();
 
-    // SCENE 1 (p ~ 0.0 - 0.33): Intro, strong 3/4 angle to show depth, slightly smaller, pushed back
-    // SCENE 2 (p ~ 0.33 - 0.67): Rotates forward, grows, comes into focus
-    // SCENE 3 (p ~ 0.67 - 1.0): Final signature orientation (near front), largest, hero composition
-    
-    // Strong initial three-quarter angle (-1.0 rad = ~-57 deg) -> near front (0.1 rad = ~5 deg)
-    const targetRotY = THREE.MathUtils.lerp(-1.0, 0.1, p);
-    
-    // Scale grows from 0.85 to 1.15 to give a feeling of "revealing" the product
-    const targetScale = THREE.MathUtils.lerp(0.85, 1.15, p);
+    // INTRO PHASE (p ~ 0.0 - 0.2): Centered hero reveal, cinematic angle
+    // TRANSITION (p ~ 0.2 - 0.3): Subtle rotation adjustment as UI appears
+    // STORYTELLING (p ~ 0.3 - 1.0): Existing wheel/scene progression
+
+    let targetRotY: number;
+    let targetScale: number;
+    let scrollYOffset: number;
+
+    if (p < 0.2) {
+      // INTRO: Cinematic 3/4 view, larger scale for hero presence
+      targetRotY = -0.75; // ~-43deg, beautiful depth reveal
+      targetScale = 1.15; // Larger for hero impact
+      scrollYOffset = -0.05; // Slightly below center
+    } else if (p < 0.3) {
+      // TRANSITION: Subtle rotation shift as text appears
+      const t = (p - 0.2) / 0.1; // Normalize 0.2-0.3 to 0-1
+      targetRotY = THREE.MathUtils.lerp(-0.75, -1.0, t);
+      targetScale = THREE.MathUtils.lerp(1.15, 0.9, t);
+      scrollYOffset = THREE.MathUtils.lerp(-0.05, -0.3, t);
+    } else {
+      // STORYTELLING: Existing wheel behavior
+      // Remap 0.3-1.0 to 0-1 for existing animation
+      const storyP = (p - 0.3) / 0.7;
+      
+      // Strong three-quarter angle (-1.0 rad) -> near front (0.1 rad)
+      targetRotY = THREE.MathUtils.lerp(-1.0, 0.1, storyP);
+      
+      // Scale grows from 0.9 to 1.2
+      targetScale = THREE.MathUtils.lerp(0.9, 1.2, storyP);
+      
+      // Position shifts slightly up as it gets closer
+      scrollYOffset = THREE.MathUtils.lerp(-0.3, 0.15, storyP);
+    }
 
     // Subtle continuous float (breathing)
     const floatOffset = Math.sin(state.clock.elapsedTime * 1.2) * 0.04;
-    // Position shifts slightly up as it gets closer
-    const scrollYOffset = THREE.MathUtils.lerp(-0.4, 0.2, p);
     const targetY = scrollYOffset + floatOffset;
 
     // Use smooth damping for luxurious, weighty movement
