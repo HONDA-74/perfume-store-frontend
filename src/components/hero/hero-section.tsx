@@ -3,45 +3,43 @@ import { ROUTES } from '@/constants';
 import { Container } from '@/components/shared';
 import { cn } from '@/lib';
 import LiquidEther from './LiquidEther';
-import { DepthText } from './DepthText';
 import { BlurText } from './BlurText';
+import { LandingNavbar } from './LandingNavbar';
 
 /**
- * Hero Section — Landing Page
+ * HeroSection — Landing Page
  *
- * Premium, cinematic hero with the "Liquid Ether" WebGL fluid background.
- * React Bits animated components provide a slow, elegant reveal sequence:
+ * Composition:
+ *  1. LandingNavbar — floating glassmorphic nav (no utility icons)
+ *  2. Eyebrow       — "THE ART OF PERFUMERY" (static, editorial)
+ *  3. Headline      — "Your Signature. Reimagined." (static serif, no 3D/depth)
+ *  4. Body          — BlurText (word-by-word blur reveal)
+ *  5. CTAs          — Primary gold + Secondary ghost
+ *  6. Scroll indicator
  *
- * 1. Eyebrow  — refined editorial label (static, fades in via CSS)
- * 2. Headline — DepthText (3-D depth + cursor-tracking)
- * 3. Body     — BlurText (word-by-word blur entrance)
- * 4. CTAs     — fade-in with sophisticated hover interaction
+ * Background: LiquidEther WebGL fluid — unchanged.
+ * DepthText has been removed per design decision.
+ * BlurText is reused exactly as implemented, not recreated.
  */
 export function HeroSection() {
   return (
     <section
       id="hero"
       aria-label="Hero — KENZ Luxury Perfume"
-      className="relative min-h-svh flex items-center overflow-hidden"
+      className="relative min-h-svh flex flex-col overflow-hidden"
     >
-      {/* ── Liquid Ether WebGL background ──────────────────────────────── */}
-      <div className="absolute inset-0" style={{ zIndex: -1 }}>
-        {/* Deep obsidian base so we never show raw white */}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'hsl(0 0% 4%)' }}
-        />
+      {/* ── Liquid Ether WebGL background ─────────────────────────────── */}
+      <div className="absolute inset-0" style={{ zIndex: 0 }}>
+        {/* Obsidian base — never show raw white */}
+        <div className="absolute inset-0" style={{ background: 'hsl(0 0% 4%)' }} />
 
-        {/* WebGL fluid layer — brand palette colours tuned from design tokens */}
+        {/* WebGL fluid layer */}
         <div className="absolute inset-0">
           <LiquidEther
             colors={[
-              /* Deep violet-indigo — depth */
-              '#1a0a2e',
-              /* Muted mauve-gold — brand warmth */
-              '#6b4226',
-              /* Champagne shimmer — primary-300 adjacent */
-              '#c9954a',
+              '#1a0a2e', /* deep violet-indigo */
+              '#6b4226', /* muted mauve-gold */
+              '#c9954a', /* champagne shimmer */
             ]}
             autoDemo={true}
             autoSpeed={0.25}
@@ -57,7 +55,7 @@ export function HeroSection() {
           />
         </div>
 
-        {/* Gradient vignette — keeps edges dark, text legible */}
+        {/* Radial vignette — text legibility */}
         <div
           className="absolute inset-0"
           style={{
@@ -66,19 +64,19 @@ export function HeroSection() {
           }}
         />
 
-        {/* Bottom fade — anchors content visually */}
+        {/* Bottom fade */}
         <div
           className="absolute bottom-0 left-0 right-0 h-40"
           style={{
-            background:
-              'linear-gradient(to top, hsl(0 0% 4% / 0.9) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, hsl(0 0% 4% / 0.9) 0%, transparent 100%)',
           }}
         />
 
-        {/* Subtle noise grain for filmic texture */}
+        {/* Filmic grain */}
         <div
-          className="absolute inset-0 opacity-[0.035] pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
+            opacity: 0.035,
             backgroundImage:
               'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
             backgroundSize: '256px 256px',
@@ -86,233 +84,231 @@ export function HeroSection() {
         />
       </div>
 
-      {/* ── Hero content ───────────────────────────────────────────────── */}
-      <Container className="relative" style={{ zIndex: 1 }}>
-        <div className="mx-auto max-w-4xl text-center" style={{ padding: '8rem 0 6rem' }}>
+      {/* ── Landing Navbar (floats above background) ──────────────────── */}
+      <div className="relative" style={{ zIndex: 10 }}>
+        <LandingNavbar />
+      </div>
 
-          {/* 1 — Eyebrow */}
+      {/* ── Hero content — vertically centred in remaining space ────────── */}
+      <div className="relative flex flex-1 items-center" style={{ zIndex: 1 }}>
+        <Container>
           <div
-            className="hero-eyebrow mb-8"
-            style={{
-              animation: 'hero-fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both',
-              animationDelay: '0.1s',
-            }}
+            className="mx-auto text-center"
+            style={{ maxWidth: '52rem', padding: '4rem 0 6rem' }}
           >
-            <span
-              className="inline-flex items-center gap-3 font-sans uppercase"
+
+            {/* 1 — Eyebrow */}
+            <div
               style={{
-                fontSize: '0.6875rem',
-                letterSpacing: '0.22em',
-                color: 'hsl(43 82% 65% / 0.85)',
-                fontWeight: 500,
+                marginBottom: '2rem',
+                animation: 'hero-fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both',
+                animationDelay: '0.15s',
               }}
             >
-              {/* Decorative rule */}
               <span
-                aria-hidden="true"
+                className="inline-flex items-center gap-3 font-sans uppercase"
                 style={{
-                  display: 'inline-block',
-                  width: '2rem',
-                  height: '1px',
-                  background: 'hsl(43 82% 65% / 0.45)',
+                  fontSize: '0.6875rem',
+                  letterSpacing: '0.22em',
+                  color: 'hsl(43 82% 65% / 0.85)',
+                  fontWeight: 500,
                 }}
-              />
-              The Art of Perfumery
-              <span
-                aria-hidden="true"
-                style={{
-                  display: 'inline-block',
-                  width: '2rem',
-                  height: '1px',
-                  background: 'hsl(43 82% 65% / 0.45)',
-                }}
-              />
-            </span>
-          </div>
-
-          {/* 2 — Headline via DepthText */}
-          <h1
-            className="font-serif"
-            style={{
-              marginBottom: '2.5rem',
-              animation: 'hero-fade-up 1.4s cubic-bezier(0.16, 1, 0.3, 1) both',
-              animationDelay: '0.25s',
-            }}
-          >
-            {/*
-              DepthText renders a cursor-reactive 3-D depth illusion.
-              Font size cascades from responsive CSS vars below.
-            */}
-            <DepthText
-              text="Your Signature."
-              fontSize="clamp(2.6rem, 7vw, 5.5rem)"
-              fontFamily="var(--font-serif)"
-              fontWeight={700}
-              faceColor="hsl(0 0% 98%)"
-              layerColor="hsl(43 78% 44% / 0.25)"
-              layerCount={10}
-              layerDistance={1.2}
-              perspective="600px"
-              className="block"
-            />
-            <DepthText
-              text="Reimagined."
-              fontSize="clamp(2.6rem, 7vw, 5.5rem)"
-              fontFamily="var(--font-serif)"
-              fontWeight={700}
-              faceColor="hsl(43 82% 65%)"
-              layerColor="hsl(43 78% 44% / 0.3)"
-              layerCount={10}
-              layerDistance={1.2}
-              perspective="600px"
-              className="block"
-            />
-          </h1>
-
-          {/* 3 — Supporting text via BlurText */}
-          <div
-            className="mx-auto mb-14"
-            style={{
-              maxWidth: '38rem',
-              animation: 'hero-fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both',
-              animationDelay: '0.5s',
-            }}
-          >
-            <BlurText
-              text="Discover fragrances curated around your taste, your mood, and the moments that define you."
-              animateBy="words"
-              direction="bottom"
-              delay={60}
-              stepDuration={0.55}
-              className={cn(
-                'font-sans leading-relaxed',
-                'text-center',
-              )}
-              style={{
-                fontSize: 'clamp(1rem, 2vw, 1.2rem)',
-                color: 'hsl(0 0% 88% / 0.82)',
-                justifyContent: 'center',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '0.3em',
-              } as React.CSSProperties}
-            />
-          </div>
-
-          {/* 4 — CTAs */}
-          <div
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-            style={{
-              animation: 'hero-fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both',
-              animationDelay: '0.8s',
-            }}
-          >
-            {/* Primary CTA */}
-            <Link
-              to={ROUTES.shop}
-              id="hero-cta-primary"
-              className={cn(
-                'group relative inline-flex items-center justify-center',
-                'font-sans font-medium',
-                'transition-all focus-visible:outline-none',
-                'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900',
-              )}
-              style={{
-                height: '3.25rem',
-                padding: '0 2.25rem',
-                fontSize: '0.875rem',
-                letterSpacing: '0.06em',
-                background: 'hsl(43 82% 52%)',
-                color: 'hsl(0 0% 4%)',
-                borderRadius: '2px',
-                transition: 'background 300ms cubic-bezier(0.2, 0, 0, 1), box-shadow 300ms cubic-bezier(0.2, 0, 0, 1), transform 150ms ease',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'hsl(43 88% 60%)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 32px -4px hsl(43 78% 44% / 0.55)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'hsl(43 82% 52%)';
-                (e.currentTarget as HTMLElement).style.boxShadow = 'none';
-              }}
-              onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.97)'; }}
-              onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
-            >
-              Explore the Collection
-            </Link>
-
-            {/* Secondary CTA */}
-            <Link
-              to={ROUTES.scentMatchmaker}
-              id="hero-cta-secondary"
-              className={cn(
-                'group relative inline-flex items-center justify-center gap-2',
-                'font-sans font-medium',
-                'transition-all focus-visible:outline-none',
-                'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900',
-              )}
-              style={{
-                height: '3.25rem',
-                padding: '0 2.25rem',
-                fontSize: '0.875rem',
-                letterSpacing: '0.06em',
-                color: 'hsl(43 82% 65%)',
-                border: '1px solid hsl(43 82% 52% / 0.4)',
-                borderRadius: '2px',
-                background: 'transparent',
-                transition: 'border-color 300ms cubic-bezier(0.2, 0, 0, 1), background 300ms cubic-bezier(0.2, 0, 0, 1), transform 150ms ease',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'hsl(43 82% 52% / 0.8)';
-                (e.currentTarget as HTMLElement).style.background = 'hsl(43 82% 52% / 0.08)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'hsl(43 82% 52% / 0.4)';
-                (e.currentTarget as HTMLElement).style.background = 'transparent';
-              }}
-              onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.97)'; }}
-              onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
-            >
-              <span>Find Your Signature</span>
-              <svg
-                aria-hidden="true"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  transition: 'transform 300ms cubic-bezier(0.2, 0, 0, 1)',
-                }}
-                className="group-hover:translate-x-1"
               >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </Container>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: 'inline-block',
+                    width: '2rem',
+                    height: '1px',
+                    background: 'hsl(43 82% 65% / 0.45)',
+                  }}
+                />
+                The Art of Perfumery
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: 'inline-block',
+                    width: '2rem',
+                    height: '1px',
+                    background: 'hsl(43 82% 65% / 0.45)',
+                  }}
+                />
+              </span>
+            </div>
 
-      {/* ── Scroll indicator ───────────────────────────────────────────── */}
+            {/* 2 — Static serif headline (DepthText removed) */}
+            <h1
+              className="font-serif"
+              style={{
+                marginBottom: '2rem',
+                lineHeight: 1.08,
+                letterSpacing: '-0.02em',
+                animation: 'hero-fade-up 1.4s cubic-bezier(0.16, 1, 0.3, 1) both',
+                animationDelay: '0.3s',
+              }}
+            >
+              {/* Line 1 — white */}
+              <span
+                className="block"
+                style={{
+                  fontSize: 'clamp(2.75rem, 7.5vw, 5.75rem)',
+                  color: 'hsl(0 0% 98%)',
+                  fontWeight: 700,
+                }}
+              >
+                Your Signature.
+              </span>
+
+              {/* Line 2 — champagne gold accent */}
+              <span
+                className="block"
+                style={{
+                  fontSize: 'clamp(2.75rem, 7.5vw, 5.75rem)',
+                  color: 'hsl(43 82% 65%)',
+                  fontWeight: 700,
+                }}
+              >
+                Reimagined.
+              </span>
+            </h1>
+
+            {/* 3 — Supporting text — BlurText (reused, not recreated) */}
+            <div
+              className="mx-auto"
+              style={{
+                maxWidth: '36rem',
+                marginBottom: '3.5rem',
+              }}
+            >
+              <BlurText
+                text="Discover fragrances curated around your taste, your mood, and the moments that define you."
+                animateBy="words"
+                direction="bottom"
+                delay={55}
+                stepDuration={0.5}
+                className={cn('font-sans leading-relaxed text-center')}
+                style={{
+                  fontSize: 'clamp(1rem, 1.8vw, 1.15rem)',
+                  color: 'hsl(0 0% 88% / 0.80)',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  gap: '0.28em',
+                } as React.CSSProperties}
+              />
+            </div>
+
+            {/* 4 — CTAs */}
+            <div
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              style={{
+                animation: 'hero-fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both',
+                animationDelay: '0.85s',
+              }}
+            >
+              {/* Primary — solid gold */}
+              <Link
+                to={ROUTES.shop}
+                id="hero-cta-primary"
+                className={cn(
+                  'group inline-flex items-center justify-center',
+                  'font-sans font-medium',
+                  'focus-visible:outline-none focus-visible:ring-2',
+                  'focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900',
+                )}
+                style={{
+                  height: '3.125rem',
+                  padding: '0 2.25rem',
+                  fontSize: '0.8125rem',
+                  letterSpacing: '0.08em',
+                  background: 'hsl(43 82% 52%)',
+                  color: 'hsl(0 0% 4%)',
+                  borderRadius: '2px',
+                  transition: 'background 280ms cubic-bezier(0.2,0,0,1), box-shadow 280ms cubic-bezier(0.2,0,0,1), transform 120ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = 'hsl(43 88% 60%)';
+                  el.style.boxShadow = '0 4px 28px -4px hsl(43 78% 44% / 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = 'hsl(43 82% 52%)';
+                  el.style.boxShadow = 'none';
+                }}
+                onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.97)'; }}
+                onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
+              >
+                Explore the Collection
+              </Link>
+
+              {/* Secondary — ghost gold */}
+              <Link
+                to={ROUTES.scentMatchmaker}
+                id="hero-cta-secondary"
+                className={cn(
+                  'group inline-flex items-center justify-center gap-2',
+                  'font-sans font-medium',
+                  'focus-visible:outline-none focus-visible:ring-2',
+                  'focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900',
+                )}
+                style={{
+                  height: '3.125rem',
+                  padding: '0 2.25rem',
+                  fontSize: '0.8125rem',
+                  letterSpacing: '0.08em',
+                  color: 'hsl(43 82% 65%)',
+                  border: '1px solid hsl(43 82% 52% / 0.38)',
+                  borderRadius: '2px',
+                  background: 'transparent',
+                  transition: 'border-color 280ms cubic-bezier(0.2,0,0,1), background 280ms cubic-bezier(0.2,0,0,1), transform 120ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = 'hsl(43 82% 52% / 0.75)';
+                  el.style.background = 'hsl(43 82% 52% / 0.07)';
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = 'hsl(43 82% 52% / 0.38)';
+                  el.style.background = 'transparent';
+                }}
+                onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.97)'; }}
+                onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
+              >
+                <span>Find Your Signature</span>
+                <svg
+                  aria-hidden="true"
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="group-hover:translate-x-1 transition-transform duration-300"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </Container>
+      </div>
+
+      {/* ── Scroll indicator ──────────────────────────────────────────── */}
       <div
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         style={{
-          zIndex: 1,
+          zIndex: 2,
           animation: 'hero-fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) both',
-          animationDelay: '1.4s',
+          animationDelay: '1.5s',
         }}
         aria-hidden="true"
       >
         <span
           className="font-sans uppercase"
-          style={{
-            fontSize: '0.6rem',
-            letterSpacing: '0.2em',
-            color: 'hsl(0 0% 74% / 0.45)',
-          }}
+          style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'hsl(0 0% 74% / 0.4)' }}
         >
           Scroll
         </span>
@@ -326,23 +322,20 @@ export function HeroSection() {
         />
       </div>
 
-      {/* ── Hero animation keyframes ───────────────────────────────────── */}
+      {/* ── Keyframes ─────────────────────────────────────────────────── */}
       <style>{`
         @keyframes hero-fade-up {
-          from { opacity: 0; transform: translateY(24px); }
+          from { opacity: 0; transform: translateY(22px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes hero-scroll-line {
           0%, 100% { opacity: 0.5; transform: scaleY(1); }
           50%       { opacity: 1;   transform: scaleY(1.15); }
         }
-
-        /* Reduced-motion: instant, no movement */
         @media (prefers-reduced-motion: reduce) {
-          .hero-eyebrow,
           [style*="hero-fade-up"],
-          [style*="hero-scroll-line"] {
+          [style*="hero-scroll-line"],
+          [style*="landing-nav-enter"] {
             animation: none !important;
             opacity: 1 !important;
             transform: none !important;

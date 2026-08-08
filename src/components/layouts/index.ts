@@ -22,3 +22,4 @@ export * from './cart-drawer';
 export * from './minimal-layout';
 export * from './public-layout';
 export * from './route-error-boundary';
+export * from './landing-layout';
