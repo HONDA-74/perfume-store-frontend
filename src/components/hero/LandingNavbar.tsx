@@ -94,7 +94,11 @@ export function LandingNavbar() {
                 key={link.href}
                 to={link.href}
                 className="landing-nav-link font-sans text-[0.7rem] font-medium uppercase tracking-[0.14em] transition-colors duration-200"
-                style={{ color: 'hsl(0 0% 74% / 0.75)' }}
+                style={{ 
+                  color: 'hsl(0 0% 74% / 0.75)',
+                  padding: '0.75rem 0.5rem', // Larger tap target
+                  margin: '-0.75rem -0.5rem', // Negative margin to maintain visual spacing
+                }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.color = 'hsl(43 82% 65%)';
                 }}
@@ -137,7 +141,11 @@ export function LandingNavbar() {
                 key={link.href}
                 to={link.href}
                 className="font-sans text-[0.7rem] font-medium uppercase tracking-[0.14em] transition-colors duration-200"
-                style={{ color: 'hsl(0 0% 74% / 0.75)' }}
+                style={{ 
+                  color: 'hsl(0 0% 74% / 0.75)',
+                  padding: '0.75rem 0.5rem', // Larger tap target
+                  margin: '-0.75rem -0.5rem', // Negative margin to maintain visual spacing
+                }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.color = 'hsl(43 82% 65%)';
                 }}
@@ -186,10 +194,11 @@ export function LandingNavbar() {
                   key={link.href}
                   to={link.href}
                   onClick={closeMobile}
-                  className="py-3 font-sans text-[0.75rem] font-medium uppercase tracking-[0.15em] border-b"
+                  className="py-4 font-sans text-[0.8rem] font-medium uppercase tracking-[0.15em] border-b"
                   style={{
                     color: 'hsl(0 0% 74% / 0.8)',
                     borderColor: 'hsl(0 0% 100% / 0.05)',
+                    minHeight: '3rem', // Minimum 48px tap target
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.color = 'hsl(43 82% 65%)';

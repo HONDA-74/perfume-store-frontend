@@ -268,6 +268,9 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
   // Ambient glow intensity that evolves with scroll
   const glowOpacity = useTransform(scrollProgress, [0, 0.25, 0.5, 0.75, 1], [0.35, 0.4, 0.38, 0.35, 0.25]);
 
+  // Subtle atmospheric depth - very restrained spotlight effect
+  const atmosphereOpacity = useTransform(scrollProgress, [0, 0.15, 0.85, 1], [0, 0.25, 0.25, 0.15]);
+
   // Position transition: centered (intro) → right side (storytelling)
   // Desktop positioning
   const bottleX = useTransform(
@@ -277,7 +280,6 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
   );
 
   // Mobile: always centered
-  const bottleXMobile = '50%';
 
   // Container width transition: wide when centered, narrower when on right
   const containerWidth = useTransform(
@@ -301,6 +303,17 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
         }}
         className="relative hidden lg:block"
       >
+        {/* Subtle atmospheric depth — barely visible spotlight/glow */}
+        <motion.div
+          className="absolute inset-0 -z-20"
+          style={{
+            opacity: atmosphereOpacity,
+            background:
+              'radial-gradient(ellipse 70% 85% at 50% 55%, hsl(43 45% 20% / 0.15) 0%, transparent 60%)',
+            filter: 'blur(80px)',
+          }}
+        />
+
         {/* Atmospheric glow beneath bottle */}
         <motion.div
           className="absolute inset-0 -z-10"
@@ -326,6 +339,17 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
 
       {/* Mobile: always centered, simpler */}
       <div className="relative block lg:hidden mx-auto" style={{ width: 'min(85vw, 450px)' }}>
+        {/* Subtle atmospheric depth — mobile */}
+        <motion.div
+          className="absolute inset-0 -z-20"
+          style={{
+            opacity: atmosphereOpacity,
+            background:
+              'radial-gradient(ellipse 75% 85% at 50% 55%, hsl(43 45% 20% / 0.12) 0%, transparent 65%)',
+            filter: 'blur(70px)',
+          }}
+        />
+
         {/* Atmospheric glow beneath bottle */}
         <motion.div
           className="absolute inset-0 -z-10"
@@ -932,32 +956,33 @@ function ClosingScene() {
           </p>
         </InViewBlock>
 
-        {/* CTA */}
+        {/* CTA — Solid champagne/gold for strong conversion moment */}
         <InViewBlock delay={0.42}>
           <Link
             to={ROUTES.scentMatchmaker}
             id="story-cta"
-            className="inline-flex items-center gap-2 font-sans font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+            className="inline-flex items-center gap-2.5 font-sans font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
             style={{
               fontSize: '0.8125rem',
               letterSpacing: '0.08em',
-              color: 'hsl(43 82% 65%)',
-              border: '1px solid hsl(43 82% 52% / 0.35)',
+              color: 'hsl(0 0% 4%)',
+              background: 'hsl(43 82% 52%)',
               borderRadius: '2px',
-              height: '3.125rem',
-              padding: '0 2.25rem',
+              height: '3.25rem',
+              padding: '0 2.5rem',
+              boxShadow: '0 2px 16px hsl(43 78% 44% / 0.3)',
               transition:
-                'border-color 280ms cubic-bezier(0.2,0,0,1), background 280ms cubic-bezier(0.2,0,0,1), transform 120ms ease',
+                'background 280ms cubic-bezier(0.2,0,0,1), box-shadow 280ms cubic-bezier(0.2,0,0,1), transform 120ms ease',
             }}
             onMouseEnter={(e) => {
               const el = e.currentTarget as HTMLElement;
-              el.style.borderColor = 'hsl(43 82% 52% / 0.7)';
-              el.style.background = 'hsl(43 82% 52% / 0.07)';
+              el.style.background = 'hsl(43 88% 60%)';
+              el.style.boxShadow = '0 4px 28px hsl(43 78% 44% / 0.5)';
             }}
             onMouseLeave={(e) => {
               const el = e.currentTarget as HTMLElement;
-              el.style.borderColor = 'hsl(43 82% 52% / 0.35)';
-              el.style.background = 'transparent';
+              el.style.background = 'hsl(43 82% 52%)';
+              el.style.boxShadow = '0 2px 16px hsl(43 78% 44% / 0.3)';
             }}
             onMouseDown={(e) => {
               (e.currentTarget as HTMLElement).style.transform = 'scale(0.97)';
@@ -969,8 +994,8 @@ function ClosingScene() {
             Find Your Signature
             <svg
               aria-hidden="true"
-              width="13"
-              height="13"
+              width="14"
+              height="14"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"

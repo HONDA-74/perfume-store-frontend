@@ -10,6 +10,7 @@
 export const ROUTES = {
   home: '/',
   shop: '/shop',
+  brandDetail: '/brands/:brandSlug',
   productDetail: '/products/:slug',
   search: '/search',
   wishlist: '/wishlist',

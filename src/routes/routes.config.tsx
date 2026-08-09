@@ -33,6 +33,7 @@ export const routeConfig: RouteObject[] = [
     errorElement: <RouteErrorBoundary />,
     children: [
       { path: ROUTES.shop.slice(1),           element: <RoutePlaceholder label="Shop / Catalog" /> },
+      { path: ROUTES.brandDetail.slice(1),    element: <RoutePlaceholder label="Brand Detail" /> },
       { path: ROUTES.productDetail.slice(1),  element: <RoutePlaceholder label="Product Detail" /> },
       { path: ROUTES.search.slice(1),         element: <RoutePlaceholder label="Search Results" /> },
       { path: ROUTES.wishlist.slice(1),       element: <RoutePlaceholder label="Wishlist" /> },
