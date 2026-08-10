@@ -27,6 +27,7 @@ export function HousesSection() {
 
   return (
     <section 
+      id="the-houses"
       className="relative w-full overflow-hidden bg-[#0B0A0C] py-24 md:py-32"
       aria-label="The Houses"
     >
