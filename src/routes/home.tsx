@@ -2,6 +2,7 @@ import { HeroSection } from '@/components/hero';
 import { StorytellingSection } from '@/components/storytelling';
 import { CollectionSection } from '@/components/collection/collection-section';
 import { HousesSection } from '@/components/houses/houses-section';
+import { LandingFooter } from '@/components/landing';
 
 /**
  * Home Page - Landing Page
@@ -11,6 +12,7 @@ import { HousesSection } from '@/components/houses/houses-section';
  *  2. StorytellingSection — cinematic scroll-driven brand narrative
  *  3. CollectionSection   — product showcase
  *  4. HousesSection       — brands marquee
+ *  5. LandingFooter       — cinematic editorial footer with KENZ signature
  */
 export function HomePage() {
   return (
@@ -19,6 +21,7 @@ export function HomePage() {
       <StorytellingSection />
       <CollectionSection />
       <HousesSection />
+      <LandingFooter />
     </main>
   );
 }
