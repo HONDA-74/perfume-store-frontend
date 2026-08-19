@@ -4,26 +4,36 @@
  */
 
 /**
- * AI chat message.
+ * Product recommendation from AI.
+ * Backend: ProductRecommendationDto
  */
-export interface AIChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
+export interface AIProductRecommendation {
+  productId: string;
+  name: string;
+  slug: string;
+  price: number;
+  discountPrice?: number;
+  reason: string;
+  confidenceScore: number;
 }
 
 /**
  * AI chat request.
+ * Backend: ChatRequestDto
  */
 export interface AIChatRequest {
-  messages: AIChatMessage[];
+  message: string;
+  conversationId?: string;
 }
 
 /**
  * AI chat response (normal endpoint).
+ * Backend: ChatResponseDto
  */
 export interface AIChatResponse {
+  conversationId: string;
   message: string;
-  recommendations?: string[];
+  recommendations: AIProductRecommendation[];
 }
 
 /**

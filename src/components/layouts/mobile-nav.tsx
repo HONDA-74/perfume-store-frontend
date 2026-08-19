@@ -1,145 +1,193 @@
+/**
+ * MobileNav Component
+ * 
+ * Mobile navigation drawer with real auth state and navigation.
+ */
+
 import * as React from 'react';
 import { Link } from 'react-router';
-import { X, Home, ShoppingBag, Heart, Package, User, Sparkles } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Logo } from '@/components/shared';
+import { X, User, Heart, ShoppingBag, Sparkles, LogOut } from 'lucide-react';
+import { useUIStore } from '@/stores/ui.store';
+import { useAuthStore } from '@/stores/auth.store';
+import { ROUTES } from '@/constants';
 
-export interface MobileNavProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+export function MobileNav() {
+  const { isMobileNavOpen, closeMobileNav } = useUIStore();
+  const authStore = useAuthStore();
+  const isAuthenticated = authStore.isAuthenticated();
+  const user = authStore.user;
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-}
+  // Close on escape
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileNavOpen) {
+        closeMobileNav();
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isMobileNavOpen, closeMobileNav]);
 
-const primaryLinks: NavItem[] = [
-  { label: 'Home', href: '/', icon: <Home className="h-5 w-5" /> },
-  { label: 'Shop All', href: '/shop', icon: <ShoppingBag className="h-5 w-5" /> },
-  { label: 'Collections', href: '/collections', icon: <Package className="h-5 w-5" /> },
-  { label: 'Wishlist', href: '/wishlist', icon: <Heart className="h-5 w-5" /> },
-];
+  // Lock body scroll
+  React.useEffect(() => {
+    if (isMobileNavOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileNavOpen]);
 
-const secondaryLinks: NavItem[] = [
-  { label: 'My Account', href: '/account', icon: <User className="h-5 w-5" /> },
-  { label: 'Orders', href: '/account/orders', icon: <Package className="h-5 w-5" /> },
-];
+  if (!isMobileNavOpen) return null;
 
-/**
- * MobileNav — slide-over navigation for mobile devices.
- * 
- * Features:
- * - Full-screen drawer on mobile
- * - Primary and secondary navigation sections
- * - AI Scent Finder CTA
- * - Keyboard accessible
- * - Focus trap when open
- * - Close on navigation
- * - Smooth slide-in animation
- * 
- * Per UX_FLOW.md §19 and Design_System.md §3.14
- */
-export function MobileNav({ isOpen, onClose }: MobileNavProps) {
+  const handleLogout = () => {
+    authStore.logout();
+    closeMobileNav();
+  };
+
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent
-        side="left"
-        className="w-full sm:w-[350px]"
-        id="mobile-navigation"
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+        onClick={closeMobileNav}
+      />
+
+      {/* Drawer */}
+      <aside
+        className="fixed left-0 top-0 z-[101] flex h-full w-full max-w-sm flex-col bg-kenz-bg shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
       >
-        <SheetHeader>
-          <SheetTitle className="flex items-center justify-between">
-            <Logo variant="dark" size="sm" />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              aria-label="Close navigation menu"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </SheetTitle>
-        </SheetHeader>
-
-        <nav className="mt-8 flex flex-col gap-2" aria-label="Mobile navigation">
-          {/* Primary Links */}
-          <div className="space-y-1">
-            {primaryLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                onClick={onClose}
-                className="flex items-center gap-3 rounded-md px-3 py-3 font-serif text-h4 font-semibold text-neutral-900 transition-colors hover:bg-neutral-50 focus-visible:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-              >
-                {link.icon}
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          <Separator className="my-4" />
-
-          {/* Secondary Links */}
-          <div className="space-y-1">
-            {secondaryLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                onClick={onClose}
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-body-lg font-medium text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-neutral-900 focus-visible:bg-neutral-50 focus-visible:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-              >
-                {link.icon}
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          <Separator className="my-4" />
-
-          {/* AI Scent Finder CTA */}
-          <div className="rounded-lg border border-primary-500 bg-primary-50 p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary-500" />
-              <h3 className="font-serif text-h4 font-semibold text-neutral-900">
-                AI Scent Finder
-              </h3>
-            </div>
-            <p className="mb-4 text-body-sm text-neutral-600">
-              Let AI help you discover your signature fragrance in 2 minutes.
-            </p>
-            <Button
-              asChild
-              variant="default"
-              size="sm"
-              className="w-full"
-              onClick={onClose}
-            >
-              <Link to="/scent-finder">Begin Quiz</Link>
-            </Button>
-          </div>
-
-          <Separator className="my-4" />
-
-          {/* Sign In/Out */}
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full"
-            onClick={onClose}
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-kenz-border px-6 py-4">
+          <Link
+            to={ROUTES.home}
+            onClick={closeMobileNav}
+            className="font-serif text-xl font-normal tracking-wider text-kenz-champagne"
           >
-            Sign In
-          </Button>
-        </nav>
-      </SheetContent>
-    </Sheet>
+            KENZ
+          </Link>
+          <button
+            onClick={closeMobileNav}
+            className="text-foreground/70 transition-colors hover:text-foreground"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* User Section */}
+          {isAuthenticated && user && (
+            <div className="mb-8 rounded-lg border border-kenz-border bg-kenz-surface/30 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-kenz-gold/20 text-kenz-gold">
+                  <User size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{user.fullName}</p>
+                  <p className="text-xs text-foreground/50">{user.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Main Navigation */}
+          <nav className="space-y-2">
+            <Link
+              to={ROUTES.shop}
+              onClick={closeMobileNav}
+              className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+            >
+              Shop
+            </Link>
+            <Link
+              to="/brands"
+              onClick={closeMobileNav}
+              className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+            >
+              Brands
+            </Link>
+            <Link
+              to="/collections"
+              onClick={closeMobileNav}
+              className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+            >
+              Collections
+            </Link>
+            <Link
+              to={ROUTES.scentMatchmaker}
+              onClick={closeMobileNav}
+              className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+            >
+              <Sparkles size={16} />
+              Scent Finder
+            </Link>
+          </nav>
+
+          {/* Authenticated Actions */}
+          {isAuthenticated && (
+            <div className="mt-8 space-y-2 border-t border-kenz-border pt-6">
+              <Link
+                to={ROUTES.account.root}
+                onClick={closeMobileNav}
+                className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+              >
+                <User size={16} />
+                My Account
+              </Link>
+              <Link
+                to={ROUTES.wishlist}
+                onClick={closeMobileNav}
+                className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+              >
+                <Heart size={16} />
+                Wishlist
+              </Link>
+              <Link
+                to={ROUTES.cart}
+                onClick={closeMobileNav}
+                className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+              >
+                <ShoppingBag size={16} />
+                Cart
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
+          )}
+
+          {/* Guest Actions */}
+          {!isAuthenticated && (
+            <div className="mt-8 space-y-3 border-t border-kenz-border pt-6">
+              <Link
+                to="/auth/login"
+                onClick={closeMobileNav}
+                className="block w-full rounded-md bg-kenz-gold px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg transition-colors hover:bg-kenz-champagne"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/auth/register"
+                onClick={closeMobileNav}
+                className="block w-full rounded-md border border-kenz-border px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-foreground transition-colors hover:border-kenz-gold hover:text-kenz-gold"
+              >
+                Create Account
+              </Link>
+            </div>
+          )}
+        </div>
+      </aside>
+    </>
   );
 }

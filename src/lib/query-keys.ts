@@ -82,6 +82,7 @@ export const queryKeys = {
   cart: {
     all: ['cart'] as const,
     current: () => [...queryKeys.cart.all, 'current'] as const,
+    enriched: () => [...queryKeys.cart.all, 'enriched'] as const,
   },
 
   /**

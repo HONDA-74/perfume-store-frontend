@@ -1,135 +1,234 @@
+/**
+ * CartDrawer Component
+ * 
+ * Slide-out cart drawer integrated with real backend cart state.
+ * Uses React Query for cart operations - shares state with /cart page.
+ */
+
 import * as React from 'react';
 import { Link } from 'react-router';
-import { ShoppingBag, X } from 'lucide-react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { EmptyState, ShippingProgress, PriceSummary } from '@/components/shared';
+import { X, ShoppingBag, Trash2, Plus, Minus } from 'lucide-react';
+import { useUIStore } from '@/stores/ui.store';
+import { useEnrichedCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/api/use-cart';
+import { Price } from '@/components/shared/price';
+import { EmptyState } from '@/components/shared/empty-state';
+import { PageLoader } from '@/components/shared/page-loader';
+import { ROUTES } from '@/constants';
 
-export interface CartDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+export function CartDrawer() {
+  const { isCartDrawerOpen, closeCartDrawer } = useUIStore();
+  const { data: cart, isLoading, error } = useEnrichedCart();
+  const updateItem = useUpdateCartItem();
+  const removeItem = useRemoveCartItem();
 
-/**
- * CartDrawer — slide-over cart preview for quick review and checkout.
- * 
- * Features:
- * - Slide-in from right
- * - Empty cart state
- * - Line items with thumbnails
- * - Quantity controls
- * - Shipping progress indicator
- * - Price summary
- * - Checkout CTA
- * - Scrollable body
- * - Sticky header and footer
- * 
- * Per UX_FLOW.md §5 and Design_System.md §3.14
- */
-export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
-  // Placeholder cart state - would come from cart context/store
-  const [cartItems] = React.useState<Array<Record<string, unknown>>>([]);
-  const cartSubtotal = 0;
-  const shippingThreshold = 100;
+  // Close on escape key
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isCartDrawerOpen) {
+        closeCartDrawer();
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isCartDrawerOpen, closeCartDrawer]);
 
-  const isEmpty = cartItems.length === 0;
+  // Lock body scroll when open
+  React.useEffect(() => {
+    if (isCartDrawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCartDrawerOpen]);
+
+  const handleUpdateQuantity = async (productId: string, quantity: number) => {
+    if (quantity < 1) return;
+    try {
+      await updateItem.mutateAsync({ productId, payload: { quantity } });
+    } catch (err) {
+      // Error handled by mutation
+    }
+  };
+
+  const handleRemoveItem = async (productId: string) => {
+    try {
+      await removeItem.mutateAsync(productId);
+    } catch (err) {
+      // Error handled by mutation
+    }
+  };
+
+  if (!isCartDrawerOpen) return null;
+
+  const subtotal = cart?.items.reduce((sum, item) => 
+    sum + (item.product.price * item.quantity), 0
+  ) ?? 0;
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="flex w-full flex-col sm:w-[450px]">
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={closeCartDrawer}
+      />
+
+      {/* Drawer */}
+      <aside
+        className="fixed right-0 top-0 z-[101] flex h-full w-full max-w-md flex-col bg-kenz-bg shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Shopping cart"
+      >
         {/* Header */}
-        <SheetHeader className="flex-shrink-0">
-          <SheetTitle className="flex items-center justify-between">
-            <span className="font-serif text-h2 font-semibold">Your Cart</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              aria-label="Close cart"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </SheetTitle>
-        </SheetHeader>
-
-        {isEmpty ? (
-          /* Empty State */
-          <div className="flex flex-1 items-center justify-center">
-            <EmptyState
-              icon={<ShoppingBag className="h-8 w-8 text-neutral-400" />}
-              title="Your cart is empty"
-              message="Discover our curated collection of luxury fragrances and find your signature scent."
-              actionLabel="Explore Collection"
-              onAction={() => {
-                onClose();
-                // Navigate to shop - would use router
-              }}
-            />
+        <div className="flex items-center justify-between border-b border-kenz-border px-6 py-4">
+          <div className="flex items-center gap-3">
+            <ShoppingBag size={20} className="text-kenz-gold" />
+            <h2 className="font-serif text-lg font-normal text-foreground">
+              Shopping Cart
+            </h2>
           </div>
-        ) : (
-          <>
-            {/* Shipping Progress */}
-            <div className="flex-shrink-0 py-4">
-              <ShippingProgress
-                current={cartSubtotal}
-                threshold={shippingThreshold}
+          <button
+            onClick={closeCartDrawer}
+            className="text-foreground/70 transition-colors hover:text-foreground"
+            aria-label="Close cart"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <PageLoader />
+            </div>
+          ) : error ? (
+            <div className="p-6">
+              <EmptyState
+                icon={<ShoppingBag className="h-8 w-8" />}
+                title="Failed to load cart"
+                message="Please try again later"
               />
             </div>
-
-            {/* Cart Items - Scrollable */}
-            <div className="flex-1 overflow-y-auto py-4">
-              <div className="space-y-4">
-                {/* Cart items would be rendered here */}
-                <div className="rounded-lg border border-neutral-200 p-4 text-center">
-                  <p className="text-body-sm text-neutral-600">
-                    Cart items would appear here
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <Separator className="flex-shrink-0" />
-
-            {/* Footer with Summary and Checkout */}
-            <div className="flex-shrink-0 space-y-4 py-4">
-              <PriceSummary
-                items={[
-                  { label: 'Subtotal', amount: cartSubtotal },
-                  { label: 'Shipping', amount: 0 },
-                ]}
-                totalAmount={cartSubtotal}
+          ) : !cart?.items.length ? (
+            <div className="flex h-full items-center justify-center p-6">
+              <EmptyState
+                icon={<ShoppingBag className="h-8 w-8" />}
+                title="Your cart is empty"
+                message="Add some fragrances to get started"
+                actionLabel="Browse Products"
+                onAction={() => {
+                  window.location.href = ROUTES.shop;
+                  closeCartDrawer();
+                }}
               />
-
-              <div className="space-y-2">
-                <Button asChild className="w-full" size="lg">
-                  <Link to="/checkout" onClick={onClose}>
-                    Proceed to Checkout
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                  onClick={onClose}
+            </div>
+          ) : (
+            <div className="space-y-4 p-6">
+              {cart.items.map((item) => (
+                <div
+                  key={item.productId}
+                  className="flex gap-4 rounded-lg border border-kenz-border bg-kenz-surface/30 p-4"
                 >
-                  <Link to="/cart">View Full Cart</Link>
-                </Button>
-              </div>
+                  {/* Image */}
+                  <Link
+                    to={`/products/${item.product.slug}`}
+                    onClick={closeCartDrawer}
+                    className="flex-shrink-0"
+                  >
+                    <img
+                      src={item.product.images[0] || '/placeholder-product.jpg'}
+                      alt={item.product.name}
+                      className="h-20 w-20 rounded-md object-cover"
+                    />
+                  </Link>
 
-              <p className="text-center text-caption text-neutral-500">
-                Taxes and shipping calculated at checkout
-              </p>
+                  {/* Details */}
+                  <div className="flex flex-1 flex-col">
+                    <Link
+                      to={`/products/${item.product.slug}`}
+                      onClick={closeCartDrawer}
+                      className="font-serif text-sm text-foreground transition-colors hover:text-kenz-gold"
+                    >
+                      {item.product.name}
+                    </Link>
+                    <p className="mt-1 text-xs text-foreground/50">
+                      {item.product.brand?.name || 'Unknown'} · {item.product.sizeMl}ml
+                    </p>
+
+                    <div className="mt-3 flex items-center justify-between">
+                      {/* Quantity Controls */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                          disabled={item.quantity <= 1 || updateItem.isPending}
+                          className="flex h-7 w-7 items-center justify-center rounded border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30"
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="w-8 text-center text-sm text-foreground">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                          disabled={updateItem.isPending}
+                          className="flex h-7 w-7 items-center justify-center rounded border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+
+                      {/* Remove */}
+                      <button
+                        onClick={() => handleRemoveItem(item.productId)}
+                        disabled={removeItem.isPending}
+                        className="text-foreground/50 transition-colors hover:text-red-500 disabled:opacity-30"
+                        aria-label="Remove item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex-shrink-0 text-right">
+                    <Price price={item.product.price * item.quantity} />
+                  </div>
+                </div>
+              ))}
             </div>
-          </>
-        )}
-      </SheetContent>
-    </Sheet>
+          )}
+        </div>
+
+        {/* Footer */}
+        {cart?.items.length ? (
+          <div className="border-t border-kenz-border p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-sm text-foreground/70">Subtotal</span>
+              <Price price={subtotal} className="text-lg font-medium" />
+            </div>
+            <Link
+              to={ROUTES.checkout}
+              onClick={closeCartDrawer}
+              className="block w-full rounded-md bg-kenz-gold px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg transition-colors hover:bg-kenz-champagne"
+            >
+              Checkout
+            </Link>
+            <Link
+              to={ROUTES.cart}
+              onClick={closeCartDrawer}
+              className="mt-3 block w-full rounded-md border border-kenz-border px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-foreground transition-colors hover:border-kenz-gold hover:text-kenz-gold"
+            >
+              View Cart
+            </Link>
+          </div>
+        ) : null}
+      </aside>
+    </>
   );
 }

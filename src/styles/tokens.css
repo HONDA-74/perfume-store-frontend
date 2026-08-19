@@ -187,7 +187,27 @@
   --z-tooltip: 80;
 
   /* ---------------------------------------------------------------------
-   * 1.10 Semantic Color Mappings (Light Mode Default)
+   * 1.10 KENZ Dark Luxury Design Tokens (NEW)
+   * Added for migrated Figma UI components
+   * ------------------------------------------------------------------- */
+  --kenz-bg: #0b0a0c;
+  --kenz-bg-secondary: #121115;
+  --kenz-surface: #19181e;
+  --kenz-surface-hover: #1f1e25;
+  --kenz-text: #f3f2f5;
+  --kenz-text-muted: rgba(243, 242, 245, 0.45);
+  --kenz-champagne: #d4c3a3;
+  --kenz-gold: hsl(43 82% 52%);
+  --kenz-gold-hover: hsl(43 88% 60%);
+  --kenz-gold-active: hsl(43 78% 42%);
+  --kenz-border: rgba(255, 255, 255, 0.06);
+  --kenz-border-hover: rgba(255, 255, 255, 0.12);
+
+  /* KENZ motion easing */
+  --ease-kenz: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---------------------------------------------------------------------
+   * 1.11 Semantic Color Mappings (Light Mode Default)
    * ------------------------------------------------------------------- */
   --background: var(--color-neutral-50);
   --foreground: var(--color-neutral-900);
@@ -212,25 +232,26 @@
 
 /* ---------------------------------------------------------------------
  * Dark Mode Semantic Color Overrides
+ * Maps semantic tokens to KENZ dark luxury palette
  * ------------------------------------------------------------------- */
 .dark {
-  --background: var(--color-neutral-900);
-  --foreground: var(--color-neutral-50);
-  --card: var(--color-neutral-800);
-  --card-foreground: var(--color-neutral-50);
-  --popover: var(--color-neutral-800);
-  --popover-foreground: var(--color-neutral-50);
-  --primary: var(--color-primary-400);
-  --primary-foreground: var(--color-neutral-900);
-  --secondary: var(--color-neutral-700);
-  --secondary-foreground: var(--color-neutral-50);
-  --muted: var(--color-neutral-800);
-  --muted-foreground: var(--color-neutral-400);
-  --accent: var(--color-neutral-700);
-  --accent-foreground: var(--color-neutral-50);
+  --background: var(--kenz-bg);
+  --foreground: var(--kenz-text);
+  --card: var(--kenz-surface);
+  --card-foreground: var(--kenz-text);
+  --popover: var(--kenz-bg-secondary);
+  --popover-foreground: var(--kenz-text);
+  --primary: var(--kenz-gold);
+  --primary-foreground: var(--kenz-bg);
+  --secondary: var(--kenz-surface);
+  --secondary-foreground: var(--kenz-text);
+  --muted: var(--kenz-surface);
+  --muted-foreground: var(--kenz-text-muted);
+  --accent: var(--kenz-surface-hover);
+  --accent-foreground: var(--kenz-champagne);
   --destructive: var(--color-error-500);
-  --destructive-foreground: var(--color-neutral-50);
-  --border: var(--color-neutral-700);
-  --input: var(--color-neutral-700);
-  --ring: var(--color-primary-400);
+  --destructive-foreground: var(--kenz-text);
+  --border: var(--kenz-border);
+  --input: var(--kenz-border);
+  --ring: var(--kenz-gold);
 }

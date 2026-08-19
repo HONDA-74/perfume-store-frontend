@@ -14,39 +14,22 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * EmptyState — displays message when a list/collection is empty.
  * Configurable icon, title, description, and call-to-action.
+ * Updated with KENZ dark luxury styling.
  */
 const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
-  (
-    {
-      icon,
-      title,
-      message,
-      actionLabel,
-      onAction,
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    const defaultIcon = <Package className="h-8 w-8 text-neutral-400" />;
+  ({ icon, title, message, actionLabel, onAction, className, ...props }, ref) => {
+    const defaultIcon = <Package className="h-8 w-8 text-muted-foreground/15" />;
 
     return (
       <div
         ref={ref}
-        className={cn(
-          'flex flex-col items-center justify-center py-12 text-center',
-          className,
-        )}
+        className={cn('flex flex-col items-center justify-center px-6 py-20 text-center', className)}
         {...props}
       >
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
-          {icon || defaultIcon}
-        </div>
-        <h3 className="mb-2 font-serif text-h3 font-semibold text-neutral-900">
-          {title}
-        </h3>
+        {(icon || defaultIcon) && <div className="mb-6 text-muted-foreground/15">{icon || defaultIcon}</div>}
+        <h3 className="mb-3 font-serif text-h3 font-normal text-foreground/70">{title}</h3>
         {message && (
-          <p className="mb-6 max-w-md text-body-md text-neutral-600">
+          <p className="text-body-sm mb-8 max-w-sm font-light leading-relaxed text-muted-foreground/35">
             {message}
           </p>
         )}

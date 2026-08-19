@@ -1,84 +1,94 @@
-import * as React from 'react';
-import { Minus, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib';
+/**
+ * Quantity Selector Component
+ *
+ * Increment/decrement input for product quantities.
+ * Pure presentation component with controlled value.
+ */
 
-export interface QuantitySelectorProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+import { cn } from '@/lib/cn';
+
+export interface QuantitySelectorProps {
+  /** Current quantity value */
   value: number;
-  onChange: (value: number) => void;
+  /** Minimum allowed value */
   min?: number;
+  /** Maximum allowed value */
   max?: number;
+  /** Callback when value changes */
+  onChange: (value: number) => void;
+  /** Additional CSS classes */
+  className?: string;
+  /** Disabled state */
   disabled?: boolean;
 }
 
-/**
- * QuantitySelector — stepper control for numeric quantity input.
- * Used in product details and cart for item quantity selection.
- */
-const QuantitySelector = React.forwardRef<HTMLDivElement, QuantitySelectorProps>(
-  (
-    { value, onChange, min = 1, max = 99, disabled = false, className, ...props },
-    ref,
-  ) => {
-    const handleDecrement = () => {
-      if (value > min) {
-        onChange(value - 1);
-      }
-    };
+export function QuantitySelector({
+  value,
+  min = 1,
+  max = 99,
+  onChange,
+  className,
+  disabled = false,
+}: QuantitySelectorProps) {
+  const handleDecrement = () => {
+    if (!disabled && value > min) {
+      onChange(Math.max(min, value - 1));
+    }
+  };
 
-    const handleIncrement = () => {
-      if (value < max) {
-        onChange(value + 1);
-      }
-    };
+  const handleIncrement = () => {
+    if (!disabled && value < max) {
+      onChange(Math.min(max, value + 1));
+    }
+  };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = parseInt(e.target.value, 10);
-      if (!isNaN(newValue) && newValue >= min && newValue <= max) {
-        onChange(newValue);
-      }
-    };
+  const isAtMin = value <= min;
+  const isAtMax = value >= max;
 
-    return (
-      <div
-        ref={ref}
-        className={cn('inline-flex items-center gap-2', className)}
-        {...props}
+  return (
+    <div
+      className={cn(
+        'inline-flex h-9 items-center overflow-hidden rounded-[2px] border border-border',
+        disabled && 'opacity-50',
+        className,
+      )}
+    >
+      <button
+        type="button"
+        onClick={handleDecrement}
+        disabled={disabled || isAtMin}
+        className={cn(
+          'flex h-full w-9 items-center justify-center transition-colors duration-150',
+          'text-lg font-light text-muted-foreground hover:bg-accent hover:text-foreground',
+          'disabled:cursor-not-allowed disabled:opacity-30',
+        )}
+        aria-label="Decrease quantity"
       >
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleDecrement}
-          disabled={disabled || value <= min}
-          aria-label="Decrease quantity"
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <Input
-          type="number"
-          value={value}
-          onChange={handleInputChange}
-          min={min}
-          max={max}
-          disabled={disabled}
-          className="h-10 w-16 text-center"
-          aria-label="Quantity"
-        />
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleIncrement}
-          disabled={disabled || value >= max}
-          aria-label="Increase quantity"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  },
-);
-QuantitySelector.displayName = 'QuantitySelector';
-
-export { QuantitySelector };
+        −
+      </button>
+      <span
+        className={cn(
+          'flex h-full w-9 items-center justify-center border-x border-border',
+          'font-sans text-sm font-normal text-foreground/90',
+        )}
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {value}
+      </span>
+      <button
+        type="button"
+        onClick={handleIncrement}
+        disabled={disabled || isAtMax}
+        className={cn(
+          'flex h-full w-9 items-center justify-center transition-colors duration-150',
+          'text-lg font-light text-muted-foreground hover:bg-accent hover:text-foreground',
+          'disabled:cursor-not-allowed disabled:opacity-30',
+        )}
+        aria-label="Increase quantity"
+      >
+        +
+      </button>
+    </div>
+  );
+}

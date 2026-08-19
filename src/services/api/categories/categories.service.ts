@@ -2,10 +2,13 @@
  * Categories API service.
  * Handles all category-related API calls.
  * 
- * Backend endpoints (when implemented):
+ * Backend endpoints:
  * GET    /api/v1/categories
  * GET    /api/v1/categories/:id
  * GET    /api/v1/categories/tree
+ * POST   /api/v1/categories (admin)
+ * PATCH  /api/v1/categories/:id (admin)
+ * DELETE /api/v1/categories/:id (admin)
  */
 
 import { apiClient } from '@/lib';
@@ -14,6 +17,8 @@ import type {
   PaginatedData,
   Category,
   BaseQueryParams,
+  CreateCategoryDto,
+  UpdateCategoryDto,
 } from '@/types';
 
 /**
@@ -47,4 +52,33 @@ export async function getCategoryTree(): Promise<Category[]> {
     '/categories/tree'
   );
   return data.data;
+}
+
+/**
+ * Create category (admin).
+ */
+export async function createCategory(payload: CreateCategoryDto): Promise<Category> {
+  const { data } = await apiClient.post<ApiSuccessResponse<Category>>(
+    '/categories',
+    payload
+  );
+  return data.data;
+}
+
+/**
+ * Update category (admin).
+ */
+export async function updateCategory(id: string, payload: UpdateCategoryDto): Promise<Category> {
+  const { data} = await apiClient.patch<ApiSuccessResponse<Category>>(
+    `/categories/${id}`,
+    payload
+  );
+  return data.data;
+}
+
+/**
+ * Delete category (admin).
+ */
+export async function deleteCategory(id: string): Promise<void> {
+  await apiClient.delete(`/categories/${id}`);
 }

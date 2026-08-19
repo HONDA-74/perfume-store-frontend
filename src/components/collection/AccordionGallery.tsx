@@ -245,7 +245,7 @@ export const AccordionGallery = ({
             aria-label={item.label}
           >
             <span className="ag-panel__frame">
-              <span className="ag-panel__media" ref={(el: HTMLSpanElement | null) => (mediaRefs.current[i] = el)}>
+              <span className="ag-panel__media" ref={(el) => { mediaRefs.current[i] = el; }}>
                 <img src={item.image} alt={item.alt || item.label || ''} draggable="false" />
               </span>
               <span className="ag-panel__overlay" aria-hidden="true" />
@@ -254,14 +254,14 @@ export const AccordionGallery = ({
               <span className="ag-panel__label" aria-hidden="true">
                 <div className="ag-panel__content-wrapper">
                   <div className="ag-panel__header">
-                    <span className="ag-panel__bar" ref={(el: HTMLSpanElement | null) => (barRefs.current[i] = el)} />
-                    <div className="ag-panel__text" ref={(el: HTMLDivElement | null) => (textRefs.current[i] = el)}>
+                    <span className="ag-panel__bar" ref={(el) => { barRefs.current[i] = el; }} />
+                    <div className="ag-panel__text" ref={(el) => { textRefs.current[i] = el; }}>
                       <h3 className="ag-panel__title">{item.label}</h3>
                       {item.sublabel && <span className="ag-panel__sublabel">{item.sublabel}</span>}
                     </div>
                   </div>
                   {(item.description || item.link) && (
-                    <div className="ag-panel__details" ref={(el: HTMLDivElement | null) => (detailRefs.current[i] = el)}>
+                    <div className="ag-panel__details" ref={(el) => { detailRefs.current[i] = el; }}>
                       {item.description && <p className="ag-panel__description">{item.description}</p>}
                       {item.link && <span className="ag-panel__cta">DISCOVER <span className="ag-panel__cta-arrow">→</span></span>}
                     </div>

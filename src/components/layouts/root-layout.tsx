@@ -5,31 +5,22 @@ import { Footer } from './footer';
 import { SearchOverlay } from './search-overlay';
 import { CartDrawer } from './cart-drawer';
 import { MobileNav } from './mobile-nav';
+import { useUIStore } from '@/stores/ui.store';
 
 /**
  * RootLayout — main application frame wrapping all pages.
  * 
- * Responsibilities:
- * - Renders Header, Footer, and main content area
- * - Manages scroll restoration between route transitions
- * - Provides skip-to-content accessibility link
- * - Hosts global overlays (Search, Cart, Mobile Nav)
- * - Semantic HTML5 landmark structure
- * 
- * Per ARCHITECTURE.md §13 and Design_System.md §3.17/§3.18
+ * Integrated with useUIStore for global overlay state management.
+ * KENZ dark luxury styling applied throughout.
  */
 export function RootLayout() {
-  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
-  const [isCartOpen, setIsCartOpen] = React.useState(false);
-  const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
   const location = useLocation();
+  const { closeAll } = useUIStore();
 
   // Close overlays on route change
   React.useEffect(() => {
-    setIsSearchOpen(false);
-    setIsCartOpen(false);
-    setIsMobileNavOpen(false);
-  }, [location.pathname]);
+    closeAll();
+  }, [location.pathname, closeAll]);
 
   return (
     <>
@@ -38,17 +29,13 @@ export function RootLayout() {
       {/* Skip to content link for keyboard navigation */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-tooltip focus:rounded-md focus:bg-primary-500 focus:px-4 focus:py-2 focus:text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-kenz-gold focus:px-4 focus:py-2 focus:text-kenz-bg focus:outline-none"
       >
         Skip to main content
       </a>
 
-      <div className="flex min-h-screen flex-col bg-neutral-0">
-        <Header
-          onSearchClick={() => setIsSearchOpen(true)}
-          onCartClick={() => setIsCartOpen(true)}
-          onMobileMenuClick={() => setIsMobileNavOpen(true)}
-        />
+      <div className="flex min-h-screen flex-col bg-kenz-bg">
+        <Header />
 
         <main id="main-content" className="flex-1" tabIndex={-1}>
           <Outlet />
@@ -58,20 +45,9 @@ export function RootLayout() {
       </div>
 
       {/* Global Overlays */}
-      <SearchOverlay
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-      />
-      
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
-      
-      <MobileNav
-        isOpen={isMobileNavOpen}
-        onClose={() => setIsMobileNavOpen(false)}
-      />
+      <SearchOverlay />
+      <CartDrawer />
+      <MobileNav />
     </>
   );
 }

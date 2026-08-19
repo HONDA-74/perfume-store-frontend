@@ -1,120 +1,125 @@
-import * as React from 'react';
-import { Link } from 'react-router';
-import { Menu } from 'lucide-react';
-import { Logo, CartButton, WishlistButton, SearchButton } from '@/components/shared';
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from './theme-toggle';
-import { cn } from '@/lib';
-
-export interface HeaderProps {
-  onSearchClick?: () => void;
-  onCartClick?: () => void;
-  onMobileMenuClick?: () => void;
-}
-
-interface NavLink {
-  label: string;
-  href: string;
-}
-
-const navigationLinks: NavLink[] = [
-  { label: 'Collections', href: '/collections' },
-  { label: 'Perfumes', href: '/shop' },
-  { label: 'Heritage', href: '/heritage' },
-  { label: 'Scent Finder', href: '/scent-finder' },
-];
-
 /**
- * Header — main site header with responsive navigation.
+ * Header Component
  * 
- * Features:
- * - Centered KENZ logo with variant support
- * - Primary navigation links (desktop only)
- * - Search, Wishlist, Cart buttons
- * - Theme toggle
- * - Mobile menu trigger
- * - Sticky positioning with backdrop blur
- * - Scroll-aware shadow
- * 
- * Per Design_System.md §3.17 and UX_FLOW.md §17
+ * Main navigation header with KENZ dark luxury styling.
+ * Integrated with real backend state for cart count, auth, and navigation.
  */
-export function Header({
-  onSearchClick,
-  onCartClick,
-  onMobileMenuClick,
-}: HeaderProps) {
-  const [isScrolled, setIsScrolled] = React.useState(false);
 
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+import { Link } from 'react-router';
+import { Search, ShoppingBag, Heart, Menu, User } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth.store';
+import { useUIStore } from '@/stores/ui.store';
+import { useCartCount } from '@/hooks/api/use-cart';
+import { useWishlistCount } from '@/hooks/api/use-wishlist';
+import { ROUTES } from '@/constants';
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+export function Header() {
+  const authStore = useAuthStore();
+  const isAuthenticated = authStore.isAuthenticated();
+  const { openCartDrawer, openSearch, openMobileNav } = useUIStore();
+  
+  // Real counts from React Query cache
+  const cartCount = useCartCount();
+  const wishlistCount = useWishlistCount();
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-navbar border-b transition-all duration-normal',
-        isScrolled
-          ? 'border-neutral-200 bg-neutral-0/90 shadow-sm backdrop-blur-md'
-          : 'border-neutral-100 bg-neutral-0/90 backdrop-blur-md',
-      )}
-      role="banner"
-    >
-      <div className="container mx-auto">
-        <div className="flex h-20 items-center justify-between gap-4 px-4 lg:px-6">
-          {/* Left: Mobile Menu Button */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onMobileMenuClick}
-              aria-label="Open menu"
-              aria-expanded={false}
-              aria-controls="mobile-navigation"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Left: Desktop Navigation */}
-          <nav
-            className="hidden items-center gap-8 lg:flex"
-            aria-label="Primary navigation"
+    <header className="sticky top-0 z-navbar glass-dark border-b border-kenz-border">
+      <div className="container mx-auto px-6">
+        <div className="flex h-16 items-center justify-between">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={openMobileNav}
+            className="flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground lg:hidden"
+            aria-label="Open menu"
           >
-            {navigationLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="text-body-md font-medium uppercase tracking-wide text-neutral-700 transition-colors duration-fast hover:text-primary-500 focus-visible:text-primary-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-              >
-                {link.label}
-              </Link>
-            ))}
+            <Menu size={20} />
+          </button>
+
+          {/* Logo */}
+          <Link
+            to={ROUTES.home}
+            className="font-serif text-xl font-normal tracking-wider text-kenz-champagne transition-colors hover:text-kenz-gold"
+          >
+            KENZ
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex lg:items-center lg:gap-8">
+            <Link
+              to={ROUTES.shop}
+              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
+            >
+              Shop
+            </Link>
+            <Link
+              to="/brands"
+              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
+            >
+              Brands
+            </Link>
+            <Link
+              to="/collections"
+              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
+            >
+              Collections
+            </Link>
+            <Link
+              to={ROUTES.scentMatchmaker}
+              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
+            >
+              Scent Finder
+            </Link>
           </nav>
 
-          {/* Center: Logo */}
-          <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:left-auto lg:translate-x-0">
-            <Link
-              to="/"
-              className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:rounded-sm"
-              aria-label="KENZ Home"
+          {/* Actions */}
+          <div className="flex items-center gap-4">
+            {/* Search */}
+            <button
+              onClick={openSearch}
+              className="flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
+              aria-label="Search"
             >
-              <Logo variant="dark" size="md" />
-            </Link>
-          </div>
+              <Search size={18} />
+            </button>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            <SearchButton onClick={onSearchClick} />
-            <WishlistButton itemCount={0} onClick={() => {}} />
-            <CartButton itemCount={0} onClick={onCartClick} />
-            <div className="hidden sm:block">
-              <ThemeToggle />
-            </div>
+            {/* Wishlist */}
+            {isAuthenticated && (
+              <Link
+                to={ROUTES.wishlist}
+                className="relative flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
+                aria-label="Wishlist"
+              >
+                <Heart size={18} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-kenz-gold text-[9px] font-medium text-kenz-bg">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            {/* Cart */}
+            <button
+              onClick={openCartDrawer}
+              className="relative flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
+              aria-label="Cart"
+            >
+              <ShoppingBag size={18} />
+              {cartCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-kenz-gold text-[9px] font-medium text-kenz-bg">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+
+            {/* Account */}
+            <Link
+              to={isAuthenticated ? ROUTES.account.root : '/auth/login'}
+              className="flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
+              aria-label={isAuthenticated ? 'Account' : 'Sign in'}
+            >
+              <User size={18} />
+            </Link>
           </div>
         </div>
       </div>

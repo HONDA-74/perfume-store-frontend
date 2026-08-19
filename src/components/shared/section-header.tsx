@@ -1,51 +1,39 @@
-import * as React from 'react';
-import { cn } from '@/lib';
+/**
+ * Section Header Component
+ *
+ * Editorial section header with optional eyebrow, title, and subtitle.
+ * KENZ dark luxury styling with Playfair Display serif headings.
+ */
 
-export interface SectionHeaderProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+import { cn } from '@/lib/cn';
+
+export interface SectionHeaderProps {
+  /** Optional eyebrow text above title */
+  eyebrow?: string;
+  /** Main title (required) */
   title: string;
-  description?: string;
-  action?: React.ReactNode;
+  /** Optional subtitle/description below title */
+  subtitle?: string;
+  /** Text alignment */
   align?: 'left' | 'center';
+  /** Additional CSS classes */
+  className?: string;
 }
 
-/**
- * SectionHeader — section title with optional description and action.
- * Provides consistent header styling across sections.
- */
-const SectionHeader = React.forwardRef<HTMLDivElement, SectionHeaderProps>(
-  (
-    { title, description, action, align = 'left', className, ...props },
-    ref,
-  ) => {
-    const alignClasses = {
-      left: 'text-left',
-      center: 'text-center',
-    };
+export function SectionHeader({ eyebrow, title, subtitle, align = 'left', className }: SectionHeaderProps) {
+  const alignClass = align === 'center' ? 'text-center items-center' : 'text-left items-start';
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'mb-8 flex flex-col gap-4',
-          align === 'left' ? 'items-start' : 'items-center',
-          className,
-        )}
-        {...props}
-      >
-        <div className={cn('flex-1', alignClasses[align])}>
-          <h2 className="font-serif text-h2 font-bold text-neutral-900">
-            {title}
-          </h2>
-          {description && (
-            <p className="mt-2 text-body-lg text-neutral-600">{description}</p>
-          )}
-        </div>
-        {action && <div className="flex-shrink-0">{action}</div>}
-      </div>
-    );
-  },
-);
-SectionHeader.displayName = 'SectionHeader';
-
-export { SectionHeader };
+  return (
+    <div className={cn('flex flex-col gap-3', alignClass, className)}>
+      {eyebrow && (
+        <span className="text-caption-kenz font-sans font-medium uppercase tracking-[0.2em] text-kenz-champagne/70">
+          {eyebrow}
+        </span>
+      )}
+      <h2 className="font-serif text-h2 font-normal text-foreground/95">{title}</h2>
+      {subtitle && (
+        <p className="text-body-md max-w-md font-light text-muted-foreground/45">{subtitle}</p>
+      )}
+    </div>
+  );
+}

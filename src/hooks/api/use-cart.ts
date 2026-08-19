@@ -5,7 +5,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import * as cartApi from '@/services/api/cart';
-import type { AddToCartDto, UpdateCartItemDto, Cart } from '@/types';
+import * as productsApi from '@/services/api/products';
+import type { AddToCartDto, UpdateCartItemDto, Cart, Product } from '@/types';
+
+/**
+ * Cart item enriched with product data.
+ */
+export interface EnrichedCartItem {
+  productId: string;
+  quantity: number;
+  priceAtAdd: number;
+  product: Product;
+}
+
+/**
+ * Cart with enriched items (includes product data).
+ */
+export interface EnrichedCart extends Omit<Cart, 'items'> {
+  items: EnrichedCartItem[];
+}
 
 /**
  * Get current user's cart.
@@ -24,6 +42,54 @@ export function useCart() {
 export function useCartCount() {
   const { data: cart } = useCart();
   return cart?.items.length ?? 0;
+}
+
+/**
+ * Get cart with enriched product data.
+ * Fetches products for all cart items.
+ * 
+ * NOTE: This performs N individual product fetches due to backend limitation.
+ * Backend has no bulk product-by-IDs endpoint. React Query caches subsequent
+ * requests to the same product ID across components.
+ */
+export function useEnrichedCart() {
+  return useQuery({
+    queryKey: queryKeys.cart.enriched(),
+    queryFn: async (): Promise<EnrichedCart | null> => {
+      const cart = await cartApi.getCart();
+      
+      if (!cart || cart.items.length === 0) {
+        return { ...cart, items: [] };
+      }
+
+      // Fetch all products for cart items
+      const productIds = cart.items.map(item => item.productId);
+      const products = await Promise.all(
+        productIds.map(id => productsApi.getProduct(id))
+      );
+
+      // Create a map for quick lookup
+      const productMap = new Map(products.map((p: Product) => [p.id, p]));
+
+      // Enrich cart items with product data
+      const enrichedItems: EnrichedCartItem[] = cart.items
+        .map(item => {
+          const product = productMap.get(item.productId);
+          if (!product) return null;
+          return {
+            ...item,
+            product,
+          };
+        })
+        .filter((item): item is EnrichedCartItem => item !== null);
+
+      return {
+        ...cart,
+        items: enrichedItems,
+      };
+    },
+    staleTime: 0,
+  });
 }
 
 /**
@@ -92,7 +158,7 @@ export function useAddToCart() {
     
     // Always refetch after mutation settles
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
     },
   });
 }
@@ -138,7 +204,7 @@ export function useUpdateCartItem() {
     },
     
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
     },
   });
 }
@@ -179,7 +245,7 @@ export function useRemoveCartItem() {
     },
     
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.cart.current() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
     },
   });
 }

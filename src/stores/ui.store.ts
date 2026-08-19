@@ -36,6 +36,9 @@ interface UIState {
   // Global Loading Overlay (for blocking operations)
   isGlobalLoading: boolean;
   setGlobalLoading: (loading: boolean) => void;
+
+  // Utilities
+  closeAll: () => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -60,4 +63,11 @@ export const useUIStore = create<UIState>((set) => ({
   // Global Loading
   isGlobalLoading: false,
   setGlobalLoading: (loading: boolean) => set({ isGlobalLoading: loading }),
+
+  // Utilities
+  closeAll: () => set({ 
+    isMobileNavOpen: false, 
+    isSearchOpen: false, 
+    isCartDrawerOpen: false 
+  }),
 }));

@@ -61,3 +61,19 @@ export function useCancelOrder() {
     },
   });
 }
+
+/**
+ * Update order status mutation (admin).
+ */
+export function useUpdateOrderStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: import('@/types').OrderStatus }) =>
+      ordersApi.updateOrderStatus(id, status),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() });
+    },
+  });
+}

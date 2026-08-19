@@ -1,37 +1,55 @@
-import * as React from 'react';
-import { cn } from '@/lib';
+/**
+ * Price Component
+ *
+ * Displays product price with optional original price (for sales).
+ * Adapted from Figma UI with correct backend field mapping.
+ *
+ * Backend fields:
+ * - price: Current/discounted price
+ * - discountPrice: Optional discounted price (if exists, show as current)
+ *
+ * Display logic:
+ * - If discountPrice exists: show discountPrice as current, price as original (strikethrough)
+ * - If no discountPrice: show price only
+ */
 
-export interface PriceProps extends React.HTMLAttributes<HTMLSpanElement> {
-  amount: number;
-  currency?: string;
-  locale?: string;
+import { cn } from '@/lib/cn';
+
+export interface PriceProps {
+  /** Current price to display (or discounted price if on sale) */
+  price: number;
+  /** Original price before discount (optional) */
+  discountPrice?: number;
+  /** Size variant */
+  size?: 'sm' | 'md' | 'lg';
+  /** Additional CSS classes */
+  className?: string;
 }
 
-/**
- * Price — formats and displays monetary amounts with proper currency symbols.
- * Uses Intl.NumberFormat for locale-aware formatting.
- */
-const Price = React.forwardRef<HTMLSpanElement, PriceProps>(
-  (
-    { amount, currency = 'USD', locale = 'en-US', className, ...props },
-    ref,
-  ) => {
-    const formatted = new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-    }).format(amount);
+const sizeMap = {
+  sm: { price: 'text-sm', original: 'text-xs' },
+  md: { price: 'text-base', original: 'text-sm' },
+  lg: { price: 'text-xl', original: 'text-base' },
+};
 
-    return (
-      <span
-        ref={ref}
-        className={cn('font-sans font-semibold text-neutral-900', className)}
-        {...props}
-      >
-        {formatted}
+export function Price({ price, discountPrice, size = 'md', className }: PriceProps) {
+  const sizes = sizeMap[size];
+  const isOnSale = discountPrice !== undefined && discountPrice < price;
+
+  // If on sale, show discountPrice as current and price as original
+  const currentPrice = isOnSale ? discountPrice : price;
+  const originalPrice = isOnSale ? price : undefined;
+
+  return (
+    <div className={cn('flex items-baseline gap-2 font-sans', className)}>
+      <span className={cn(sizes.price, 'font-medium text-gold')}>
+        ${currentPrice.toFixed(2)}
       </span>
-    );
-  },
-);
-Price.displayName = 'Price';
-
-export { Price };
+      {originalPrice !== undefined && (
+        <span className={cn(sizes.original, 'text-muted-foreground/30 line-through')}>
+          ${originalPrice.toFixed(2)}
+        </span>
+      )}
+    </div>
+  );
+}

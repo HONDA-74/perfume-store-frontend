@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib';
 import { Separator } from '@/components/ui/separator';
-import { Price } from './price';
 
 export interface PriceSummaryItem {
   label: string;
@@ -38,36 +37,23 @@ const PriceSummary = React.forwardRef<HTMLDivElement, PriceSummaryProps>(
     return (
       <div
         ref={ref}
-        className={cn('space-y-3 rounded-lg bg-neutral-50 p-4', className)}
+        className={cn('space-y-3 rounded-lg bg-kenz-surface p-4', className)}
         {...props}
       >
         {/* Line Items */}
         {items.map((item, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between"
-          >
+          <div key={index} className="flex items-center justify-between">
             <span
               className={cn(
                 'text-body-sm',
-                item.emphasized
-                  ? 'font-semibold text-neutral-900'
-                  : 'text-neutral-600',
+                item.emphasized ? 'font-semibold text-foreground' : 'text-muted-foreground',
               )}
             >
               {item.label}
             </span>
-            <Price
-              amount={item.amount}
-              currency={currency}
-              locale={locale}
-              className={cn(
-                'text-body-sm',
-                item.emphasized
-                  ? 'font-semibold text-neutral-900'
-                  : 'text-neutral-700',
-              )}
-            />
+            <span className={cn('font-sans text-sm', item.emphasized ? 'font-semibold text-foreground' : 'text-foreground/80')}>
+              ${item.amount.toFixed(2)}
+            </span>
           </div>
         ))}
 
@@ -75,15 +61,8 @@ const PriceSummary = React.forwardRef<HTMLDivElement, PriceSummaryProps>(
 
         {/* Total */}
         <div className="flex items-center justify-between">
-          <span className="font-serif text-h4 font-bold text-neutral-900">
-            {totalLabel}
-          </span>
-          <Price
-            amount={totalAmount}
-            currency={currency}
-            locale={locale}
-            className="font-serif text-h4 font-bold text-primary-500"
-          />
+          <span className="font-serif text-h4 font-bold text-foreground">{totalLabel}</span>
+          <span className="font-serif text-h4 font-bold text-kenz-gold">${totalAmount.toFixed(2)}</span>
         </div>
       </div>
     );

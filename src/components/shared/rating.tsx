@@ -1,96 +1,71 @@
-import * as React from 'react';
-import { Star } from 'lucide-react';
-import { cn } from '@/lib';
+/**
+ * Rating Component
+ *
+ * Displays star rating with optional review count.
+ * Adapted from Figma UI to use backend field names.
+ *
+ * Backend fields:
+ * - ratingAverage: Average rating (0-5)
+ * - ratingCount: Number of reviews
+ */
 
-export interface RatingProps extends React.HTMLAttributes<HTMLDivElement> {
-  rating: number;
-  maxRating?: number;
-  showValue?: boolean;
-  reviewCount?: number;
-  size?: 'sm' | 'md' | 'lg';
+import { cn } from '@/lib/cn';
+
+export interface RatingProps {
+  /** Rating value (0-5) */
+  value: number;
+  /** Number of reviews (optional) */
+  count?: number;
+  /** Size variant */
+  size?: 'sm' | 'md';
+  /** Additional CSS classes */
+  className?: string;
 }
 
-/**
- * Rating — displays star rating with optional numeric value and review count.
- * Supports fractional ratings with partial star fills.
- */
-const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
-  (
-    {
-      rating,
-      maxRating = 5,
-      showValue = false,
-      reviewCount,
-      size = 'md',
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    const sizeClasses = {
-      sm: 'h-3 w-3',
-      md: 'h-4 w-4',
-      lg: 'h-5 w-5',
-    };
+export function Rating({ value, count, size = 'sm', className }: RatingProps) {
+  const starSize = size === 'sm' ? 10 : 13;
+  const filled = Math.floor(value);
+  const hasHalf = value - filled >= 0.5;
 
-    const textSizeClasses = {
-      sm: 'text-caption',
-      md: 'text-body-sm',
-      lg: 'text-body-md',
-    };
+  return (
+    <div className={cn('flex items-center gap-1.5', className)}>
+      <div className="flex items-center gap-0.5" role="img" aria-label={`${value} out of 5 stars`}>
+        {Array.from({ length: 5 }).map((_, i) => {
+          const isFilled = i < filled;
+          const isHalf = i === filled && hasHalf;
 
-    const clampedRating = Math.max(0, Math.min(rating, maxRating));
-
-    return (
-      <div
-        ref={ref}
-        className={cn('flex items-center gap-1', className)}
-        {...props}
-      >
-        <div className="flex items-center gap-0.5" aria-label={`Rating: ${rating} out of ${maxRating}`}>
-          {Array.from({ length: maxRating }, (_, index) => {
-            const fillPercentage = Math.max(
-              0,
-              Math.min(100, (clampedRating - index) * 100),
-            );
-
-            return (
-              <div key={index} className="relative">
-                <Star
-                  className={cn(sizeClasses[size], 'text-neutral-200')}
-                  fill="currentColor"
-                />
-                {fillPercentage > 0 && (
-                  <div
-                    className="absolute inset-0 overflow-hidden"
-                    style={{ width: `${fillPercentage}%` }}
-                  >
-                    <Star
-                      className={cn(sizeClasses[size], 'text-primary-500')}
-                      fill="currentColor"
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {showValue && (
-          <span className={cn('font-medium text-neutral-700', textSizeClasses[size])}>
-            {rating.toFixed(1)}
-          </span>
-        )}
-
-        {reviewCount !== undefined && (
-          <span className={cn('text-neutral-500', textSizeClasses[size])}>
-            ({reviewCount})
-          </span>
-        )}
+          return (
+            <svg
+              key={i}
+              width={starSize}
+              height={starSize}
+              viewBox="0 0 12 12"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M6 1l1.236 2.505L10 3.91l-2 1.95.472 2.74L6 7.27 3.528 8.6 4 5.86 2 3.91l2.764-.405z"
+                fill={isFilled ? 'hsl(43 82% 52%)' : isHalf ? 'url(#half-star)' : 'none'}
+                stroke={isFilled || isHalf ? 'hsl(43 82% 52%)' : 'rgba(255,255,255,0.2)'}
+                strokeWidth="0.8"
+              />
+              {isHalf && (
+                <defs>
+                  <linearGradient id="half-star" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="50%" stopColor="hsl(43 82% 52%)" />
+                    <stop offset="50%" stopColor="transparent" />
+                  </linearGradient>
+                </defs>
+              )}
+            </svg>
+          );
+        })}
       </div>
-    );
-  },
-);
-Rating.displayName = 'Rating';
-
-export { Rating };
+      {count !== undefined && count > 0 && (
+        <span className="font-sans text-[10px] leading-none text-muted-foreground/35">
+          ({count})
+        </span>
+      )}
+    </div>
+  );
+}

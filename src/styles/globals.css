@@ -156,6 +156,122 @@
 
   /* Container max-widths — Design_System.md §4.1 */
   --container-2xl: 1440px;
+
+  /* KENZ-specific token mappings for Tailwind utilities */
+  --color-kenz-bg: var(--kenz-bg);
+  --color-kenz-surface: var(--kenz-surface);
+  --color-kenz-surface-hover: var(--kenz-surface-hover);
+  --color-kenz-champagne: var(--kenz-champagne);
+  --color-kenz-gold: var(--kenz-gold);
+  --color-kenz-border: var(--kenz-border);
+}
+
+/**
+ * KENZ Utility Extensions
+ * Additional utilities for migrated Figma components
+ */
+@layer utilities {
+  /* KENZ type scale */
+  .text-display {
+    font-size: clamp(3rem, 8vw, 4.5rem);
+    line-height: 1.05;
+    font-family: var(--font-serif);
+  }
+  .text-h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    font-family: var(--font-serif);
+  }
+  .text-h2 {
+    font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    line-height: 1.15;
+    font-family: var(--font-serif);
+  }
+  .text-h3 {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    line-height: 1.2;
+    font-family: var(--font-serif);
+  }
+  .text-h4 {
+    font-size: 1.125rem;
+    line-height: 1.35;
+    font-family: var(--font-sans);
+  }
+  .text-body-lg-kenz {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+  .text-body-md-kenz {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+  .text-body-sm-kenz {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+  .text-caption-kenz {
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+  }
+
+  /* Serif/sans utilities */
+  .font-kenz-serif {
+    font-family: var(--font-serif) !important;
+  }
+  .font-kenz-sans {
+    font-family: var(--font-sans) !important;
+  }
+
+  /* KENZ motion easing */
+  .ease-kenz {
+    transition-timing-function: var(--ease-kenz);
+  }
+
+  /* Gold effects */
+  .shadow-gold-kenz {
+    box-shadow: 0 4px 20px -2px rgba(212, 160, 23, 0.25);
+  }
+  .glow-gold {
+    box-shadow: 0 0 30px -5px hsla(43, 82%, 52%, 0.35);
+  }
+
+  /* Glass surfaces */
+  .glass-dark {
+    background: rgba(11, 10, 12, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .glass-surface {
+    background: rgba(25, 24, 30, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Champagne / gold text */
+  .text-champagne {
+    color: var(--kenz-champagne);
+  }
+  .text-gold {
+    color: var(--kenz-gold);
+  }
+
+  /* Z-index utilities */
+  .z-navbar-kenz {
+    z-index: 30;
+  }
+  .z-drawer-kenz {
+    z-index: 50;
+  }
+  .z-modal-kenz {
+    z-index: 60;
+  }
+  .z-popover-kenz {
+    z-index: 70;
+  }
+  .z-toast-kenz {
+    z-index: 80;
+  }
 }
 
 /**
@@ -346,5 +462,63 @@
     to {
       height: 0;
     }
+  }
+
+  /* KENZ animations */
+  @keyframes kenz-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes kenz-slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes gold-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 hsla(43, 82%, 52%, 0);
+    }
+    50% {
+      box-shadow: 0 0 0 6px hsla(43, 82%, 52%, 0.12);
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* KENZ animation utilities */
+@layer utilities {
+  .animate-kenz-fade-in {
+    animation: kenz-fade-in 0.4s var(--ease-kenz) both;
+  }
+  .animate-kenz-slide-right {
+    animation: kenz-slide-in-right 0.4s var(--ease-kenz) both;
+  }
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+  .animate-gold-pulse {
+    animation: gold-pulse 2s ease-in-out infinite;
   }
 }

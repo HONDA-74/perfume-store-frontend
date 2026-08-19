@@ -1,116 +1,99 @@
-import * as React from 'react';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib';
-import { ProductImage } from './product-image';
-import { Price } from './price';
+/**
+ * Product Card Compact Component
+ *
+ * Condensed product card for dense grid layouts, cart items, or related products.
+ * Integrated with real backend data and hooks.
+ */
 
-export interface ProductCardCompactProps
-  extends React.HTMLAttributes<HTMLDivElement> {
-  id: string;
-  slug: string;
-  title: string;
-  brand: string;
-  price: number;
-  quantity?: number;
-  imageUrl: string;
-  imageAlt?: string;
-  onRemove?: (id: string) => void;
-  onCardClick?: (slug: string) => void;
+import * as React from 'react';
+import { Link } from 'react-router';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/cn';
+import { mapProductForUI, type ProductUI } from '@/lib/adapters';
+import type { Product } from '@/types/product.types';
+import { Price } from './price';
+import { ProductBadge } from './product-badge';
+
+export interface ProductCardCompactProps {
+  /** Product data from backend */
+  product: Product;
+  /** Optional remove handler (for cart/wishlist items) */
+  onRemove?: (productId: string) => void;
+  /** Additional CSS classes */
+  className?: string;
+  /** Show remove button */
+  showRemove?: boolean;
 }
 
-/**
- * ProductCardCompact — condensed product card for cart and wishlist views.
- * Horizontal layout with smaller image and essential info only.
- */
-const ProductCardCompact = React.forwardRef<
-  HTMLDivElement,
-  ProductCardCompactProps
->(
-  (
-    {
-      id,
-      slug,
-      title,
-      brand,
-      price,
-      quantity,
-      imageUrl,
-      imageAlt,
-      onRemove,
-      onCardClick,
-      className,
-      ...props
-    },
-    ref,
-  ) => {
-    const handleCardClick = () => {
-      onCardClick?.(slug);
-    };
+export function ProductCardCompact({ product, onRemove, className, showRemove = false }: ProductCardCompactProps) {
+  const productUI: ProductUI = React.useMemo(() => mapProductForUI(product), [product]);
 
-    const handleRemove = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onRemove?.(id);
-    };
+  const handleRemove = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onRemove?.(product.id);
+  };
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'group relative flex gap-4 rounded-lg border border-neutral-200 bg-neutral-0 p-3 transition-shadow hover:shadow-md',
-          onCardClick && 'cursor-pointer',
-          className,
-        )}
-        onClick={onCardClick ? handleCardClick : undefined}
-        {...props}
+  return (
+    <article className={cn('group relative flex gap-4', className)}>
+      {/* Image */}
+      <Link
+        to={`/products/${product.slug}`}
+        className="relative block h-24 w-24 flex-shrink-0 overflow-hidden border border-border bg-kenz-surface"
       >
-        {/* Image */}
-        <div className="flex-shrink-0">
-          <ProductImage
-            src={imageUrl}
-            alt={imageAlt || `${brand} ${title}`}
-            aspectRatio="square"
-            className="h-20 w-20"
-          />
-        </div>
-
-        {/* Content */}
-        <div className="flex min-w-0 flex-1 flex-col justify-between">
-          <div>
-            <p className="text-caption font-medium uppercase tracking-wider text-neutral-600">
-              {brand}
-            </p>
-            <h4 className="line-clamp-2 text-body-sm font-semibold text-neutral-900">
-              {title}
-            </h4>
+        <img
+          src={product.images[0] || '/placeholder-product.jpg'}
+          alt={productUI.title}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+        {productUI.badge && (
+          <div className="absolute left-1 top-1">
+            <ProductBadge badge={productUI.badge} className="scale-75" />
           </div>
-
-          <div className="flex items-center justify-between">
-            <Price amount={price} className="text-body-md" />
-            {quantity !== undefined && (
-              <span className="text-body-sm text-neutral-600">
-                Qty: {quantity}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Remove Button */}
-        {onRemove && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-            onClick={handleRemove}
-            aria-label="Remove item"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         )}
-      </div>
-    );
-  },
-);
-ProductCardCompact.displayName = 'ProductCardCompact';
+      </Link>
 
-export { ProductCardCompact };
+      {/* Info */}
+      <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
+        <div className="flex-1">
+          {/* Brand */}
+          <span className="font-sans text-[9px] font-medium uppercase tracking-[0.1em] text-muted-foreground/50">
+            {product.brand?.name || 'KENZ'}
+          </span>
+
+          {/* Title */}
+          <Link
+            to={`/products/${product.slug}`}
+            className="mt-0.5 line-clamp-2 font-serif text-xs font-normal leading-tight text-foreground/90 transition-colors hover:text-kenz-gold"
+          >
+            {productUI.title}
+          </Link>
+        </div>
+
+        {/* Price */}
+        <Price price={product.price} discountPrice={product.discountPrice} size="sm" />
+      </div>
+
+      {/* Remove Button */}
+      {showRemove && onRemove && (
+        <button
+          onClick={handleRemove}
+          className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center text-muted-foreground/40 transition-colors hover:text-foreground"
+          aria-label="Remove item"
+        >
+          <X size={14} />
+        </button>
+      )}
+
+      {/* Out of Stock Indicator */}
+      {!productUI.inStock && (
+        <div className="absolute inset-0 flex items-center justify-center bg-kenz-bg/60">
+          <span className="font-sans text-[9px] font-medium uppercase tracking-[0.15em] text-foreground/40">
+            Out of Stock
+          </span>
+        </div>
+      )}
+    </article>
+  );
+}
