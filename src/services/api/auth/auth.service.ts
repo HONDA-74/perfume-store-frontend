@@ -46,8 +46,9 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
 /**
  * Logout user.
  */
-export async function logout(): Promise<void> {
-  await apiClient.post('/auth/logout');
+export async function logout(refreshToken: string | null): Promise<void> {
+  if (!refreshToken) return;
+  await apiClient.post('/auth/logout', { refreshToken });
 }
 
 /**

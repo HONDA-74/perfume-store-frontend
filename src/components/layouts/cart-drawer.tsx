@@ -140,7 +140,7 @@ export function CartDrawer() {
                     className="flex-shrink-0"
                   >
                     <img
-                      src={item.product.images[0] || '/placeholder-product.jpg'}
+                      src={item.product.images[0]}
                       alt={item.product.name}
                       className="h-20 w-20 rounded-md object-cover"
                     />

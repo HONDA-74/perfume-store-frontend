@@ -73,7 +73,17 @@ apiClient.interceptors.response.use(
     const normalizedError = handleApiError(error);
 
     // Handle 401 Unauthorized - attempt token refresh
-    if (normalizedError.status === 401 && originalRequest && !originalRequest._retry) {
+    const requestUrl = originalRequest?.url ?? '';
+    const isAuthEntryRequest = ['/auth/login', '/auth/register', '/auth/refresh'].some((path) =>
+      requestUrl.endsWith(path),
+    );
+
+    if (
+      normalizedError.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthEntryRequest
+    ) {
       if (isRefreshing) {
         // Wait for the ongoing refresh to complete
         return new Promise((resolve, reject) => {

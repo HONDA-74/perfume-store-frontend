@@ -13,7 +13,7 @@ import { PageLoader } from '@/components/shared/page-loader';
 interface StatCard {
   label: string;
   value: number | string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
 }
 
 export function AdminDashboardPage() {

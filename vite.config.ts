@@ -39,6 +39,19 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       sourcemap: mode !== 'production',
       target: 'es2022',
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('@react-three') || id.includes('/three/')) return 'three-vendor';
+            if (id.includes('/ogl/')) return 'webgl-vendor';
+            if (id.includes('framer-motion')) return 'motion-vendor';
+            if (id.includes('@tanstack/react-query')) return 'query-vendor';
+            if (id.includes('react-router') || id.includes('react-dom') || id.includes('/react/')) return 'react-vendor';
+            return undefined;
+          },
+        },
+      },
     },
   };
 });

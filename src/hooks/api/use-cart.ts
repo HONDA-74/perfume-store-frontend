@@ -7,6 +7,7 @@ import { queryKeys } from '@/lib/query-keys';
 import * as cartApi from '@/services/api/cart';
 import * as productsApi from '@/services/api/products';
 import type { AddToCartDto, UpdateCartItemDto, Cart, Product } from '@/types';
+import { useAuthStore } from '@/stores/auth.store';
 
 /**
  * Cart item enriched with product data.
@@ -29,10 +30,12 @@ export interface EnrichedCart extends Omit<Cart, 'items'> {
  * Get current user's cart.
  */
 export function useCart() {
+  const hasSession = useAuthStore((state) => !!state.accessToken);
   return useQuery({
     queryKey: queryKeys.cart.current(),
     queryFn: cartApi.getCart,
     staleTime: 0, // Always fresh - cart changes frequently
+    enabled: hasSession,
   });
 }
 
@@ -53,6 +56,7 @@ export function useCartCount() {
  * requests to the same product ID across components.
  */
 export function useEnrichedCart() {
+  const hasSession = useAuthStore((state) => !!state.accessToken);
   return useQuery({
     queryKey: queryKeys.cart.enriched(),
     queryFn: async (): Promise<EnrichedCart | null> => {
@@ -89,6 +93,7 @@ export function useEnrichedCart() {
       };
     },
     staleTime: 0,
+    enabled: hasSession,
   });
 }
 

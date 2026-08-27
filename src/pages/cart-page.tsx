@@ -90,7 +90,7 @@ export function CartPage() {
                   className="flex-shrink-0"
                 >
                   <img
-                    src={item.product.images[0] || '/placeholder-product.jpg'}
+                    src={item.product.images[0]}
                     alt={item.product.name}
                     className="h-32 w-24 rounded-md object-cover"
                   />

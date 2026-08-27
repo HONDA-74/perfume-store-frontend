@@ -1,21 +1,39 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Environment, Preload } from '@react-three/drei';
+import { Environment } from '@react-three/drei';
 import type { MotionValue } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
 import { PerfumeBottle } from './PerfumeBottle';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 interface PerfumeSceneProps {
   scrollProgress: MotionValue<number>;
 }
 
 export function PerfumeScene({ scrollProgress }: PerfumeSceneProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const update = (inViewport: boolean) => setVisible(inViewport && !document.hidden);
+    const observer = new IntersectionObserver(([entry]) => update(entry.isIntersecting), { rootMargin: '150px' });
+    const onVisibility = () => update(wrapper.getBoundingClientRect().bottom > -150 && wrapper.getBoundingClientRect().top < window.innerHeight + 150);
+    observer.observe(wrapper);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { observer.disconnect(); document.removeEventListener('visibilitychange', onVisibility); };
+  }, []);
+
   return (
-    <div className="w-full h-full absolute inset-0">
-      <Canvas
+    <div ref={wrapperRef} className="absolute inset-0 h-full w-full">
+      {visible && <Canvas
         camera={{ position: [0, 0, 5.5], fov: 45 }} // Moved camera closer for a stronger hero presence
-        dpr={[1, 2]} // Optimize for mobile vs desktop
+        dpr={isMobile ? 1 : [1, 1.5]}
         gl={{ 
-          antialias: true,
+          antialias: !isMobile,
           powerPreference: 'high-performance',
           alpha: true,
           toneMapping: 4, // ACESFilmicToneMapping is standard for photorealism (THREE.ACESFilmicToneMapping is 4)
@@ -65,12 +83,9 @@ export function PerfumeScene({ scrollProgress }: PerfumeSceneProps) {
           <Environment preset="studio" environmentIntensity={1.0} />
 
           {/* The main bottle asset, animated by scroll progress */}
-          <PerfumeBottle scrollProgress={scrollProgress} />
-          
-          {/* Preload all necessary GL objects and textures */}
-          <Preload all />
+          <PerfumeBottle scrollProgress={scrollProgress} reducedMotion={!!reducedMotion} />
         </Suspense>
-      </Canvas>
+      </Canvas>}
     </div>
   );
 }

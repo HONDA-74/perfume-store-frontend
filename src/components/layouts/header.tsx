@@ -1,125 +1,76 @@
-/**
- * Header Component
- * 
- * Main navigation header with KENZ dark luxury styling.
- * Integrated with real backend state for cart count, auth, and navigation.
- */
-
-import { Link } from 'react-router';
-import { Search, ShoppingBag, Heart, Menu, User } from 'lucide-react';
-import { useAuthStore } from '@/stores/auth.store';
-import { useUIStore } from '@/stores/ui.store';
+import * as React from 'react';
+import { Link, useLocation } from 'react-router';
+import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react';
+import { ROUTES } from '@/constants';
 import { useCartCount } from '@/hooks/api/use-cart';
 import { useWishlistCount } from '@/hooks/api/use-wishlist';
-import { ROUTES } from '@/constants';
+import { useAuthStore } from '@/stores/auth.store';
+import { useUIStore } from '@/stores/ui.store';
+
+const navLinks = [
+  { label: 'Collections', href: ROUTES.collections },
+  { label: 'Shop', href: ROUTES.shop },
+  { label: 'Brands', href: ROUTES.brands },
+  { label: 'Heritage', href: ROUTES.heritage },
+  { label: 'Scent Finder', href: ROUTES.scentMatchmaker },
+];
+
+function NavBadge({ count }: { count: number }) {
+  if (!count) return null;
+  return <span className="absolute -right-1 -top-1 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-[#D4A017] px-[3px] text-[8px] font-semibold leading-none text-[#0B0A0C]">{count > 99 ? '99+' : count}</span>;
+}
+
+function NavLink({ href, label, active }: { href: string; label: string; active: boolean }) {
+  return (
+    <Link to={href} className="group relative pb-1 text-[10px] font-medium uppercase tracking-[0.15em] transition-colors duration-200" style={{ color: active ? '#D4C3A3' : 'rgba(243,242,245,0.55)' }}>
+      {label}
+      <span className="absolute bottom-0 left-0 h-px bg-[#D4C3A3] transition-all duration-300" style={{ width: active ? '100%' : 0 }} />
+      {!active && <span className="absolute bottom-0 left-0 h-px w-0 bg-[#D4C3A3]/40 transition-all duration-300 group-hover:w-full" />}
+    </Link>
+  );
+}
 
 export function Header() {
-  const authStore = useAuthStore();
-  const isAuthenticated = authStore.isAuthenticated();
+  const [scrolled, setScrolled] = React.useState(false);
+  const location = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const { openCartDrawer, openSearch, openMobileNav } = useUIStore();
-  
-  // Real counts from React Query cache
   const cartCount = useCartCount();
   const wishlistCount = useWishlistCount();
 
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-navbar glass-dark border-b border-kenz-border">
-      <div className="container mx-auto px-6">
-        <div className="flex h-16 items-center justify-between">
-          {/* Mobile Menu Button */}
-          <button
-            onClick={openMobileNav}
-            className="flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground lg:hidden"
-            aria-label="Open menu"
-          >
-            <Menu size={20} />
-          </button>
-
-          {/* Logo */}
-          <Link
-            to={ROUTES.home}
-            className="font-serif text-xl font-normal tracking-wider text-kenz-champagne transition-colors hover:text-kenz-gold"
-          >
-            KENZ
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex lg:items-center lg:gap-8">
-            <Link
-              to={ROUTES.shop}
-              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
-            >
-              Shop
-            </Link>
-            <Link
-              to="/brands"
-              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
-            >
-              Brands
-            </Link>
-            <Link
-              to="/collections"
-              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
-            >
-              Collections
-            </Link>
-            <Link
-              to={ROUTES.scentMatchmaker}
-              className="font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:text-foreground"
-            >
-              Scent Finder
-            </Link>
+    <header className="sticky top-0 z-navbar transition-all duration-300" style={{ background: scrolled ? 'rgba(11,10,12,0.95)' : 'rgba(11,10,12,0.78)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)', boxShadow: scrolled ? '0 1px 30px rgba(0,0,0,0.5)' : 'none' }}>
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
+        <div className="relative flex h-16 items-center justify-between lg:h-20">
+          <button onClick={openMobileNav} className="flex h-11 w-11 items-center justify-center text-white/60 transition hover:text-white lg:hidden" aria-label="Open menu"><Menu size={20} /></button>
+          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
+            {navLinks.slice(0, 3).map((link) => <NavLink key={link.href} {...link} active={location.pathname.startsWith(link.href)} />)}
           </nav>
-
-          {/* Actions */}
-          <div className="flex items-center gap-4">
-            {/* Search */}
-            <button
-              onClick={openSearch}
-              className="flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
-              aria-label="Search"
-            >
-              <Search size={18} />
-            </button>
-
-            {/* Wishlist */}
-            {isAuthenticated && (
-              <Link
-                to={ROUTES.wishlist}
-                className="relative flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
-                aria-label="Wishlist"
-              >
-                <Heart size={18} />
-                {wishlistCount > 0 && (
-                  <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-kenz-gold text-[9px] font-medium text-kenz-bg">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
+          <Link to={ROUTES.home} className="absolute left-1/2 -translate-x-1/2 font-serif text-xl tracking-[0.2em] text-[#D4C3A3] transition hover:text-[#E2BB55] lg:static lg:translate-x-0" aria-label="KENZ home">KENZ</Link>
+          <div className="hidden items-center gap-7 lg:flex">
+            {navLinks.slice(3).map((link) => <NavLink key={link.href} {...link} active={location.pathname.startsWith(link.href)} />)}
+          </div>
+          <div className="flex items-center gap-0.5 sm:gap-1">
+            <button onClick={openSearch} className="flex h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90" aria-label="Search"><Search size={18} /></button>
+            {isAuthenticated ? (
+              <>
+                <Link to={ROUTES.wishlist} className="relative flex h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90" aria-label="Wishlist"><Heart size={18} /><NavBadge count={wishlistCount} /></Link>
+                <button onClick={openCartDrawer} className="relative flex h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90" aria-label="Cart"><ShoppingBag size={18} /><NavBadge count={cartCount} /></button>
+                <Link to={ROUTES.account.root} className="hidden h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90 sm:flex" aria-label="Account"><User size={18} /></Link>
+              </>
+            ) : (
+              <div className="hidden items-center gap-2 sm:flex">
+                <Link to={ROUTES.auth.login} className="px-3 py-2 text-[10px] font-medium uppercase tracking-[0.13em] text-white/60 transition hover:text-white">Sign In</Link>
+                <Link to={ROUTES.auth.register} className="border border-[#D4C3A3]/35 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.13em] text-[#D4C3A3] transition hover:border-[#D4C3A3] hover:bg-[#D4C3A3]/10">Sign Up</Link>
+              </div>
             )}
-
-            {/* Cart */}
-            <button
-              onClick={openCartDrawer}
-              className="relative flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
-              aria-label="Cart"
-            >
-              <ShoppingBag size={18} />
-              {cartCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-kenz-gold text-[9px] font-medium text-kenz-bg">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-
-            {/* Account */}
-            <Link
-              to={isAuthenticated ? ROUTES.account.root : '/auth/login'}
-              className="flex items-center justify-center text-foreground/70 transition-colors hover:text-foreground"
-              aria-label={isAuthenticated ? 'Account' : 'Sign in'}
-            >
-              <User size={18} />
-            </Link>
           </div>
         </div>
       </div>

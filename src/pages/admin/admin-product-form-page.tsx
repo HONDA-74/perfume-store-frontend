@@ -10,7 +10,7 @@ import { useProduct, useCreateProduct, useUpdateProduct } from '@/hooks/api/use-
 import { useBrands } from '@/hooks/api/use-brands';
 import { useCategories } from '@/hooks/api/use-categories';
 import { PageLoader } from '@/components/shared/page-loader';
-import type { CreateProductDto } from '@/types';
+import { FragranceConcentration, FragranceGender, type CreateProductDto } from '@/types';
 
 export function AdminProductFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,12 +29,13 @@ export function AdminProductFormPage() {
     description: '',
     price: 0,
     stockQuantity: 0,
-    gender: 'UNISEX' as const,
-    concentration: undefined,
-    sizeMl: undefined,
+    gender: FragranceGender.UNISEX,
+    concentration: FragranceConcentration.EDP,
+    sizeMl: 100,
     discountPrice: undefined,
     images: [],
     isFeatured: false,
+    notes: { top: [], middle: [], base: [] },
     categoryId: '',
     brandId: '',
   });
@@ -54,8 +55,9 @@ export function AdminProductFormPage() {
         discountPrice: p.discountPrice,
         images: p.images,
         isFeatured: p.isFeatured,
-        categoryId: p.category.id,
-        brandId: p.brand.id,
+        notes: p.notes,
+        categoryId: p.category?.id ?? p.categoryId,
+        brandId: p.brand?.id ?? p.brandId,
       });
     }
   }, [isEditing, productQuery.data]);
@@ -72,11 +74,12 @@ export function AdminProductFormPage() {
       gender: formData.gender!,
       categoryId: formData.categoryId!,
       brandId: formData.brandId!,
-      concentration: formData.concentration,
-      sizeMl: formData.sizeMl,
+      concentration: formData.concentration!,
+      sizeMl: formData.sizeMl!,
       discountPrice: formData.discountPrice,
       images: formData.images,
       isFeatured: formData.isFeatured,
+      notes: formData.notes ?? { top: [], middle: [], base: [] },
     };
 
     if (isEditing) {
@@ -252,13 +255,13 @@ export function AdminProductFormPage() {
               <select
                 required
                 value={formData.gender}
-                onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value as any }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value as FragranceGender }))}
                 className="w-full px-4 py-2 border rounded bg-transparent outline-none"
                 style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(243,242,245,0.9)', fontFamily: 'var(--font-sans)', fontSize: '13px' }}
               >
-                <option value="MEN">Men</option>
-                <option value="WOMEN">Women</option>
-                <option value="UNISEX">Unisex</option>
+                <option value={FragranceGender.MALE}>Men</option>
+                <option value={FragranceGender.FEMALE}>Women</option>
+                <option value={FragranceGender.UNISEX}>Unisex</option>
               </select>
             </div>
 
@@ -268,16 +271,14 @@ export function AdminProductFormPage() {
               </label>
               <select
                 value={formData.concentration || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, concentration: e.target.value || undefined as any }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, concentration: e.target.value as FragranceConcentration }))}
                 className="w-full px-4 py-2 border rounded bg-transparent outline-none"
                 style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(243,242,245,0.9)', fontFamily: 'var(--font-sans)', fontSize: '13px' }}
               >
-                <option value="">None</option>
-                <option value="EDP">EDP</option>
-                <option value="EDT">EDT</option>
-                <option value="EDC">EDC</option>
-                <option value="PARFUM">Parfum</option>
-                <option value="EXTRAIT">Extrait</option>
+                <option value={FragranceConcentration.EDP}>EDP</option>
+                <option value={FragranceConcentration.EDT}>EDT</option>
+                <option value={FragranceConcentration.EDC}>EDC</option>
+                <option value={FragranceConcentration.PARFUM}>Parfum</option>
               </select>
             </div>
           </div>

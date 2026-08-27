@@ -1,8 +1,10 @@
+import { lazy, Suspense } from 'react';
 import { HeroSection } from '@/components/hero';
-import { StorytellingSection } from '@/components/storytelling';
-import { CollectionSection } from '@/components/collection/collection-section';
-import { HousesSection } from '@/components/houses/houses-section';
-import { LandingFooter } from '@/components/landing';
+
+const StorytellingSection = lazy(() => import('@/components/storytelling').then((module) => ({ default: module.StorytellingSection })));
+const CollectionSection = lazy(() => import('@/components/collection/collection-section').then((module) => ({ default: module.CollectionSection })));
+const HousesSection = lazy(() => import('@/components/houses/houses-section').then((module) => ({ default: module.HousesSection })));
+const LandingFooter = lazy(() => import('@/components/landing').then((module) => ({ default: module.LandingFooter })));
 
 /**
  * Home Page - Landing Page
@@ -18,10 +20,12 @@ export function HomePage() {
   return (
     <main>
       <HeroSection />
-      <StorytellingSection />
-      <CollectionSection />
-      <HousesSection />
-      <LandingFooter />
+      <Suspense fallback={<div className="min-h-screen bg-[#0B0A0C]" aria-label="Loading the KENZ story" />}>
+        <StorytellingSection />
+        <CollectionSection />
+        <HousesSection />
+        <LandingFooter />
+      </Suspense>
     </main>
   );
 }

@@ -1,10 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router';
 import { ROUTES } from '@/constants';
 import { Container } from '@/components/shared';
 import { cn } from '@/lib';
-import LiquidEther from './LiquidEther';
 import { BlurText } from './BlurText';
 import { LandingNavbar } from './LandingNavbar';
+
+const LiquidEther = lazy(() => import('./LiquidEther'));
 
 /**
  * HeroSection — Landing Page
@@ -35,24 +37,26 @@ export function HeroSection() {
 
         {/* WebGL fluid layer */}
         <div className="absolute inset-0">
-          <LiquidEther
-            colors={[
-              '#1a0a2e', /* deep violet-indigo */
-              '#6b4226', /* muted mauve-gold */
-              '#c9954a', /* champagne shimmer */
-            ]}
-            autoDemo={true}
-            autoSpeed={0.25}
-            autoIntensity={1.6}
-            autoResumeDelay={800}
-            autoRampDuration={1.2}
-            mouseForce={18}
-            cursorSize={90}
-            resolution={0.5}
-            dt={0.012}
-            BFECC={true}
-            style={{ width: '100%', height: '100%' }}
-          />
+          <Suspense fallback={null}>
+            <LiquidEther
+              colors={[
+                '#1a0a2e', /* deep violet-indigo */
+                '#6b4226', /* muted mauve-gold */
+                '#c9954a', /* champagne shimmer */
+              ]}
+              autoDemo={true}
+              autoSpeed={0.25}
+              autoIntensity={1.6}
+              autoResumeDelay={800}
+              autoRampDuration={1.2}
+              mouseForce={18}
+              cursorSize={90}
+              resolution={0.5}
+              dt={0.012}
+              BFECC={true}
+              style={{ width: '100%', height: '100%' }}
+            />
+          </Suspense>
         </div>
 
         {/* Radial vignette — text legibility */}

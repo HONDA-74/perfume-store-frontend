@@ -2,17 +2,14 @@ import { useRef } from 'react';
 import { useInView, motion } from 'framer-motion';
 import { Link } from 'react-router';
 import { LogoLoop } from './LogoLoop';
-import { MOCK_BRANDS } from '@/lib/mock-data';
+import { useBrands } from '@/hooks/api/use-brands';
 
 export function HousesSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-10% 0px' });
 
-  // Map our mock brands into nodes suitable for LogoLoop.
-  // The LogoLoop will wrap these in a list item, but we handle the Link internally 
-  // via the renderItem override or by providing a node with href. 
-  // We'll pass `node` which contains a Link.
-  const logoItems = MOCK_BRANDS.map(brand => ({
+  const brands = useBrands({ limit: 100 });
+  const logoItems = (brands.data?.items ?? []).map(brand => ({
     node: (
       <Link 
         to={`/brands/${brand.slug}`}
@@ -105,14 +102,15 @@ export function HousesSection() {
         transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="w-full relative"
       >
-        <LogoLoop 
-          logos={logoItems}
-          speed={40} 
-          gap={12} 
-          fadeOut={true}
-          pauseOnHover={true} 
-          logoHeight={70}
-        />
+        {brands.isLoading ? (
+          <p className="py-12 text-center text-xs uppercase tracking-[0.18em] text-white/30" role="status">Discovering our houses…</p>
+        ) : brands.isError ? (
+          <div className="flex justify-center py-10"><button onClick={() => brands.refetch()} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">Try Again</button></div>
+        ) : logoItems.length ? (
+          <LogoLoop logos={logoItems} speed={40} gap={12} fadeOut={true} pauseOnHover={true} logoHeight={70} />
+        ) : (
+          <p className="py-12 text-center text-sm text-white/40">No fragrance houses are available yet.</p>
+        )}
       </motion.div>
     </section>
   );

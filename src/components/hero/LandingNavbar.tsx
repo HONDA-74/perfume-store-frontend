@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { ROUTES } from '@/constants';
 import { cn } from '@/lib';
+import { useAuthStore } from '@/stores/auth.store';
 
 /** Navigation links for the Landing Page only. No utility icons. */
 const NAV_LINKS = [
@@ -27,6 +28,7 @@ export function LandingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
 
   /* Tighten glass when user scrolls */
   useEffect(() => {
@@ -65,7 +67,7 @@ export function LandingNavbar() {
       <div
         ref={mobileMenuRef}
         className={cn(
-          'mx-auto max-w-5xl',
+          'mx-auto max-w-6xl',
           'rounded-[10px]',
           'transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]',
         )}
@@ -156,6 +158,17 @@ export function LandingNavbar() {
                 {link.label}
               </Link>
             ))}
+            <span aria-hidden="true" className="h-4 w-px bg-white/10" />
+            {isAuthenticated ? (
+              <Link to={ROUTES.account.root} className="border border-[hsl(43_82%_65%/0.35)] px-4 py-2 font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-[hsl(43_82%_70%)] transition hover:bg-[hsl(43_82%_52%/0.1)]">
+                Account
+              </Link>
+            ) : (
+              <>
+                <Link to={ROUTES.auth.login} className="font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-white/65 transition hover:text-white">Sign In</Link>
+                <Link to={ROUTES.auth.register} className="border border-[hsl(43_82%_65%/0.35)] px-4 py-2 font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-[hsl(43_82%_70%)] transition hover:bg-[hsl(43_82%_52%/0.1)]">Sign Up</Link>
+              </>
+            )}
           </nav>
 
           {/* Mobile — hamburger */}
@@ -210,6 +223,16 @@ export function LandingNavbar() {
                   {link.label}
                 </Link>
               ))}
+              <div className="mt-3 grid grid-cols-2 gap-3 pt-3">
+                {isAuthenticated ? (
+                  <Link to={ROUTES.account.root} onClick={closeMobile} className="col-span-2 flex min-h-12 items-center justify-center border border-[hsl(43_82%_65%/0.35)] font-sans text-[0.72rem] font-medium uppercase tracking-[0.15em] text-[hsl(43_82%_70%)]">Account</Link>
+                ) : (
+                  <>
+                    <Link to={ROUTES.auth.login} onClick={closeMobile} className="flex min-h-12 items-center justify-center border border-white/10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.15em] text-white/70">Sign In</Link>
+                    <Link to={ROUTES.auth.register} onClick={closeMobile} className="flex min-h-12 items-center justify-center bg-[hsl(43_82%_52%)] font-sans text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#0B0A0C]">Sign Up</Link>
+                  </>
+                )}
+              </div>
             </div>
           </nav>
         )}

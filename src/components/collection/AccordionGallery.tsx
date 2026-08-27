@@ -34,12 +34,8 @@ interface AccordionGalleryProps {
   className?: string;
 }
 
-const DEFAULT_ITEMS: GalleryItem[] = [
-  { image: 'https://picsum.photos/id/1015/900/1200', label: 'Canyon', link: '#' },
-];
-
 export const AccordionGallery = ({
-  items = DEFAULT_ITEMS,
+  items = [],
   defaultIndex = 2,
   accentColor = 'hsl(43 82% 52%)',
   overlayColor = '#0b0a0c',
@@ -231,7 +227,9 @@ export const AccordionGallery = ({
         return (
           <Tag
             key={i}
-            ref={(el: any) => (panelRefs.current[i] = el)}
+            ref={(el: HTMLAnchorElement | HTMLDivElement | null) => {
+              panelRefs.current[i] = el;
+            }}
             className={`ag-panel${isActive ? ' ag-panel--active' : ''}`}
             style={{ borderRadius: `${radius}px` }}
             to={item.link || '#'}

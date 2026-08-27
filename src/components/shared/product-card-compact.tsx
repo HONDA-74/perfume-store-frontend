@@ -42,7 +42,7 @@ export function ProductCardCompact({ product, onRemove, className, showRemove = 
         className="relative block h-24 w-24 flex-shrink-0 overflow-hidden border border-border bg-kenz-surface"
       >
         <img
-          src={product.images[0] || '/placeholder-product.jpg'}
+          src={product.images[0]}
           alt={productUI.title}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"

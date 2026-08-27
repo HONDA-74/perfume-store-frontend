@@ -1,6 +1,8 @@
 import type { PropsWithChildren } from 'react';
 import { QueryProvider } from './query-provider';
 import { ThemeProvider } from './theme-provider';
+import { AuthBootstrap } from './auth-bootstrap';
+import { Toaster } from '@/components/ui/toast';
 
 /**
  * Single composition root for every app-wide provider. `main.tsx` wraps the
@@ -11,7 +13,10 @@ import { ThemeProvider } from './theme-provider';
 export function AppProviders({ children }: PropsWithChildren) {
   return (
     <ThemeProvider defaultTheme="system" storageKey="luxury-perfume-store-theme">
-      <QueryProvider>{children}</QueryProvider>
+      <QueryProvider>
+        <AuthBootstrap>{children}</AuthBootstrap>
+        <Toaster position="top-right" />
+      </QueryProvider>
     </ThemeProvider>
   );
 }

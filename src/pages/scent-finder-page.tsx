@@ -15,6 +15,7 @@ import { ProductCard } from '@/components/shared/product-card';
 import { PageLoader } from '@/components/shared/page-loader';
 import { ROUTES } from '@/constants/routes.constants';
 import type { AIProductRecommendation } from '@/types/ai.types';
+import type { Product } from '@/types/product.types';
 
 /* ── Quiz definition ── */
 
@@ -128,7 +129,7 @@ function OptionBtn({ label, selected, onClick }: { label: string; selected: bool
 
 /* ── Result card ── */
 
-function ResultCard({ rec, rank, product }: { rec: AIProductRecommendation; rank: number; product: any }) {
+function ResultCard({ rec, rank, product }: { rec: AIProductRecommendation; rank: number; product?: Product }) {
   return (
     <div>
       <div className="mb-2 flex items-center gap-2">
@@ -156,7 +157,6 @@ export function ScentFinderPage() {
   const sendChatMutation = useSendChatMessage();
   
   // Fetch products for recommendations
-  const recommendedProductIds = result?.recommendations.map(r => r.productId) ?? [];
   const productsQuery = useProducts({ limit: 100 });
 
   const question = QUESTIONS[step] ?? null;

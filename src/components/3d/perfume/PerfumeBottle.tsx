@@ -6,13 +6,18 @@ import type { MotionValue } from 'framer-motion';
 
 interface PerfumeBottleProps {
   scrollProgress: MotionValue<number>;
+  reducedMotion?: boolean;
 }
 
-export function PerfumeBottle({ scrollProgress }: PerfumeBottleProps) {
+interface PerfumeModel {
+  nodes: Record<'Bottle_Glass' | 'Bottle_Liquid' | 'Bottle_Metal' | 'Bottle_Atomizer' | 'Bottle_Cap', THREE.Mesh>;
+}
+
+export function PerfumeBottle({ scrollProgress, reducedMotion = false }: PerfumeBottleProps) {
   const groupRef = useRef<THREE.Group>(null);
 
   // Load the prepared GLB asset
-  const { nodes } = useGLTF('/3d-assets/lebeni/lebeni-prepared.glb') as any;
+  const { nodes } = useGLTF('/3d-assets/lebeni/lebeni-prepared.glb') as unknown as PerfumeModel;
 
   // Custom high-end materials built dynamically so we don't destructively modify the GLB
   const materials = useMemo(() => {
@@ -94,7 +99,7 @@ export function PerfumeBottle({ scrollProgress }: PerfumeBottleProps) {
     }
 
     // Subtle continuous float (breathing)
-    const floatOffset = Math.sin(state.clock.elapsedTime * 1.2) * 0.04;
+    const floatOffset = reducedMotion ? 0 : Math.sin(state.clock.elapsedTime * 1.2) * 0.04;
     const targetY = scrollYOffset + floatOffset;
 
     // Use smooth damping for luxurious, weighty movement

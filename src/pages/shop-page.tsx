@@ -1,36 +1,28 @@
-/**
- * Shop Page - Main product catalog with filters and pagination.
- * 
- * Integrated with real backend API via useProducts, useBrands, useCategories.
- * URL-based filter state for shareable/bookmarkable filtered views.
- */
-
+import * as React from 'react';
 import { useSearchParams } from 'react-router';
-import { SlidersHorizontal, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useProducts } from '@/hooks/api/use-products';
-import { useBrands } from '@/hooks/api/use-brands';
-import { useCategories } from '@/hooks/api/use-categories';
+import { ChevronLeft, ChevronRight, Minus, Plus, SlidersHorizontal, X } from 'lucide-react';
 import { ProductCard } from '@/components/shared/product-card';
 import { EmptyState } from '@/components/shared/empty-state';
+import { ErrorState } from '@/components/shared/error-state';
 import { PageLoader } from '@/components/shared/page-loader';
-import { SectionHeader } from '@/components/shared/section-header';
-import { FragranceGender, FragranceConcentration } from '@/types';
+import { useBrands } from '@/hooks/api/use-brands';
+import { useCategories } from '@/hooks/api/use-categories';
+import { useProducts } from '@/hooks/api/use-products';
+import { FragranceConcentration, FragranceGender, type ProductQueryParams } from '@/types';
 
 const ITEMS_PER_PAGE = 12;
-
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'price-asc', label: 'Price: Low to High' },
-  { value: 'price-desc', label: 'Price: High to Low' },
-] as const;
-
+  { value: 'createdAt:desc', label: 'Newest' },
+  { value: 'price:asc', label: 'Price: Low to High' },
+  { value: 'price:desc', label: 'Price: High to Low' },
+  { value: 'name:asc', label: 'Name: A–Z' },
+];
 const GENDER_OPTIONS = [
   { value: FragranceGender.MALE, label: 'Men' },
   { value: FragranceGender.FEMALE, label: 'Women' },
   { value: FragranceGender.UNISEX, label: 'Unisex' },
 ];
-
 const CONCENTRATION_OPTIONS = [
   { value: FragranceConcentration.PARFUM, label: 'Parfum' },
   { value: FragranceConcentration.EDP, label: 'Eau de Parfum' },
@@ -38,300 +30,140 @@ const CONCENTRATION_OPTIONS = [
   { value: FragranceConcentration.EDC, label: 'Eau de Cologne' },
 ];
 
+function FilterLabel({ children }: { children: React.ReactNode }) {
+  return <p className="mb-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#D4C3A3]/60">{children}</p>;
+}
+
+function Choice({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
+  return (
+    <label className="flex min-h-8 cursor-pointer items-center gap-2 text-xs text-white/45 transition hover:text-white/75">
+      <input type="checkbox" checked={checked} onChange={onChange} className="h-3.5 w-3.5 accent-[#D4A017]" />
+      {label}
+    </label>
+  );
+}
+
+function Filters({
+  brandId,
+  categoryId,
+  gender,
+  concentration,
+  inStock,
+  brands,
+  categories,
+  update,
+  mobile = false,
+}: {
+  brandId?: string;
+  categoryId?: string;
+  gender?: FragranceGender;
+  concentration?: FragranceConcentration;
+  inStock: boolean;
+  brands: Array<{ id: string; name: string }>;
+  categories: Array<{ id: string; name: string }>;
+  update: (key: string, value?: string) => void;
+  mobile?: boolean;
+}) {
+  return (
+    <div className={mobile ? 'space-y-7' : 'grid grid-cols-5 gap-8'}>
+      <div><FilterLabel>Brand</FilterLabel><div className={mobile ? '' : 'max-h-32 overflow-y-auto pr-2'}>{brands.map((item) => <Choice key={item.id} label={item.name} checked={brandId === item.id} onChange={() => update('brandId', brandId === item.id ? undefined : item.id)} />)}</div></div>
+      <div><FilterLabel>Collection</FilterLabel><div className={mobile ? '' : 'max-h-32 overflow-y-auto pr-2'}>{categories.map((item) => <Choice key={item.id} label={item.name} checked={categoryId === item.id} onChange={() => update('categoryId', categoryId === item.id ? undefined : item.id)} />)}</div></div>
+      <div><FilterLabel>Gender</FilterLabel>{GENDER_OPTIONS.map((item) => <Choice key={item.value} label={item.label} checked={gender === item.value} onChange={() => update('gender', gender === item.value ? undefined : item.value)} />)}</div>
+      <div><FilterLabel>Concentration</FilterLabel>{CONCENTRATION_OPTIONS.map((item) => <Choice key={item.value} label={item.label} checked={concentration === item.value} onChange={() => update('concentration', concentration === item.value ? undefined : item.value)} />)}</div>
+      <div><FilterLabel>Availability</FilterLabel><Choice label="In stock only" checked={inStock} onChange={() => update('inStock', inStock ? undefined : 'true')} /></div>
+    </div>
+  );
+}
+
 export function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [desktopOpen, setDesktopOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const gridRef = React.useRef<HTMLDivElement>(null);
 
-  // Parse URL params
-  const page = parseInt(searchParams.get('page') || '1');
+  const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const sort = searchParams.get('sort') || 'featured';
   const brandId = searchParams.get('brandId') || undefined;
   const categoryId = searchParams.get('categoryId') || undefined;
-  const gender = searchParams.get('gender') as FragranceGender | undefined;
-  const concentration = searchParams.get('concentration') as FragranceConcentration | undefined;
-  const inStock = searchParams.get('inStock') === 'true' || undefined;
-  const minPrice = searchParams.get('minPrice') ? parseFloat(searchParams.get('minPrice')!) : undefined;
-  const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined;
+  const gender = (searchParams.get('gender') || undefined) as FragranceGender | undefined;
+  const concentration = (searchParams.get('concentration') || undefined) as FragranceConcentration | undefined;
+  const inStock = searchParams.get('inStock') === 'true';
 
-  // Fetch data
-  const { data: productsData, isLoading: isLoadingProducts } = useProducts({
-    page,
-    limit: ITEMS_PER_PAGE,
-    brandId,
-    categoryId,
-    gender,
-    concentration,
-    inStock,
-    minPrice,
-    maxPrice,
-  });
+  const params: ProductQueryParams = { page, limit: ITEMS_PER_PAGE, brandId, categoryId, gender, concentration, inStock: inStock || undefined, sort: sort === 'featured' ? undefined : sort };
+  const products = useProducts(params);
+  const brands = useBrands({ limit: 100 });
+  const categories = useCategories({ limit: 100 });
 
-  const { data: brandsData } = useBrands();
-  const { data: categoriesData } = useCategories();
+  const update = (key: string, value?: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    if (key !== 'page') next.set('page', '1');
+    setSearchParams(next, { replace: true });
+  };
+  const reset = () => setSearchParams({}, { replace: true });
+  const activeCount = [brandId, categoryId, gender, concentration, inStock ? 'yes' : undefined].filter(Boolean).length;
+  const total = products.data?.meta.totalItems ?? 0;
+  const totalPages = products.data?.meta.totalPages ?? 1;
 
-  // Update filter
-  const updateFilter = (key: string, value: string | undefined) => {
-    const newParams = new URLSearchParams(searchParams);
-    if (value) {
-      newParams.set(key, value);
-    } else {
-      newParams.delete(key);
-    }
-    // Reset to page 1 when filter changes
-    if (key !== 'page') {
-      newParams.set('page', '1');
-    }
-    setSearchParams(newParams);
+  const changePage = (next: number) => {
+    if (next < 1 || next > totalPages) return;
+    update('page', String(next));
+    requestAnimationFrame(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   };
 
-  // Clear all filters
-  const clearFilters = () => {
-    setSearchParams({});
-  };
-
-  // Check if any filters are active
-  const hasActiveFilters = brandId || categoryId || gender || concentration || inStock || minPrice || maxPrice;
-
-  // Pagination
-  const totalPages = productsData?.meta.totalPages || 1;
-  const currentPage = productsData?.meta.page || 1;
-
-  const goToPage = (pageNum: number) => {
-    if (pageNum < 1 || pageNum > totalPages) return;
-    updateFilter('page', pageNum.toString());
-  };
+  React.useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   return (
-    <div className="min-h-screen bg-kenz-bg">
-      <div className="container mx-auto px-6 py-12">
-        <SectionHeader
-          title="Shop Fragrances"
-          subtitle="Discover your signature scent"
-        />
-
-        <div className="mt-12 flex gap-8">
-          {/* Desktop Filters Sidebar */}
-          <aside className="hidden w-64 flex-shrink-0 lg:block">
-            <div className="sticky top-24 space-y-6">
-              {/* Clear Filters */}
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="flex w-full items-center justify-center gap-2 rounded-md border border-kenz-border px-4 py-2 text-sm text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold"
-                >
-                  <X size={14} />
-                  Clear Filters
-                </button>
-              )}
-
-              {/* Sort */}
-              <div>
-                <h3 className="mb-3 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-                  Sort By
-                </h3>
-                <select
-                  value={sort}
-                  onChange={(e) => updateFilter('sort', e.target.value)}
-                  className="w-full rounded-md border border-kenz-border bg-kenz-surface px-3 py-2 text-sm text-foreground focus:border-kenz-gold focus:outline-none"
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Brands */}
-              {brandsData?.items && brandsData.items.length > 0 && (
-                <div>
-                  <h3 className="mb-3 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-                    Brand
-                  </h3>
-                  <div className="space-y-2">
-                    {brandsData.items.map((brand) => (
-                      <label key={brand.id} className="flex items-center gap-2 cursor-pointer group">
-                        <input
-                          type="radio"
-                          name="brand"
-                          checked={brandId === brand.id}
-                          onChange={() => updateFilter('brandId', brandId === brand.id ? undefined : brand.id)}
-                          className="h-4 w-4 border-kenz-border text-kenz-gold focus:ring-kenz-gold"
-                        />
-                        <span className="text-sm text-foreground/70 transition-colors group-hover:text-foreground">
-                          {brand.name}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Categories */}
-              {categoriesData?.items && categoriesData.items.length > 0 && (
-                <div>
-                  <h3 className="mb-3 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-                    Category
-                  </h3>
-                  <div className="space-y-2">
-                    {categoriesData.items.map((category) => (
-                      <label key={category.id} className="flex items-center gap-2 cursor-pointer group">
-                        <input
-                          type="radio"
-                          name="category"
-                          checked={categoryId === category.id}
-                          onChange={() => updateFilter('categoryId', categoryId === category.id ? undefined : category.id)}
-                          className="h-4 w-4 border-kenz-border text-kenz-gold focus:ring-kenz-gold"
-                        />
-                        <span className="text-sm text-foreground/70 transition-colors group-hover:text-foreground">
-                          {category.name}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Gender */}
-              <div>
-                <h3 className="mb-3 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-                  Gender
-                </h3>
-                <div className="space-y-2">
-                  {GENDER_OPTIONS.map((option) => (
-                    <label key={option.value} className="flex items-center gap-2 cursor-pointer group">
-                      <input
-                        type="radio"
-                        name="gender"
-                        checked={gender === option.value}
-                        onChange={() => updateFilter('gender', gender === option.value ? undefined : option.value)}
-                        className="h-4 w-4 border-kenz-border text-kenz-gold focus:ring-kenz-gold"
-                      />
-                      <span className="text-sm text-foreground/70 transition-colors group-hover:text-foreground">
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Concentration */}
-              <div>
-                <h3 className="mb-3 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-                  Concentration
-                </h3>
-                <div className="space-y-2">
-                  {CONCENTRATION_OPTIONS.map((option) => (
-                    <label key={option.value} className="flex items-center gap-2 cursor-pointer group">
-                      <input
-                        type="radio"
-                        name="concentration"
-                        checked={concentration === option.value}
-                        onChange={() => updateFilter('concentration', concentration === option.value ? undefined : option.value)}
-                        className="h-4 w-4 border-kenz-border text-kenz-gold focus:ring-kenz-gold"
-                      />
-                      <span className="text-sm text-foreground/70 transition-colors group-hover:text-foreground">
-                        {option.label}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* In Stock Only */}
-              <div>
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={inStock || false}
-                    onChange={(e) => updateFilter('inStock', e.target.checked ? 'true' : undefined)}
-                    className="h-4 w-4 rounded border-kenz-border text-kenz-gold focus:ring-kenz-gold"
-                  />
-                  <span className="text-sm text-foreground/70 transition-colors group-hover:text-foreground">
-                    In Stock Only
-                  </span>
-                </label>
-              </div>
+    <div className="min-h-screen bg-[#0B0A0C] text-[#F3F2F5]">
+      <div className="sticky top-16 z-20 border-b border-white/[0.05] bg-[#0B0A0C]/95 backdrop-blur-xl lg:top-20">
+        <div className="mx-auto max-w-[1440px] px-5 lg:px-12">
+          <div className="flex h-14 items-center justify-between gap-4">
+            <span className="text-[10px] uppercase tracking-[0.15em] text-white/30">{products.isLoading ? 'Curating…' : `${total} ${total === 1 ? 'Fragrance' : 'Fragrances'}`}</span>
+            <div className="flex items-center gap-3">
+              {activeCount > 0 && <button onClick={reset} className="hidden items-center gap-1.5 text-[9px] font-medium uppercase tracking-[0.12em] text-[#D4A017]/80 lg:flex"><X size={11} />{activeCount} Active</button>}
+              <label className="sr-only" htmlFor="shop-sort">Sort products</label>
+              <select id="shop-sort" value={sort} onChange={(event) => update('sort', event.target.value)} className="h-9 border border-white/[0.08] bg-[#121115] px-3 text-[10px] tracking-[0.06em] text-white/60 outline-none focus:border-[#D4C3A3]/50">
+                {SORT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+              <button onClick={() => setDesktopOpen((value) => !value)} className="hidden h-9 items-center gap-2 px-2 text-[10px] font-medium uppercase tracking-[0.15em] text-white/45 transition hover:text-white/75 lg:flex" aria-expanded={desktopOpen}>{desktopOpen ? <Minus size={12} /> : <Plus size={12} />}Filters{activeCount > 0 && ` · ${activeCount}`}</button>
+              <button onClick={() => setMobileOpen(true)} className="flex h-10 items-center gap-2 text-[10px] font-medium uppercase tracking-[0.12em] text-white/55 lg:hidden"><SlidersHorizontal size={14} />Filters{activeCount > 0 && ` (${activeCount})`}</button>
             </div>
-          </aside>
-
-          {/* Mobile Filter Button */}
-          <button
-            onClick={() => alert('Mobile filters coming soon')}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-kenz-gold px-6 py-3 font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg shadow-lg transition-all hover:bg-kenz-champagne lg:hidden"
-          >
-            <SlidersHorizontal size={16} />
-            Filters
-          </button>
-
-          {/* Products Grid */}
-          <div className="flex-1">
-            {isLoadingProducts ? (
-              <PageLoader />
-            ) : !productsData?.items.length ? (
-              <EmptyState
-                title="No products found"
-                message={hasActiveFilters ? 'Try adjusting your filters' : 'No products available'}
-                actionLabel={hasActiveFilters ? 'Clear Filters' : undefined}
-                onAction={hasActiveFilters ? clearFilters : undefined}
-              />
-            ) : (
-              <>
-                {/* Results Count */}
-                <div className="mb-6 flex items-center justify-between">
-                  <p className="text-sm text-foreground/70">
-                    Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-
-                    {Math.min(currentPage * ITEMS_PER_PAGE, productsData.meta.totalItems)} of {productsData.meta.totalItems} products
-                  </p>
-                </div>
-
-                {/* Products Grid */}
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {productsData.items.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-12 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => goToPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="flex h-10 w-10 items-center justify-center rounded-md border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30 disabled:hover:border-kenz-border disabled:hover:text-foreground/70"
-                      aria-label="Previous page"
-                    >
-                      <ChevronLeft size={18} />
-                    </button>
-
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => goToPage(pageNum)}
-                        className={`flex h-10 w-10 items-center justify-center rounded-md border text-sm transition-colors ${
-                          pageNum === currentPage
-                            ? 'border-kenz-gold bg-kenz-gold text-kenz-bg'
-                            : 'border-kenz-border text-foreground/70 hover:border-kenz-gold hover:text-kenz-gold'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={() => goToPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="flex h-10 w-10 items-center justify-center rounded-md border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30 disabled:hover:border-kenz-border disabled:hover:text-foreground/70"
-                      aria-label="Next page"
-                    >
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
           </div>
         </div>
       </div>
+
+      <div className={`hidden overflow-hidden border-b border-white/[0.05] bg-[#0D0C10] transition-[max-height,opacity] duration-300 lg:block ${desktopOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="mx-auto max-w-[1440px] px-12 py-7">
+          <Filters brandId={brandId} categoryId={categoryId} gender={gender} concentration={concentration} inStock={inStock} brands={brands.data?.items ?? []} categories={categories.data?.items ?? []} update={update} />
+          {activeCount > 0 && <div className="mt-5 flex justify-end border-t border-white/[0.05] pt-4"><button onClick={reset} className="flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-[0.15em] text-white/35 hover:text-white/65"><X size={10} />Reset filters</button></div>}
+        </div>
+      </div>
+
+      <div ref={gridRef} className="mx-auto max-w-[1440px] scroll-mt-36 px-5 py-9 lg:px-12 lg:py-12">
+        {products.isLoading ? <PageLoader /> : products.isError ? <ErrorState className="min-h-[50vh]" onRetry={() => products.refetch()} message="We couldn't load the fragrance collection." /> : !products.data?.items.length ? <EmptyState className="min-h-[50vh]" title="No Fragrance Found" message="Try adjusting your filters to discover another expression of scent." actionLabel="Reset Filters" onAction={reset} /> : (
+          <>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-7 lg:gap-y-14">{products.data.items.map((product) => <ProductCard key={product.id} product={product} />)}</div>
+            {totalPages > 1 && <nav className="mt-14 flex items-center justify-center gap-2" aria-label="Product pages">
+              <button onClick={() => changePage(page - 1)} disabled={page === 1} className="flex h-10 w-10 items-center justify-center border border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-25" aria-label="Previous page"><ChevronLeft size={16} /></button>
+              {Array.from({ length: totalPages }, (_, index) => index + 1).filter((item) => item === 1 || item === totalPages || Math.abs(item - page) <= 1).map((item, index, list) => <React.Fragment key={item}>{index > 0 && item - list[index - 1] > 1 && <span className="px-1 text-white/25">…</span>}<button onClick={() => changePage(item)} aria-current={item === page ? 'page' : undefined} className={`h-10 min-w-10 border px-3 text-xs ${item === page ? 'border-[#D4A017]/45 bg-[#D4A017]/[0.08] text-[#D4A017]' : 'border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white/70'}`}>{item}</button></React.Fragment>)}
+              <button onClick={() => changePage(page + 1)} disabled={page === totalPages} className="flex h-10 w-10 items-center justify-center border border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-25" aria-label="Next page"><ChevronRight size={16} /></button>
+            </nav>}
+          </>
+        )}
+      </div>
+
+      {mobileOpen && <div className="fixed inset-0 z-drawer lg:hidden">
+        <button className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-label="Close filters" />
+        <aside className="absolute inset-x-0 bottom-0 flex max-h-[90vh] flex-col border-t border-white/10 bg-[#121115]" role="dialog" aria-modal="true" aria-label="Product filters">
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4"><span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/60">Filters {activeCount > 0 && `(${activeCount})`}</span><button onClick={() => setMobileOpen(false)} className="flex h-10 w-10 items-center justify-center text-white/45" aria-label="Close filters"><X size={17} /></button></div>
+          <div className="overflow-y-auto px-5 py-5"><Filters mobile brandId={brandId} categoryId={categoryId} gender={gender} concentration={concentration} inStock={inStock} brands={brands.data?.items ?? []} categories={categories.data?.items ?? []} update={update} /></div>
+          <div className="grid grid-cols-2 gap-3 border-t border-white/[0.06] p-5"><button onClick={reset} className="h-12 border border-white/10 text-[10px] font-medium uppercase tracking-[0.15em] text-white/50">Reset</button><button onClick={() => setMobileOpen(false)} className="h-12 bg-[#D4A017] text-[10px] font-semibold uppercase tracking-[0.15em] text-[#0B0A0C]">Show Results</button></div>
+        </aside>
+      </div>}
     </div>
   );
 }

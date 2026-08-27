@@ -18,12 +18,13 @@ import type {
  */
 export function useCurrentUser() {
   const setUser = useAuthStore((state) => state.setUser);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
 
   const query = useQuery({
     queryKey: queryKeys.auth.user(),
     queryFn: authApi.getCurrentUser,
-    enabled: isAuthenticated,
+    enabled: isHydrated && !!accessToken,
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -32,10 +33,10 @@ export function useCurrentUser() {
   useEffect(() => {
     if (query.data) {
       setUser(query.data);
-    } else if (query.isError) {
+    } else if (query.isError || !accessToken) {
       setUser(null);
     }
-  }, [query.data, query.isError, setUser]);
+  }, [accessToken, query.data, query.isError, setUser]);
 
   return query;
 }
@@ -90,9 +91,10 @@ export function useLogin() {
 export function useLogout() {
   const queryClient = useQueryClient();
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const refreshToken = useAuthStore((state) => state.refreshToken);
 
   return useMutation({
-    mutationFn: authApi.logout,
+    mutationFn: () => authApi.logout(refreshToken),
     onSuccess: () => {
       // Clear auth store (tokens + user)
       clearAuth();

@@ -24,14 +24,17 @@ export const queryClient = new QueryClient({
       
       // Retry once for network/timeout errors
       // Don't retry auth errors (401/403) or client errors (400/422)
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
+        const status = typeof error === 'object' && error !== null && 'status' in error
+          ? Number(error.status)
+          : undefined;
         // Don't retry on auth errors
-        if (error?.status === 401 || error?.status === 403) {
+        if (status === 401 || status === 403) {
           return false;
         }
         
         // Don't retry on client errors
-        if (error?.status >= 400 && error?.status < 500) {
+        if (status !== undefined && status >= 400 && status < 500) {
           return false;
         }
         

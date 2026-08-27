@@ -8,8 +8,8 @@ import { Link } from 'react-router';
 import { Plus, Search, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { useProducts, useDeleteProduct } from '@/hooks/api/use-products';
 import { PageLoader } from '@/components/shared/page-loader';
-import { deriveProductBadge } from '@/lib/adapters/product.adapter';
-import { getConcentrationLabel } from '@/lib/adapters/enum.adapter';
+import { deriveProductBadge } from '@/lib/adapters/product-adapter';
+import { getConcentrationLabel } from '@/lib/adapters/enum-adapter';
 
 export function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,8 +136,8 @@ export function AdminProductsPage() {
                             <span
                               className="inline-block mt-1 px-2 py-0.5 rounded text-xs"
                               style={{
-                                background: badge === 'NEW' ? 'rgba(76,175,80,0.15)' : badge === 'SALE' ? 'rgba(244,67,54,0.15)' : 'rgba(212,195,163,0.08)',
-                                color: badge === 'NEW' ? 'rgb(76,175,80)' : badge === 'SALE' ? 'rgb(244,67,54)' : 'hsl(43 82% 52%)',
+                                background: badge === 'new' ? 'rgba(76,175,80,0.15)' : badge === 'sale' ? 'rgba(244,67,54,0.15)' : 'rgba(212,195,163,0.08)',
+                                color: badge === 'new' ? 'rgb(76,175,80)' : badge === 'sale' ? 'rgb(244,67,54)' : 'hsl(43 82% 52%)',
                                 fontFamily: 'var(--font-sans)',
                                 fontSize: '9px',
                                 fontWeight: 500,
@@ -153,7 +153,7 @@ export function AdminProductsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 300, color: 'rgba(243,242,245,0.6)' }}>
-                        {product.brand.name}
+                        {product.brand?.name ?? 'Unknown brand'}
                       </p>
                     </td>
                     <td className="px-6 py-4">

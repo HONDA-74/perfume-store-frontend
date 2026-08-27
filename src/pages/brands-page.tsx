@@ -54,10 +54,10 @@ export function BrandsPage() {
               to={`/brands/${brand.slug}`}
               className="group overflow-hidden rounded-lg border border-kenz-border bg-kenz-surface/30 p-8 transition-all hover:border-kenz-gold"
             >
-              {brand.logo && (
+              {brand.logoUrl && (
                 <div className="mb-6 flex h-24 items-center justify-center">
                   <img
-                    src={brand.logo}
+                    src={brand.logoUrl}
                     alt={brand.name}
                     className="max-h-full max-w-full object-contain opacity-90 transition-opacity group-hover:opacity-100"
                   />
@@ -71,9 +71,9 @@ export function BrandsPage() {
                   {brand.description}
                 </p>
               )}
-              {brand.country && (
+              {brand.countryOfOrigin && (
                 <p className="mt-3 text-xs uppercase tracking-wider text-foreground/40">
-                  {brand.country}
+                  {brand.countryOfOrigin}
                 </p>
               )}
             </Link>

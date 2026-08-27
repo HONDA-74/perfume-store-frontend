@@ -37,7 +37,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
   const [isHovered, setIsHovered] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const addToCart = useAddToCart();
   const { toggle: toggleWishlist, isLoading: isTogglingWishlist } = useToggleWishlist();
   
@@ -103,7 +103,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
       >
         {/* Product Image */}
         <img
-          src={product.images[0] || '/placeholder-product.jpg'}
+          src={product.images[0]}
           alt={productUI.title}
           className="h-full w-full object-cover transition-transform duration-700 ease-kenz"
           style={{ transform: isHovered ? 'scale(1.06)' : 'scale(1)' }}

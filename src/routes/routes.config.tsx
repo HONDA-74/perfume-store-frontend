@@ -1,23 +1,39 @@
+import { lazy, Suspense, type ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { ROUTES } from '@/constants';
 import { RootLayout, LandingLayout, RouteErrorBoundary } from '@/components/layouts';
+import { PageLoader } from '@/components/shared/page-loader';
 import { RoutePlaceholder } from './route-placeholder';
-import { HomePage } from './home';
-import { ShopPage } from '@/pages/shop-page';
-import { ProductDetailPage } from '@/pages/product-detail-page';
-import { BrandsPage } from '@/pages/brands-page';
-import { BrandDetailPage } from '@/pages/brand-detail-page';
-import { SearchPage } from '@/pages/search-page';
-import { CartPage } from '@/pages/cart-page';
-import { WishlistPage } from '@/pages/wishlist-page';
-import { CheckoutPage } from '@/pages/checkout-page';
-import { OrderConfirmedPage } from '@/pages/order-confirmed-page';
-import { AccountDashboardPage } from '@/pages/account/account-dashboard-page';
-import { OrdersPage } from '@/pages/account/orders-page';
-import { OrderDetailPage } from '@/pages/account/order-detail-page';
-import { ProfilePage } from '@/pages/account/profile-page';
-import { AddressesPage } from '@/pages/account/addresses-page';
-import { ScentFinderPage } from '@/pages/scent-finder-page';
+import { AdminLayout } from '@/components/layouts/admin-layout';
+import { AdminRoute, GuestRoute, ProtectedRoute } from './route-guards';
+
+const HomePage = lazy(() => import('./home').then((module) => ({ default: module.HomePage })));
+const ShopPage = lazy(() => import('@/pages/shop-page').then((module) => ({ default: module.ShopPage })));
+const ProductDetailPage = lazy(() => import('@/pages/product-detail-page').then((module) => ({ default: module.ProductDetailPage })));
+const BrandsPage = lazy(() => import('@/pages/brands-page').then((module) => ({ default: module.BrandsPage })));
+const CollectionsPage = lazy(() => import('@/pages/collections-page').then((module) => ({ default: module.CollectionsPage })));
+const HeritagePage = lazy(() => import('@/pages/heritage-page').then((module) => ({ default: module.HeritagePage })));
+const BrandDetailPage = lazy(() => import('@/pages/brand-detail-page').then((module) => ({ default: module.BrandDetailPage })));
+const SearchPage = lazy(() => import('@/pages/search-page').then((module) => ({ default: module.SearchPage })));
+const CartPage = lazy(() => import('@/pages/cart-page').then((module) => ({ default: module.CartPage })));
+const WishlistPage = lazy(() => import('@/pages/wishlist-page').then((module) => ({ default: module.WishlistPage })));
+const CheckoutPage = lazy(() => import('@/pages/checkout-page').then((module) => ({ default: module.CheckoutPage })));
+const OrderConfirmedPage = lazy(() => import('@/pages/order-confirmed-page').then((module) => ({ default: module.OrderConfirmedPage })));
+const AccountDashboardPage = lazy(() => import('@/pages/account/account-dashboard-page').then((module) => ({ default: module.AccountDashboardPage })));
+const OrdersPage = lazy(() => import('@/pages/account/orders-page').then((module) => ({ default: module.OrdersPage })));
+const OrderDetailPage = lazy(() => import('@/pages/account/order-detail-page').then((module) => ({ default: module.OrderDetailPage })));
+const ProfilePage = lazy(() => import('@/pages/account/profile-page').then((module) => ({ default: module.ProfilePage })));
+const AddressesPage = lazy(() => import('@/pages/account/addresses-page').then((module) => ({ default: module.AddressesPage })));
+const ScentFinderPage = lazy(() => import('@/pages/scent-finder-page').then((module) => ({ default: module.ScentFinderPage })));
+const LoginPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.LoginPage })));
+const RegisterPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.RegisterPage })));
+const AdminLoginPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.AdminLoginPage })));
+const AdminDashboardPage = lazy(() => import('@/pages/admin/admin-dashboard-page').then((module) => ({ default: module.AdminDashboardPage })));
+const AdminProductsPage = lazy(() => import('@/pages/admin/admin-products-page').then((module) => ({ default: module.AdminProductsPage })));
+const AdminProductFormPage = lazy(() => import('@/pages/admin/admin-product-form-page').then((module) => ({ default: module.AdminProductFormPage })));
+const AdminBrandsPage = lazy(() => import('@/pages/admin/admin-brands-page').then((module) => ({ default: module.AdminBrandsPage })));
+
+const loadPage = (page: ReactNode) => <Suspense fallback={<PageLoader />}>{page}</Suspense>;
 
 /**
  * Route tree definition, consumed by `src/routes/router.tsx`.
@@ -31,13 +47,38 @@ import { ScentFinderPage } from '@/pages/scent-finder-page';
  * in more than one place.
  */
 export const routeConfig: RouteObject[] = [
+  {
+    path: ROUTES.auth.login,
+    element: <GuestRoute>{loadPage(<LoginPage />)}</GuestRoute>,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: '/auth/login',
+    element: <GuestRoute>{loadPage(<LoginPage />)}</GuestRoute>,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: ROUTES.auth.register,
+    element: <GuestRoute>{loadPage(<RegisterPage />)}</GuestRoute>,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: '/auth/register',
+    element: <GuestRoute>{loadPage(<RegisterPage />)}</GuestRoute>,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: ROUTES.admin.login,
+    element: <GuestRoute>{loadPage(<AdminLoginPage />)}</GuestRoute>,
+    errorElement: <RouteErrorBoundary />,
+  },
   /* ── Landing Page — headerless layout ─────────────────────────────── */
   {
     path: ROUTES.home,
     element: <LandingLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: loadPage(<HomePage />) },
     ],
   },
 
@@ -47,22 +88,36 @@ export const routeConfig: RouteObject[] = [
     element: <RootLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { path: ROUTES.shop.slice(1),           element: <ShopPage /> },
-      { path: ROUTES.brandDetail.slice(1),    element: <BrandDetailPage /> },
-      { path: ROUTES.productDetail.slice(1),  element: <ProductDetailPage /> },
-      { path: ROUTES.search.slice(1),         element: <SearchPage /> },
-      { path: ROUTES.wishlist.slice(1),       element: <WishlistPage /> },
-      { path: ROUTES.cart.slice(1),           element: <CartPage /> },
-      { path: 'brands',                       element: <BrandsPage /> },
-      { path: ROUTES.checkout.slice(1),       element: <CheckoutPage /> },
-      { path: ROUTES.orderSuccess.slice(1),   element: <OrderConfirmedPage /> },
-      { path: ROUTES.account.root.slice(1),   element: <AccountDashboardPage /> },
-      { path: ROUTES.account.orders.slice(1), element: <OrdersPage /> },
-      { path: ROUTES.account.orderDetail.slice(1), element: <OrderDetailPage /> },
-      { path: ROUTES.account.profile.slice(1), element: <ProfilePage /> },
-      { path: ROUTES.account.addresses.slice(1), element: <AddressesPage /> },
-      { path: ROUTES.scentMatchmaker.slice(1), element: <ScentFinderPage /> },
+      { path: ROUTES.shop.slice(1),           element: loadPage(<ShopPage />) },
+      { path: ROUTES.brandDetail.slice(1),    element: loadPage(<BrandDetailPage />) },
+      { path: ROUTES.productDetail.slice(1),  element: loadPage(<ProductDetailPage />) },
+      { path: ROUTES.search.slice(1),         element: loadPage(<SearchPage />) },
+      { path: ROUTES.wishlist.slice(1),       element: <ProtectedRoute>{loadPage(<WishlistPage />)}</ProtectedRoute> },
+      { path: ROUTES.cart.slice(1),           element: <ProtectedRoute>{loadPage(<CartPage />)}</ProtectedRoute> },
+      { path: ROUTES.brands.slice(1),         element: loadPage(<BrandsPage />) },
+      { path: ROUTES.collections.slice(1),    element: loadPage(<CollectionsPage />) },
+      { path: ROUTES.heritage.slice(1),       element: loadPage(<HeritagePage />) },
+      { path: ROUTES.checkout.slice(1),       element: <ProtectedRoute>{loadPage(<CheckoutPage />)}</ProtectedRoute> },
+      { path: ROUTES.orderSuccess.slice(1),   element: <ProtectedRoute>{loadPage(<OrderConfirmedPage />)}</ProtectedRoute> },
+      { path: ROUTES.account.root.slice(1),   element: <ProtectedRoute>{loadPage(<AccountDashboardPage />)}</ProtectedRoute> },
+      { path: ROUTES.account.orders.slice(1), element: <ProtectedRoute>{loadPage(<OrdersPage />)}</ProtectedRoute> },
+      { path: ROUTES.account.orderDetail.slice(1), element: <ProtectedRoute>{loadPage(<OrderDetailPage />)}</ProtectedRoute> },
+      { path: ROUTES.account.profile.slice(1), element: <ProtectedRoute>{loadPage(<ProfilePage />)}</ProtectedRoute> },
+      { path: ROUTES.account.addresses.slice(1), element: <ProtectedRoute>{loadPage(<AddressesPage />)}</ProtectedRoute> },
+      { path: ROUTES.scentMatchmaker.slice(1), element: loadPage(<ScentFinderPage />) },
       { path: ROUTES.notFound,                element: <RoutePlaceholder label="404 Not Found" /> },
+    ],
+  },
+  {
+    path: ROUTES.admin.root,
+    element: <AdminRoute><AdminLayout /></AdminRoute>,
+    errorElement: <RouteErrorBoundary />,
+    children: [
+      { index: true, element: loadPage(<AdminDashboardPage />) },
+      { path: 'products', element: loadPage(<AdminProductsPage />) },
+      { path: 'products/new', element: loadPage(<AdminProductFormPage />) },
+      { path: 'products/:id/edit', element: loadPage(<AdminProductFormPage />) },
+      { path: 'brands', element: loadPage(<AdminBrandsPage />) },
     ],
   },
 ];

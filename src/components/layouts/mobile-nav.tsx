@@ -10,12 +10,14 @@ import { X, User, Heart, ShoppingBag, Sparkles, LogOut } from 'lucide-react';
 import { useUIStore } from '@/stores/ui.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { ROUTES } from '@/constants';
+import { useLogout } from '@/hooks/api/use-auth';
 
 export function MobileNav() {
   const { isMobileNavOpen, closeMobileNav } = useUIStore();
   const authStore = useAuthStore();
   const isAuthenticated = authStore.isAuthenticated();
   const user = authStore.user;
+  const logout = useLogout();
 
   // Close on escape
   React.useEffect(() => {
@@ -42,8 +44,8 @@ export function MobileNav() {
 
   if (!isMobileNavOpen) return null;
 
-  const handleLogout = () => {
-    authStore.logout();
+  const handleLogout = async () => {
+    await logout.mutateAsync();
     closeMobileNav();
   };
 
@@ -107,14 +109,14 @@ export function MobileNav() {
               Shop
             </Link>
             <Link
-              to="/brands"
+              to={ROUTES.brands}
               onClick={closeMobileNav}
               className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
             >
               Brands
             </Link>
             <Link
-              to="/collections"
+              to={ROUTES.collections}
               onClick={closeMobileNav}
               className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
             >
@@ -171,14 +173,14 @@ export function MobileNav() {
           {!isAuthenticated && (
             <div className="mt-8 space-y-3 border-t border-kenz-border pt-6">
               <Link
-                to="/auth/login"
+                to={ROUTES.auth.login}
                 onClick={closeMobileNav}
                 className="block w-full rounded-md bg-kenz-gold px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg transition-colors hover:bg-kenz-champagne"
               >
                 Sign In
               </Link>
               <Link
-                to="/auth/register"
+                to={ROUTES.auth.register}
                 onClick={closeMobileNav}
                 className="block w-full rounded-md border border-kenz-border px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-foreground transition-colors hover:border-kenz-gold hover:text-kenz-gold"
               >

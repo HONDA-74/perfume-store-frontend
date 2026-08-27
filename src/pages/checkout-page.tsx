@@ -201,7 +201,7 @@ export function CheckoutPage() {
                 {cart.items.map((item) => (
                   <div key={item.productId} className="flex gap-4">
                     <img
-                      src={item.product.images[0] || '/placeholder-product.jpg'}
+                      src={item.product.images[0]}
                       alt={item.product.name}
                       className="h-16 w-12 rounded object-cover"
                     />

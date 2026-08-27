@@ -59,6 +59,10 @@ export default function LiquidEther({
 
   useEffect(() => {
     if (!mountRef.current) return;
+    const reducedQuality = window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)').matches;
+    const effectiveResolution = reducedQuality ? Math.min(resolution, 0.32) : resolution;
+    const effectivePoissonIterations = reducedQuality ? Math.min(iterationsPoisson, 16) : iterationsPoisson;
+    const effectiveViscousIterations = reducedQuality ? Math.min(iterationsViscous, 16) : iterationsViscous;
 
     function makePaletteTexture(stops: string[]) {
       let arr: string[];
@@ -103,9 +107,9 @@ export default function LiquidEther({
 
       init(container: HTMLElement) {
         this.container = container;
-        this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        this.pixelRatio = Math.min(window.devicePixelRatio || 1, reducedQuality ? 1 : 1.5);
         this.resize();
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: !reducedQuality, alpha: true, powerPreference: 'high-performance' });
         this.renderer.autoClear = false;
         this.renderer.setClearColor(new THREE.Color(0x000000), 0);
         this.renderer.setPixelRatio(this.pixelRatio);
@@ -817,8 +821,8 @@ export default function LiquidEther({
       constructor() {
         this.simulation = new Simulation({
           mouse_force: mouseForce, cursor_size: cursorSize, isViscous, viscous,
-          iterations_viscous: iterationsViscous, iterations_poisson: iterationsPoisson,
-          dt, BFECC, resolution, isBounce,
+          iterations_viscous: effectiveViscousIterations, iterations_poisson: effectivePoissonIterations,
+          dt, BFECC: reducedQuality ? false : BFECC, resolution: effectiveResolution, isBounce,
         });
         this.scene = new THREE.Scene();
         this.camera = new THREE.Camera();
@@ -853,6 +857,7 @@ export default function LiquidEther({
       private _loop: () => void;
       private _resize: () => void;
       private _onVisibility: () => void;
+      private lastFrame = 0;
 
       constructor(props: { $wrapper: HTMLElement }) {
         Common.init(props.$wrapper);
@@ -882,9 +887,12 @@ export default function LiquidEther({
         Common.update();
         this.output.update();
       }
-      loop() {
+      loop(timestamp = performance.now()) {
         if (!this.running) return;
-        this.render();
+        if (!reducedQuality || timestamp - this.lastFrame >= 1000 / 30) {
+          this.render();
+          this.lastFrame = timestamp;
+        }
         rafRef.current = requestAnimationFrame(this._loop);
       }
       start() {

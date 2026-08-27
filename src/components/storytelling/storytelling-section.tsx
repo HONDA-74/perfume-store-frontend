@@ -10,6 +10,7 @@ import { Link } from 'react-router';
 import { ROUTES } from '@/constants';
 import { BlurText } from '@/components/hero/BlurText';
 import { PerfumeScene } from '@/components/3d/perfume';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * CONSTANTS — 5-scene narrative structure
@@ -262,6 +263,7 @@ function StoryDot({ progress }: { progress: MotionValue<number> }) {
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
   // Opacity — fade in after brief moment, stay visible throughout
   const bottleOpacity = useTransform(scrollProgress, [0, 0.03, 0.85, 1], [0, 1, 1, 0.35]);
 
@@ -295,13 +297,13 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
       aria-hidden="true"
     >
       {/* Desktop: animated horizontal position */}
-      <motion.div
+      {isDesktop && <motion.div
         style={{
           x: '-50%', // Offset for centered transform origin
           left: bottleX,
           width: containerWidth,
         }}
-        className="relative hidden lg:block"
+        className="relative"
       >
         {/* Subtle atmospheric depth — barely visible spotlight/glow */}
         <motion.div
@@ -335,10 +337,10 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
         >
           <PerfumeScene scrollProgress={scrollProgress} />
         </div>
-      </motion.div>
+      </motion.div>}
 
       {/* Mobile: always centered, simpler */}
-      <div className="relative block lg:hidden mx-auto" style={{ width: 'min(85vw, 450px)' }}>
+      {!isDesktop && <div className="relative mx-auto" style={{ width: 'min(85vw, 450px)' }}>
         {/* Subtle atmospheric depth — mobile */}
         <motion.div
           className="absolute inset-0 -z-20"
@@ -371,7 +373,7 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
         >
           <PerfumeScene scrollProgress={scrollProgress} />
         </div>
-      </div>
+      </div>}
     </motion.div>
   );
 }
@@ -630,9 +632,13 @@ function ScrollStorySequence() {
   }));
 
   // Individual normalised progress for each scene (0→1 within its window)
-  const sceneProgress = STORY_SCENES.map((_, i) =>
-    useTransform(storyProgress, [progressValues[i].enter, progressValues[i].exit], [0, 1])
-  );
+  const sceneProgress = [
+    useTransform(storyProgress, [progressValues[0].enter, progressValues[0].exit], [0, 1]),
+    useTransform(storyProgress, [progressValues[1].enter, progressValues[1].exit], [0, 1]),
+    useTransform(storyProgress, [progressValues[2].enter, progressValues[2].exit], [0, 1]),
+    useTransform(storyProgress, [progressValues[3].enter, progressValues[3].exit], [0, 1]),
+    useTransform(storyProgress, [progressValues[4].enter, progressValues[4].exit], [0, 1]),
+  ];
 
   // Progress bar (only shows during storytelling, not intro)
   const lineScaleX = useTransform(storyProgress, [0, 1], [0, 1]);

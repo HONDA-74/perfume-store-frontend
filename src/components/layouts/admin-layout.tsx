@@ -4,46 +4,33 @@
  * Enforces admin authorization - redirects non-admin users.
  */
 
-import { useEffect } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router';
 import { 
   LayoutDashboard, 
   Package, 
   Tag, 
-  FolderOpen, 
-  ShoppingCart,
   LogOut,
   ChevronRight
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { ROUTES } from '@/constants/routes.constants';
+import { useLogout } from '@/hooks/api/use-auth';
 
 const adminNav = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
-  { label: 'Products', icon: Package, path: '/admin/products' },
-  { label: 'Brands', icon: Tag, path: '/admin/brands' },
-  { label: 'Categories', icon: FolderOpen, path: '/admin/categories' },
-  { label: 'Orders', icon: ShoppingCart, path: '/admin/orders' },
+  { label: 'Dashboard', icon: LayoutDashboard, path: ROUTES.admin.root },
+  { label: 'Products', icon: Package, path: ROUTES.admin.products },
+  { label: 'Brands', icon: Tag, path: ROUTES.admin.brands },
 ];
 
 export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, user, logout } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const logout = useLogout();
 
-  useEffect(() => {
-    if (!isAdmin()) {
-      navigate(ROUTES.home, { replace: true });
-    }
-  }, [isAdmin, navigate]);
-
-  if (!isAdmin()) {
-    return null;
-  }
-
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.home);
+  const handleLogout = async () => {
+    await logout.mutateAsync();
+    navigate(ROUTES.home, { replace: true });
   };
 
   return (

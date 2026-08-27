@@ -55,10 +55,8 @@ export interface Brand {
   name: string;
   slug: string;
   description?: string;
-  logo?: string;
-  country?: string;
-  foundedYear?: number;
-  website?: string;
+  logoUrl?: string;
+  countryOfOrigin?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -69,15 +67,28 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
-  parentId?: string;
-  parent?: Category;
-  children?: Category[];
-  image?: string;
-  order: number;
+  imageUrl?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CreateBrandDto {
+  name: string;
+  description?: string;
+  logoUrl?: string;
+  countryOfOrigin?: string;
+}
+
+export type UpdateBrandDto = Partial<CreateBrandDto>;
+
+export interface CreateCategoryDto {
+  name: string;
+  description?: string;
+  imageUrl?: string;
+}
+
+export type UpdateCategoryDto = Partial<CreateCategoryDto>;
 
 /**
  * Query parameters for product listing.
@@ -90,7 +101,7 @@ export interface ProductQueryParams extends BaseQueryParams {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
-  featured?: boolean;
+  isFeatured?: boolean;
   search?: string;
 }
 

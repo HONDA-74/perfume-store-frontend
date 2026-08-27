@@ -6,15 +6,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import * as wishlistApi from '@/services/api/wishlist';
 import type { Wishlist } from '@/types';
+import { useAuthStore } from '@/stores/auth.store';
 
 /**
  * Get current user's wishlist.
  */
 export function useWishlist() {
+  const hasSession = useAuthStore((state) => !!state.accessToken);
   return useQuery({
     queryKey: queryKeys.wishlist.current(),
     queryFn: wishlistApi.getWishlist,
     staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled: hasSession,
   });
 }
 

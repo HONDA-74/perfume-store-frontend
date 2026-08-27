@@ -10,6 +10,9 @@
 export const ROUTES = {
   home: '/',
   shop: '/shop',
+  brands: '/brands',
+  collections: '/collections',
+  heritage: '/heritage',
   brandDetail: '/brands/:brandSlug',
   productDetail: '/products/:slug',
   search: '/search',
@@ -25,5 +28,17 @@ export const ROUTES = {
     addresses: '/account/addresses',
   },
   scentMatchmaker: '/scent-finder',
+  auth: {
+    login: '/login',
+    register: '/register',
+  },
+  admin: {
+    login: '/admin/login',
+    root: '/admin',
+    products: '/admin/products',
+    productNew: '/admin/products/new',
+    productEdit: '/admin/products/:id/edit',
+    brands: '/admin/brands',
+  },
   notFound: '*',
 } as const;

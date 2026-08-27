@@ -134,7 +134,7 @@ export function ProductDetailPage() {
             <div className="relative flex-1 overflow-hidden rounded-lg border border-kenz-border bg-kenz-surface/30">
               <div className="aspect-[4/5]">
                 <img
-                  src={product.images[activeImageIndex] || '/placeholder-product.jpg'}
+                  src={product.images[activeImageIndex]}
                   alt={product.name}
                   className="h-full w-full object-cover"
                 />

@@ -1,19 +1,22 @@
 import { useRef } from 'react';
 import { useInView, motion } from 'framer-motion';
 import { AccordionGallery } from './AccordionGallery';
-import { MOCK_PRODUCTS } from '@/lib/mock-data';
+import { useProducts } from '@/hooks/api/use-products';
+import { Link } from 'react-router';
+import { ROUTES } from '@/constants';
 
 export function CollectionSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-10% 0px' });
 
-  // Map our mock products to the format expected by AccordionGallery
-  const galleryItems = MOCK_PRODUCTS.map(product => ({
-    image: product.image,
+  const products = useProducts({ limit: 5, isFeatured: true });
+  const galleryItems = (products.data?.items ?? []).map(product => ({
+    image: product.images[0],
     label: product.name,
-    sublabel: product.family,
+    sublabel: product.brand?.name ?? product.concentration,
     description: product.description,
-    link: product.link,
+    link: `/products/${product.slug}`,
+    alt: product.name,
   }));
 
   return (
@@ -92,13 +95,15 @@ export function CollectionSection() {
           transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="w-full"
         >
-          <AccordionGallery 
-            items={galleryItems}
-            height={550}
-            defaultIndex={0}
-            tilt={6}
-            parallax={0.3}
-          />
+          {products.isLoading ? (
+            <div className="flex h-[550px] items-center justify-center border border-white/[0.06] text-xs uppercase tracking-[0.18em] text-white/30" role="status">Curating the collection…</div>
+          ) : products.isError ? (
+            <div className="flex h-[420px] flex-col items-center justify-center gap-5 border border-white/[0.06] text-center text-white/45"><p>We couldn't load the collection.</p><button onClick={() => products.refetch()} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">Try Again</button></div>
+          ) : galleryItems.length ? (
+            <AccordionGallery items={galleryItems} height={550} defaultIndex={0} tilt={6} parallax={0.3} />
+          ) : (
+            <div className="flex h-[420px] flex-col items-center justify-center gap-5 border border-white/[0.06] text-center text-white/45"><p>No featured fragrances are available yet.</p><Link to={ROUTES.shop} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">Explore the Shop</Link></div>
+          )}
         </motion.div>
       </div>
     </section>

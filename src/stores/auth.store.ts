@@ -22,10 +22,12 @@ interface AuthState {
 
   // User (synced from React Query)
   user: User | null;
+  isHydrated: boolean;
 
   // Actions
   setTokens: (accessToken: string, refreshToken: string) => void;
   setUser: (user: User | null) => void;
+  setHydrated: (hydrated: boolean) => void;
   clearAuth: () => void;
   logout: () => void;
 
@@ -41,6 +43,7 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       user: null,
+      isHydrated: false,
 
       // Set tokens after login/register/refresh
       setTokens: (accessToken: string, refreshToken: string) => {
@@ -50,6 +53,10 @@ export const useAuthStore = create<AuthState>()(
       // Sync user from React Query
       setUser: (user: User | null) => {
         set({ user });
+      },
+
+      setHydrated: (isHydrated: boolean) => {
+        set({ isHydrated });
       },
 
       // Clear all auth state on logout
@@ -85,6 +92,9 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     }
   )
 );
