@@ -19,14 +19,15 @@ using the shared Axios instance from `src/lib/axios.ts`:
 
 ```ts
 import { apiClient } from '@/lib/axios';
-import type { ApiSuccessResponse, PaginatedData } from '@/types';
+import { normalizePaginatedResponse } from '@/services/api/pagination';
+import type { ApiPaginatedResponse, ProductQueryParams, Product } from '@/types';
 
 export async function getProducts(params: ProductQueryParams) {
-  const { data } = await apiClient.get<ApiSuccessResponse<PaginatedData<Product>>>(
+  const { data } = await apiClient.get<ApiPaginatedResponse<Product>>(
     '/products',
     { params },
   );
-  return data.data;
+  return normalizePaginatedResponse(data);
 }
 ```
 

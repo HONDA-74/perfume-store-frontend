@@ -10,12 +10,10 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, ArrowLeft, RefreshCw, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { useSendChatMessage } from '@/hooks/api/use-ai';
-import { useProducts } from '@/hooks/api/use-products';
+import { useProduct } from '@/hooks/api/use-products';
 import { ProductCard } from '@/components/shared/product-card';
-import { PageLoader } from '@/components/shared/page-loader';
 import { ROUTES } from '@/constants/routes.constants';
 import type { AIProductRecommendation } from '@/types/ai.types';
-import type { Product } from '@/types/product.types';
 
 /* ── Quiz definition ── */
 
@@ -129,7 +127,9 @@ function OptionBtn({ label, selected, onClick }: { label: string; selected: bool
 
 /* ── Result card ── */
 
-function ResultCard({ rec, rank, product }: { rec: AIProductRecommendation; rank: number; product?: Product }) {
+function ResultCard({ rec, rank }: { rec: AIProductRecommendation; rank: number }) {
+  const productQuery = useProduct(rec.productId);
+
   return (
     <div>
       <div className="mb-2 flex items-center gap-2">
@@ -142,7 +142,13 @@ function ResultCard({ rec, rank, product }: { rec: AIProductRecommendation; rank
           {rec.reason}
         </span>
       </div>
-      {product && <ProductCard product={product} />}
+      {productQuery.isLoading ? (
+        <div className="aspect-[4/5] animate-pulse bg-white/[0.04]" role="status" aria-label="Loading recommended fragrance" />
+      ) : productQuery.data ? (
+        <ProductCard product={productQuery.data} />
+      ) : (
+        <p className="border border-white/[0.06] p-5 text-xs text-white/35">This recommendation is unavailable.</p>
+      )}
     </div>
   );
 }
@@ -156,9 +162,6 @@ export function ScentFinderPage() {
   
   const sendChatMutation = useSendChatMessage();
   
-  // Fetch products for recommendations
-  const productsQuery = useProducts({ limit: 100 });
-
   const question = QUESTIONS[step] ?? null;
   const isFreeTextStep = step === FREE_TEXT_STEP;
   const isResult = step === TOTAL_STEPS;
@@ -242,11 +245,6 @@ export function ScentFinderPage() {
   }, [sendChatMutation]);
 
   const canProceed = isFreeTextStep ? true : (currentAnswer !== undefined);
-
-  // Map recommendation product IDs to actual products
-  const recommendedProducts = result?.recommendations.map(rec => {
-    return productsQuery.data?.items.find(p => p.id === rec.productId);
-  }).filter(Boolean) ?? [];
 
   return (
     <div style={{ backgroundColor: '#0B0A0C', minHeight: '100vh' }}>
@@ -419,16 +417,11 @@ export function ScentFinderPage() {
             </p>
           </div>
 
-          {productsQuery.isLoading && <PageLoader />}
-
           {result && result.recommendations.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {result.recommendations.map((rec, i) => {
-                const product = recommendedProducts[i];
-                return (
-                  <ResultCard key={rec.productId} rec={rec} rank={i + 1} product={product} />
-                );
-              })}
+              {result.recommendations.map((rec, i) => (
+                <ResultCard key={rec.productId} rec={rec} rank={i + 1} />
+              ))}
             </div>
           )}
 

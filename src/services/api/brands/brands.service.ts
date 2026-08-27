@@ -11,7 +11,10 @@
  */
 
 import { apiClient } from '@/lib';
+import { PAGINATION_DEFAULTS } from '@/constants/app.constants';
+import { normalizePaginatedResponse } from '@/services/api/pagination';
 import type {
+  ApiPaginatedResponse,
   ApiSuccessResponse,
   PaginatedData,
   Brand,
@@ -26,11 +29,38 @@ import type {
 export async function getBrands(
   params?: BaseQueryParams
 ): Promise<PaginatedData<Brand>> {
-  const { data } = await apiClient.get<ApiSuccessResponse<PaginatedData<Brand>>>(
+  const { data } = await apiClient.get<ApiPaginatedResponse<Brand>>(
     '/brands',
     { params }
   );
-  return data.data;
+  return normalizePaginatedResponse(data);
+}
+
+/**
+ * Fetch every brand using backend-compliant pages.
+ */
+export async function getAllBrands(): Promise<PaginatedData<Brand>> {
+  const firstPage = await getBrands({ page: 1, limit: PAGINATION_DEFAULTS.maxLimit });
+
+  const remainingPages = firstPage.meta.totalPages > 1
+    ? await Promise.all(
+      Array.from({ length: firstPage.meta.totalPages - 1 }, (_, index) =>
+        getBrands({ page: index + 2, limit: PAGINATION_DEFAULTS.maxLimit })
+      )
+    )
+    : [];
+
+  const items = [firstPage, ...remainingPages].flatMap((page) => page.items);
+
+  return {
+    items,
+    meta: {
+      page: 1,
+      limit: items.length,
+      totalItems: items.length,
+      totalPages: 1,
+    },
+  };
 }
 
 /**

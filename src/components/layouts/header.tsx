@@ -31,39 +31,31 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
 }
 
 export function Header() {
-  const [scrolled, setScrolled] = React.useState(false);
   const location = useLocation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const { openCartDrawer, openSearch, openMobileNav } = useUIStore();
   const cartCount = useCartCount();
   const wishlistCount = useWishlistCount();
 
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
   return (
-    <header className="sticky top-0 z-navbar transition-all duration-300" style={{ background: scrolled ? 'rgba(11,10,12,0.95)' : 'rgba(11,10,12,0.78)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)', boxShadow: scrolled ? '0 1px 30px rgba(0,0,0,0.5)' : 'none' }}>
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
+    <header className="sticky top-0 z-30 border-b border-white/[0.05] bg-[#0B0A0C]">
+      <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
         <div className="relative flex h-16 items-center justify-between lg:h-20">
-          <button onClick={openMobileNav} className="flex h-11 w-11 items-center justify-center text-white/60 transition hover:text-white lg:hidden" aria-label="Open menu"><Menu size={20} /></button>
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
+          <button onClick={openMobileNav} className="flex h-9 w-9 items-center justify-center text-white/60 transition-colors hover:text-white/90 lg:hidden" aria-label="Open menu"><Menu size={20} /></button>
+          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
             {navLinks.slice(0, 3).map((link) => <NavLink key={link.href} {...link} active={location.pathname.startsWith(link.href)} />)}
           </nav>
-          <Link to={ROUTES.home} className="absolute left-1/2 -translate-x-1/2 font-serif text-xl tracking-[0.2em] text-[#D4C3A3] transition hover:text-[#E2BB55] lg:static lg:translate-x-0" aria-label="KENZ home">KENZ</Link>
-          <div className="hidden items-center gap-7 lg:flex">
-            {navLinks.slice(3).map((link) => <NavLink key={link.href} {...link} active={location.pathname.startsWith(link.href)} />)}
-          </div>
-          <div className="flex items-center gap-0.5 sm:gap-1">
-            <button onClick={openSearch} className="flex h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90" aria-label="Search"><Search size={18} /></button>
+          <Link to={ROUTES.home} className="absolute left-1/2 -translate-x-1/2 font-serif text-xl tracking-[0.25em] text-[#D4C3A3] transition-colors hover:text-[#E2BB55]" aria-label="KENZ home">KENZ</Link>
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-1 lg:gap-7">
+            <div className="hidden items-center gap-7 lg:flex">
+              {navLinks.slice(3).map((link) => <NavLink key={link.href} {...link} active={location.pathname.startsWith(link.href)} />)}
+            </div>
+            <button onClick={openSearch} className="flex h-9 w-9 items-center justify-center text-white/55 transition-colors hover:text-white/90" aria-label="Search"><Search size={18} /></button>
             {isAuthenticated ? (
               <>
-                <Link to={ROUTES.wishlist} className="relative flex h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90" aria-label="Wishlist"><Heart size={18} /><NavBadge count={wishlistCount} /></Link>
-                <button onClick={openCartDrawer} className="relative flex h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90" aria-label="Cart"><ShoppingBag size={18} /><NavBadge count={cartCount} /></button>
-                <Link to={ROUTES.account.root} className="hidden h-11 w-10 items-center justify-center text-white/55 transition hover:text-white/90 sm:flex" aria-label="Account"><User size={18} /></Link>
+                <Link to={ROUTES.wishlist} className="relative flex h-9 w-9 items-center justify-center text-white/55 transition-colors hover:text-white/90" aria-label="Wishlist"><Heart size={18} /><NavBadge count={wishlistCount} /></Link>
+                <button onClick={openCartDrawer} className="relative flex h-9 w-9 items-center justify-center text-white/55 transition-colors hover:text-white/90" aria-label="Cart"><ShoppingBag size={18} /><NavBadge count={cartCount} /></button>
+                <Link to={ROUTES.account.root} className="hidden h-9 w-9 items-center justify-center text-white/55 transition-colors hover:text-white/90 sm:flex" aria-label="Account"><User size={18} /></Link>
               </>
             ) : (
               <div className="hidden items-center gap-2 sm:flex">

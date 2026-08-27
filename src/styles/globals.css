@@ -55,6 +55,27 @@
   --color-info-500: hsl(var(--color-info-500) / <alpha-value>);
   --color-info-700: hsl(var(--color-info-700) / <alpha-value>);
 
+  /* Dark-first semantic colors used by the Figma-aligned application shell. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
   /* Typography */
   --font-serif: var(--font-serif);
   --font-sans: var(--font-sans);
@@ -287,12 +308,16 @@
   }
 
   html {
+    position: relative;
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-neutral-50 text-neutral-700 antialiased;
+    background-color: var(--kenz-bg);
+    color: var(--kenz-text);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,

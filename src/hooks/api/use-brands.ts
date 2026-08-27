@@ -19,6 +19,17 @@ export function useBrands(params?: BaseQueryParams) {
 }
 
 /**
+ * Fetch the complete brand list through legal pages of at most 50 records.
+ */
+export function useAllBrands() {
+  return useQuery({
+    queryKey: queryKeys.brands.list({ all: true }),
+    queryFn: brandsApi.getAllBrands,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+/**
  * Fetch single brand by ID or slug.
  */
 export function useBrand(idOrSlug: string) {

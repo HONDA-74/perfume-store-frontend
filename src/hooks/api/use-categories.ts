@@ -21,6 +21,17 @@ export function useCategories(params?: BaseQueryParams) {
 }
 
 /**
+ * Fetch the complete category list through legal pages of at most 50 records.
+ */
+export function useAllCategories() {
+  return useQuery({
+    queryKey: queryKeys.categories.list({ all: true }),
+    queryFn: categoriesApi.getAllCategories,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+/**
  * Fetch single category by ID or slug.
  */
 export function useCategory(idOrSlug: string) {

@@ -12,7 +12,10 @@
  */
 
 import { apiClient } from '@/lib';
+import { PAGINATION_DEFAULTS } from '@/constants/app.constants';
+import { normalizePaginatedResponse } from '@/services/api/pagination';
 import type {
+  ApiPaginatedResponse,
   ApiSuccessResponse,
   PaginatedData,
   Category,
@@ -27,11 +30,38 @@ import type {
 export async function getCategories(
   params?: BaseQueryParams
 ): Promise<PaginatedData<Category>> {
-  const { data } = await apiClient.get<ApiSuccessResponse<PaginatedData<Category>>>(
+  const { data } = await apiClient.get<ApiPaginatedResponse<Category>>(
     '/categories',
     { params }
   );
-  return data.data;
+  return normalizePaginatedResponse(data);
+}
+
+/**
+ * Fetch every category using backend-compliant pages.
+ */
+export async function getAllCategories(): Promise<PaginatedData<Category>> {
+  const firstPage = await getCategories({ page: 1, limit: PAGINATION_DEFAULTS.maxLimit });
+
+  const remainingPages = firstPage.meta.totalPages > 1
+    ? await Promise.all(
+      Array.from({ length: firstPage.meta.totalPages - 1 }, (_, index) =>
+        getCategories({ page: index + 2, limit: PAGINATION_DEFAULTS.maxLimit })
+      )
+    )
+    : [];
+
+  const items = [firstPage, ...remainingPages].flatMap((page) => page.items);
+
+  return {
+    items,
+    meta: {
+      page: 1,
+      limit: items.length,
+      totalItems: items.length,
+      totalPages: 1,
+    },
+  };
 }
 
 /**

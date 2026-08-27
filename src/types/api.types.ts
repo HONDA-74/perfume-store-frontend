@@ -11,6 +11,14 @@ export interface ApiSuccessResponse<T> {
   meta?: PaginationMeta;
 }
 
+/**
+ * Wire shape emitted by the backend transform interceptor for paginated routes.
+ * Items are placed in `data`; pagination metadata remains at the envelope level.
+ */
+export interface ApiPaginatedResponse<T> extends ApiSuccessResponse<T[]> {
+  meta: PaginationMeta;
+}
+
 export interface ApiErrorResponse {
   success: false;
   message: string;

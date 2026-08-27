@@ -34,7 +34,7 @@ export function RootLayout() {
         Skip to main content
       </a>
 
-      <div className="flex min-h-screen flex-col bg-kenz-bg">
+      <div className="flex min-h-screen flex-col bg-kenz-bg text-foreground">
         <Header />
 
         <main id="main-content" className="flex-1" tabIndex={-1}>

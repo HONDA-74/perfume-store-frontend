@@ -175,29 +175,29 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-col gap-1">
             {/* Brand */}
-            <span className="font-sans text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground/50">
+            <span className="truncate font-sans text-[10px] font-medium uppercase tracking-[0.15em] text-[#D4C3A3]/60">
               {product.brand?.name || 'KENZ'}
             </span>
 
             {/* Title */}
             <Link
               to={`/products/${product.slug}`}
-              className="line-clamp-2 font-serif text-sm font-normal leading-snug text-foreground/90 transition-colors hover:text-kenz-gold"
+              className="line-clamp-2 font-serif text-[1.0625rem] font-normal leading-snug text-white/90 transition-colors hover:text-kenz-gold"
             >
               {productUI.title}
             </Link>
           </div>
 
-          {/* Price */}
-          <div className="flex-shrink-0">
-            <Price price={product.price} discountPrice={product.discountPrice} size="sm" />
-          </div>
         </div>
 
-        {/* Rating */}
-        {product.ratingCount > 0 && (
+        <div className="flex items-center gap-3">
           <Rating value={product.ratingAverage} count={product.ratingCount} size="sm" />
-        )}
+          <span className="font-sans text-[9px] uppercase tracking-[0.1em] text-white/20">
+            {product.concentration.replaceAll('_', ' ')}
+          </span>
+        </div>
+
+        <Price price={product.price} discountPrice={product.discountPrice} size="sm" />
       </div>
     </article>
   );

@@ -1,9 +1,9 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
-import { useCategories } from '@/hooks/api/use-categories';
+import { useAllCategories } from '@/hooks/api/use-categories';
 
 export function CollectionsPage() {
-  const categories = useCategories({ limit: 100 });
+  const categories = useAllCategories();
 
   return (
     <main className="min-h-screen bg-[#0B0A0C] px-5 pb-24 pt-24 text-[#F3F2F5] sm:px-8 lg:px-12 lg:pt-32">

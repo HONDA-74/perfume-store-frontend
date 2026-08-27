@@ -2,13 +2,13 @@ import { useRef } from 'react';
 import { useInView, motion } from 'framer-motion';
 import { Link } from 'react-router';
 import { LogoLoop } from './LogoLoop';
-import { useBrands } from '@/hooks/api/use-brands';
+import { useAllBrands } from '@/hooks/api/use-brands';
 
 export function HousesSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-10% 0px' });
 
-  const brands = useBrands({ limit: 100 });
+  const brands = useAllBrands();
   const logoItems = (brands.data?.items ?? []).map(brand => ({
     node: (
       <Link 

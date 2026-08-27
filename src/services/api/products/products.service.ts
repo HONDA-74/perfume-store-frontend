@@ -12,7 +12,9 @@
  */
 
 import { apiClient } from '@/lib';
+import { normalizePaginatedResponse } from '@/services/api/pagination';
 import type {
+  ApiPaginatedResponse,
   ApiSuccessResponse,
   PaginatedData,
   Product,
@@ -28,11 +30,11 @@ import type {
 export async function getProducts(
   params?: ProductQueryParams
 ): Promise<PaginatedData<Product>> {
-  const { data } = await apiClient.get<ApiSuccessResponse<PaginatedData<Product>>>(
+  const { data } = await apiClient.get<ApiPaginatedResponse<Product>>(
     '/products',
     { params }
   );
-  return data.data;
+  return normalizePaginatedResponse(data);
 }
 
 /**

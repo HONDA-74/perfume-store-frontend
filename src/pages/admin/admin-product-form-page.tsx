@@ -7,8 +7,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import { useProduct, useCreateProduct, useUpdateProduct } from '@/hooks/api/use-products';
-import { useBrands } from '@/hooks/api/use-brands';
-import { useCategories } from '@/hooks/api/use-categories';
+import { useAllBrands } from '@/hooks/api/use-brands';
+import { useAllCategories } from '@/hooks/api/use-categories';
 import { PageLoader } from '@/components/shared/page-loader';
 import { FragranceConcentration, FragranceGender, type CreateProductDto } from '@/types';
 
@@ -18,8 +18,8 @@ export function AdminProductFormPage() {
   const isEditing = !!id;
 
   const productQuery = useProduct(id!);
-  const brandsQuery = useBrands({ limit: 100 });
-  const categoriesQuery = useCategories({ limit: 100 });
+  const brandsQuery = useAllBrands();
+  const categoriesQuery = useAllCategories();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
 

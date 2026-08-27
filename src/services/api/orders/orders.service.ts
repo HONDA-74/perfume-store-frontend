@@ -11,7 +11,9 @@
  */
 
 import { apiClient } from '@/lib';
+import { normalizePaginatedResponse } from '@/services/api/pagination';
 import type {
+  ApiPaginatedResponse,
   ApiSuccessResponse,
   PaginatedData,
   Order,
@@ -26,11 +28,11 @@ import type {
 export async function getOrders(
   params?: OrderQueryParams
 ): Promise<PaginatedData<Order>> {
-  const { data } = await apiClient.get<ApiSuccessResponse<PaginatedData<Order>>>(
+  const { data } = await apiClient.get<ApiPaginatedResponse<Order>>(
     '/orders',
     { params }
   );
-  return data.data;
+  return normalizePaginatedResponse(data);
 }
 
 /**

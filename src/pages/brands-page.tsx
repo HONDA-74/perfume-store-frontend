@@ -5,13 +5,13 @@
  */
 
 import { Link } from 'react-router';
-import { useBrands } from '@/hooks/api/use-brands';
+import { useAllBrands } from '@/hooks/api/use-brands';
 import { EmptyState } from '@/components/shared/empty-state';
 import { PageLoader } from '@/components/shared/page-loader';
 import { SectionHeader } from '@/components/shared/section-header';
 
 export function BrandsPage() {
-  const { data, isLoading, error } = useBrands();
+  const { data, isLoading, error } = useAllBrands();
 
   if (isLoading) {
     return <PageLoader />;

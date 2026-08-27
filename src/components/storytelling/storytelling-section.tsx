@@ -296,27 +296,24 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
       className="absolute inset-0 flex items-center pointer-events-none"
       aria-hidden="true"
     >
-      {/* Desktop: animated horizontal position */}
-      {isDesktop && <motion.div
-        style={{
-          x: '-50%', // Offset for centered transform origin
-          left: bottleX,
-          width: containerWidth,
-        }}
+      {/* A single scene instance adapts its frame without remounting WebGL at breakpoints. */}
+      <motion.div
+        style={isDesktop
+          ? { x: '-50%', left: bottleX, width: containerWidth }
+          : { width: 'min(85vw, 450px)', marginLeft: 'auto', marginRight: 'auto' }}
         className="relative"
       >
-        {/* Subtle atmospheric depth — barely visible spotlight/glow */}
         <motion.div
           className="absolute inset-0 -z-20"
           style={{
             opacity: atmosphereOpacity,
-            background:
-              'radial-gradient(ellipse 70% 85% at 50% 55%, hsl(43 45% 20% / 0.15) 0%, transparent 60%)',
-            filter: 'blur(80px)',
+            background: isDesktop
+              ? 'radial-gradient(ellipse 70% 85% at 50% 55%, hsl(43 45% 20% / 0.15) 0%, transparent 60%)'
+              : 'radial-gradient(ellipse 75% 85% at 50% 55%, hsl(43 45% 20% / 0.12) 0%, transparent 65%)',
+            filter: isDesktop ? 'blur(80px)' : 'blur(70px)',
           }}
         />
 
-        {/* Atmospheric glow beneath bottle */}
         <motion.div
           className="absolute inset-0 -z-10"
           style={{
@@ -327,53 +324,13 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
           }}
         />
 
-        {/* The interactive 3D bottle */}
         <div
           className="relative block select-none"
-          style={{
-            width: '100%',
-            height: '70vh', // Provides a tall canvas for the bottle
-          }}
+          style={{ width: '100%', height: isDesktop ? '70vh' : '65vh' }}
         >
           <PerfumeScene scrollProgress={scrollProgress} />
         </div>
-      </motion.div>}
-
-      {/* Mobile: always centered, simpler */}
-      {!isDesktop && <div className="relative mx-auto" style={{ width: 'min(85vw, 450px)' }}>
-        {/* Subtle atmospheric depth — mobile */}
-        <motion.div
-          className="absolute inset-0 -z-20"
-          style={{
-            opacity: atmosphereOpacity,
-            background:
-              'radial-gradient(ellipse 75% 85% at 50% 55%, hsl(43 45% 20% / 0.12) 0%, transparent 65%)',
-            filter: 'blur(70px)',
-          }}
-        />
-
-        {/* Atmospheric glow beneath bottle */}
-        <motion.div
-          className="absolute inset-0 -z-10"
-          style={{
-            opacity: glowOpacity,
-            background:
-              'radial-gradient(ellipse 65% 80% at 50% 60%, hsl(43 60% 30% / 0.20) 0%, transparent 70%)',
-            filter: 'blur(45px)',
-          }}
-        />
-
-        {/* The interactive 3D bottle */}
-        <div
-          className="relative block select-none"
-          style={{
-            width: '100%',
-            height: '65vh',
-          }}
-        >
-          <PerfumeScene scrollProgress={scrollProgress} />
-        </div>
-      </div>}
+      </motion.div>
     </motion.div>
   );
 }

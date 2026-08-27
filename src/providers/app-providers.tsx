@@ -12,7 +12,7 @@ import { Toaster } from '@/components/ui/toast';
  */
 export function AppProviders({ children }: PropsWithChildren) {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="luxury-perfume-store-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="kenz-dark-theme">
       <QueryProvider>
         <AuthBootstrap>{children}</AuthBootstrap>
         <Toaster position="top-right" />

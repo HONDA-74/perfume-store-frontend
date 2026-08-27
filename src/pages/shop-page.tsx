@@ -5,8 +5,8 @@ import { ProductCard } from '@/components/shared/product-card';
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
 import { PageLoader } from '@/components/shared/page-loader';
-import { useBrands } from '@/hooks/api/use-brands';
-import { useCategories } from '@/hooks/api/use-categories';
+import { useAllBrands } from '@/hooks/api/use-brands';
+import { useAllCategories } from '@/hooks/api/use-categories';
 import { useProducts } from '@/hooks/api/use-products';
 import { FragranceConcentration, FragranceGender, type ProductQueryParams } from '@/types';
 
@@ -91,8 +91,9 @@ export function ShopPage() {
 
   const params: ProductQueryParams = { page, limit: ITEMS_PER_PAGE, brandId, categoryId, gender, concentration, inStock: inStock || undefined, sort: sort === 'featured' ? undefined : sort };
   const products = useProducts(params);
-  const brands = useBrands({ limit: 100 });
-  const categories = useCategories({ limit: 100 });
+  const brands = useAllBrands();
+  const categories = useAllCategories();
+  const productData = products.data;
 
   const update = (key: string, value?: string) => {
     const next = new URLSearchParams(searchParams);
@@ -103,8 +104,8 @@ export function ShopPage() {
   };
   const reset = () => setSearchParams({}, { replace: true });
   const activeCount = [brandId, categoryId, gender, concentration, inStock ? 'yes' : undefined].filter(Boolean).length;
-  const total = products.data?.meta.totalItems ?? 0;
-  const totalPages = products.data?.meta.totalPages ?? 1;
+  const total = productData ? productData.meta.totalItems : 0;
+  const totalPages = productData ? productData.meta.totalPages : 1;
 
   const changePage = (next: number) => {
     if (next < 1 || next > totalPages) return;
@@ -144,9 +145,9 @@ export function ShopPage() {
       </div>
 
       <div ref={gridRef} className="mx-auto max-w-[1440px] scroll-mt-36 px-5 py-9 lg:px-12 lg:py-12">
-        {products.isLoading ? <PageLoader /> : products.isError ? <ErrorState className="min-h-[50vh]" onRetry={() => products.refetch()} message="We couldn't load the fragrance collection." /> : !products.data?.items.length ? <EmptyState className="min-h-[50vh]" title="No Fragrance Found" message="Try adjusting your filters to discover another expression of scent." actionLabel="Reset Filters" onAction={reset} /> : (
+        {products.isLoading ? <PageLoader /> : products.isError ? <ErrorState className="min-h-[50vh]" onRetry={() => products.refetch()} message="We couldn't load the fragrance collection." /> : !productData?.items.length ? <EmptyState className="min-h-[50vh]" title="No Fragrance Found" message="Try adjusting your filters to discover another expression of scent." actionLabel="Reset Filters" onAction={reset} /> : (
           <>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-7 lg:gap-y-14">{products.data.items.map((product) => <ProductCard key={product.id} product={product} />)}</div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-7 lg:gap-y-14">{productData.items.map((product) => <ProductCard key={product.id} product={product} />)}</div>
             {totalPages > 1 && <nav className="mt-14 flex items-center justify-center gap-2" aria-label="Product pages">
               <button onClick={() => changePage(page - 1)} disabled={page === 1} className="flex h-10 w-10 items-center justify-center border border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-25" aria-label="Previous page"><ChevronLeft size={16} /></button>
               {Array.from({ length: totalPages }, (_, index) => index + 1).filter((item) => item === 1 || item === totalPages || Math.abs(item - page) <= 1).map((item, index, list) => <React.Fragment key={item}>{index > 0 && item - list[index - 1] > 1 && <span className="px-1 text-white/25">…</span>}<button onClick={() => changePage(item)} aria-current={item === page ? 'page' : undefined} className={`h-10 min-w-10 border px-3 text-xs ${item === page ? 'border-[#D4A017]/45 bg-[#D4A017]/[0.08] text-[#D4A017]' : 'border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white/70'}`}>{item}</button></React.Fragment>)}

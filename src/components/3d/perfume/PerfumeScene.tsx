@@ -13,13 +13,18 @@ interface PerfumeSceneProps {
 export function PerfumeScene({ scrollProgress }: PerfumeSceneProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
-    const update = (inViewport: boolean) => setVisible(inViewport && !document.hidden);
+    const update = (inViewport: boolean) => {
+      const nextVisible = inViewport && !document.hidden;
+      setVisible(nextVisible);
+      if (nextVisible) setHasEnteredViewport(true);
+    };
     const observer = new IntersectionObserver(([entry]) => update(entry.isIntersecting), { rootMargin: '150px' });
     const onVisibility = () => update(wrapper.getBoundingClientRect().bottom > -150 && wrapper.getBoundingClientRect().top < window.innerHeight + 150);
     observer.observe(wrapper);
@@ -29,7 +34,8 @@ export function PerfumeScene({ scrollProgress }: PerfumeSceneProps) {
 
   return (
     <div ref={wrapperRef} className="absolute inset-0 h-full w-full">
-      {visible && <Canvas
+      {hasEnteredViewport && <Canvas
+        frameloop={visible ? 'always' : 'never'}
         camera={{ position: [0, 0, 5.5], fov: 45 }} // Moved camera closer for a stronger hero presence
         dpr={isMobile ? 1 : [1, 1.5]}
         gl={{ 

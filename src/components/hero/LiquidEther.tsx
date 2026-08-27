@@ -103,7 +103,7 @@ export default function LiquidEther({
       delta = 0;
       container: HTMLElement | null = null;
       renderer: THREE.WebGLRenderer | null = null;
-      clock: THREE.Clock | null = null;
+      timer: THREE.Timer | null = null;
 
       init(container: HTMLElement) {
         this.container = container;
@@ -117,8 +117,8 @@ export default function LiquidEther({
         this.renderer.domElement.style.width = '100%';
         this.renderer.domElement.style.height = '100%';
         this.renderer.domElement.style.display = 'block';
-        this.clock = new THREE.Clock();
-        this.clock.start();
+        this.timer = new THREE.Timer();
+        this.timer.connect(document);
       }
       resize() {
         if (!this.container) return;
@@ -128,9 +128,15 @@ export default function LiquidEther({
         this.aspect = this.width / this.height;
         if (this.renderer) this.renderer.setSize(this.width, this.height, false);
       }
-      update() {
-        this.delta = this.clock!.getDelta();
-        this.time += this.delta;
+      update(timestamp?: number) {
+        this.timer!.update(timestamp);
+        this.delta = this.timer!.getDelta();
+        this.time = this.timer!.getElapsed();
+      }
+      dispose() {
+        this.timer?.dispose();
+        this.timer = null;
+        this.container = null;
       }
     }
     const Common = new CommonClass();
@@ -182,6 +188,10 @@ export default function LiquidEther({
         if (this.docTarget) this.docTarget.addEventListener('mouseleave', this._onDocumentLeave);
       }
       dispose() {
+        if (this.timer !== null) {
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
         this.listenerTarget?.removeEventListener('mousemove', this._onMouseMove);
         this.listenerTarget?.removeEventListener('touchstart', this._onTouchStart);
         this.listenerTarget?.removeEventListener('touchmove', this._onTouchMove);
@@ -555,6 +565,24 @@ export default function LiquidEther({
         Common.renderer!.render(this.scene!, this.camera!);
         Common.renderer!.setRenderTarget(null);
       }
+      dispose() {
+        this.scene?.traverse((object) => {
+          const renderable = object as THREE.Mesh | THREE.LineSegments;
+          renderable.geometry?.dispose();
+          const materials = Array.isArray(renderable.material)
+            ? renderable.material
+            : renderable.material
+              ? [renderable.material]
+              : [];
+          materials.forEach((material) => material.dispose());
+        });
+        this.scene?.clear();
+        this.scene = null;
+        this.camera = null;
+        this.material = null;
+        this.geometry = null;
+        this.plane = null;
+      }
     }
 
     // ─── Advection ─────────────────────────────────────────────────────────────
@@ -809,6 +837,15 @@ export default function LiquidEther({
         const pressure = this.poissonPass.updatePoisson({ iterations: this.options.iterations_poisson });
         this.pressurePass.updatePressure({ vel, pressure });
       }
+      dispose() {
+        this.advection.dispose();
+        this.externalForce.dispose();
+        this.viscousPass.dispose();
+        this.divergencePass.dispose();
+        this.poissonPass.dispose();
+        this.pressurePass.dispose();
+        Object.values(this.fbos).forEach((fbo) => fbo.dispose());
+      }
     }
 
     // ─── Output ────────────────────────────────────────────────────────────────
@@ -846,6 +883,13 @@ export default function LiquidEther({
         Common.renderer!.render(this.scene, this.camera);
       }
       update() { this.simulation.update(); this.render(); }
+      dispose() {
+        this.simulation.dispose();
+        this.outputMesh.geometry.dispose();
+        (this.outputMesh.material as THREE.Material).dispose();
+        paletteTex.dispose();
+        this.scene.clear();
+      }
     }
 
     // ─── WebGLManager ──────────────────────────────────────────────────────────
@@ -881,16 +925,16 @@ export default function LiquidEther({
         document.addEventListener('visibilitychange', this._onVisibility);
       }
       resize() { Common.resize(); this.output.resize(); }
-      render() {
+      render(timestamp?: number) {
         this.autoDriver?.update();
         Mouse.update();
-        Common.update();
+        Common.update(timestamp);
         this.output.update();
       }
       loop(timestamp = performance.now()) {
         if (!this.running) return;
         if (!reducedQuality || timestamp - this.lastFrame >= 1000 / 30) {
-          this.render();
+          this.render(timestamp);
           this.lastFrame = timestamp;
         }
         rafRef.current = requestAnimationFrame(this._loop);
@@ -902,18 +946,21 @@ export default function LiquidEther({
       }
       pause() {
         this.running = false;
-        if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+        if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
       }
       dispose() {
         try {
+          this.pause();
           window.removeEventListener('resize', this._resize);
           document.removeEventListener('visibilitychange', this._onVisibility);
           Mouse.dispose();
+          this.output.dispose();
+          Common.dispose();
           if (Common.renderer) {
             const canvas = Common.renderer.domElement;
             if (canvas?.parentNode) canvas.parentNode.removeChild(canvas);
             Common.renderer.dispose();
-            Common.renderer.forceContextLoss();
+            Common.renderer = null;
           }
         } catch { void 0; }
       }
@@ -953,11 +1000,16 @@ export default function LiquidEther({
     resizeObserverRef.current = ro;
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (resizeRafRef.current !== null) cancelAnimationFrame(resizeRafRef.current);
       try { resizeObserverRef.current?.disconnect(); } catch { void 0; }
       try { intersectionObserverRef.current?.disconnect(); } catch { void 0; }
       webglRef.current?.dispose();
       webglRef.current = null;
+      rafRef.current = null;
+      resizeRafRef.current = null;
+      resizeObserverRef.current = null;
+      intersectionObserverRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

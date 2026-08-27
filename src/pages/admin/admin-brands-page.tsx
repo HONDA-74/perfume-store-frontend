@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { Plus, Edit, Trash2, AlertCircle, X, Save } from 'lucide-react';
-import { useBrands, useCreateBrand, useUpdateBrand, useDeleteBrand } from '@/hooks/api/use-brands';
+import { useAllBrands, useCreateBrand, useUpdateBrand, useDeleteBrand } from '@/hooks/api/use-brands';
 import { PageLoader } from '@/components/shared/page-loader';
 import type { CreateBrandDto, Brand } from '@/types';
 
@@ -13,7 +13,7 @@ export function AdminBrandsPage() {
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [formData, setFormData] = useState<CreateBrandDto>({ name: '', description: '', logoUrl: '', countryOfOrigin: '' });
 
-  const brandsQuery = useBrands({ limit: 100 });
+  const brandsQuery = useAllBrands();
   const createMutation = useCreateBrand();
   const updateMutation = useUpdateBrand();
   const deleteMutation = useDeleteBrand();
