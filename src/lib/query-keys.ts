@@ -38,6 +38,11 @@ export const queryKeys = {
     user: () => [...queryKeys.auth.all, 'user'] as const,
   },
 
+  users: {
+    all: ['users'] as const,
+    addresses: () => [...queryKeys.users.all, 'addresses'] as const,
+  },
+
   /**
    * Products
    */

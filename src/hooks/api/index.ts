@@ -12,3 +12,4 @@ export * from './use-wishlist';
 export * from './use-orders';
 export * from './use-payments';
 export * from './use-ai';
+export * from './use-users';

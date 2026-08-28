@@ -11,7 +11,39 @@ export interface User {
   role: UserRole;
   createdAt?: string;
   updatedAt?: string;
+  phone?: string;
 }
+
+export interface UpdateProfileData {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface SavedAddress {
+  id: string;
+  label?: string;
+  recipientName: string;
+  phone: string;
+  country: string;
+  city: string;
+  street: string;
+  postalCode?: string;
+  isDefault: boolean;
+}
+
+export interface CreateSavedAddressData {
+  label?: string;
+  recipientName: string;
+  phone: string;
+  country: string;
+  city: string;
+  street: string;
+  postalCode?: string;
+  isDefault?: boolean;
+}
+
+export type UpdateSavedAddressData = Partial<CreateSavedAddressData>;
 
 export enum UserRole {
   CUSTOMER = 'CUSTOMER',

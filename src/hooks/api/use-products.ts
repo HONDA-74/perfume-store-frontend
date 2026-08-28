@@ -23,6 +23,15 @@ export function useProducts(params?: ProductQueryParams) {
   });
 }
 
+/** Fetch the complete catalogue once for cross-resource editorial summaries. */
+export function useAllProducts() {
+  return useQuery({
+    queryKey: queryKeys.products.list({ all: true }),
+    queryFn: productsApi.getAllProducts,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 /**
  * Fetch single product by ID or slug.
  */

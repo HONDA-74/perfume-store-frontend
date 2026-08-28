@@ -9,7 +9,7 @@ export function AuthBootstrap({ children }: PropsWithChildren) {
   const currentUser = useCurrentUser();
 
   const isBootstrapping =
-    !isHydrated || (!!accessToken && !user && (currentUser.isPending || currentUser.isFetching));
+    !isHydrated || (!!accessToken && !user && !currentUser.isError);
 
   if (isBootstrapping) {
     return (

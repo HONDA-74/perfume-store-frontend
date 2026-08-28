@@ -100,6 +100,7 @@ export interface ProductQueryParams extends BaseQueryParams {
   concentration?: FragranceConcentration;
   minPrice?: number;
   maxPrice?: number;
+  sizeMl?: number;
   inStock?: boolean;
   isFeatured?: boolean;
   search?: string;

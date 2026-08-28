@@ -1,86 +1,60 @@
-/**
- * Wishlist Page
- * 
- * User's saved products with ability to remove and add to cart.
- */
-
-import { useNavigate } from 'react-router';
 import { Heart } from 'lucide-react';
-import { useWishlist } from '@/hooks/api/use-wishlist';
-import { useProduct } from '@/hooks/api/use-products';
-import { ProductCard } from '@/components/shared/product-card';
-import { EmptyState } from '@/components/shared/empty-state';
+import { useNavigate } from 'react-router';
+import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { PageLoader } from '@/components/shared/page-loader';
-import { SectionHeader } from '@/components/shared/section-header';
+import { ProductCard } from '@/components/shared/product-card';
+import { useProduct } from '@/hooks/api/use-products';
+import { useWishlist } from '@/hooks/api/use-wishlist';
 import { ROUTES } from '@/constants';
 
 export function WishlistPage() {
   const navigate = useNavigate();
   const { data: wishlist, isLoading, error } = useWishlist();
 
-  if (isLoading) {
-    return <PageLoader />;
-  }
+  if (isLoading) return <PageLoader />;
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-6 py-24">
-        <EmptyState
-          title="Failed to load wishlist"
-          message="Please try again later"
-        />
-      </div>
-    );
-  }
-
-  if (!wishlist?.items.length) {
-    return (
-      <div className="container mx-auto px-6 py-24">
-        <EmptyState
-          icon={<Heart className="h-12 w-12" />}
-          title="Your wishlist is empty"
-          message="Save your favorite fragrances here"
-          actionLabel="Browse Products"
-          onAction={() => navigate(ROUTES.shop)}
-        />
-      </div>
-    );
-  }
+  const count = wishlist?.items.length ?? 0;
 
   return (
-    <div className="min-h-screen bg-kenz-bg">
-      <div className="container mx-auto px-6 py-12">
-        <SectionHeader
-          title="My Wishlist"
-          subtitle={`${wishlist.items.length} ${wishlist.items.length === 1 ? 'item' : 'items'} saved`}
-        />
-
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {wishlist.items.map((item) => (
-            <WishlistProductCard key={item.productId} productId={item.productId} />
-          ))}
+    <main className="min-h-screen bg-[#0B0A0C]">
+      <header className="border-b border-white/5 bg-[#0D0C10]">
+        <div className="mx-auto max-w-[1440px] px-6 py-10 lg:px-12 lg:py-14">
+          <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Wishlist' }]} className="mb-6" />
+          <p className="mb-2 text-[9px] font-medium uppercase tracking-[0.2em] text-[#D4C3A3]/45">Wishlist</p>
+          <h1 className="font-serif text-[clamp(1.75rem,3vw,2.5rem)] font-normal text-white/85">Pieces Worth Keeping</h1>
+          {count > 0 && <p className="mt-3 text-[11px] font-light text-white/30">{count} {count === 1 ? 'fragrance' : 'fragrances'} saved</p>}
         </div>
+      </header>
+
+      <div className="mx-auto max-w-[1440px] px-6 py-10 lg:px-12 lg:py-12">
+        {error ? (
+          <WishlistMessage title="Unable to Load Your Collection" description="Please refresh the page and try again." action="Return to Shop" onAction={() => navigate(ROUTES.shop)} />
+        ) : count === 0 ? (
+          <WishlistMessage icon={<Heart size={36} strokeWidth={1} />} title="Your Collection is Empty" description="Save the fragrances that speak to you and return to them whenever inspiration calls." action="Explore Fragrances" onAction={() => navigate(ROUTES.shop)} />
+        ) : (
+          <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-7 lg:gap-y-14">
+            {wishlist!.items.map((item) => <WishlistProductCard key={item.productId} productId={item.productId} />)}
+          </div>
+        )}
       </div>
+    </main>
+  );
+}
+
+function WishlistMessage({ icon, title, description, action, onAction }: { icon?: React.ReactNode; title: string; description: string; action: string; onAction: () => void }) {
+  return (
+    <div className="flex min-h-[50vh] flex-col items-center justify-center px-6 text-center">
+      {icon && <div className="mb-6 text-white/25">{icon}</div>}
+      <h2 className="font-serif text-xl font-normal text-white/55">{title}</h2>
+      <p className="mt-3 max-w-md text-[12px] font-light leading-6 text-white/30">{description}</p>
+      <button type="button" onClick={onAction} className="mt-7 h-11 bg-kenz-gold px-8 text-[10px] font-medium uppercase tracking-[0.15em] text-[#0B0A0C] transition-opacity hover:opacity-80">{action}</button>
     </div>
   );
 }
 
-/**
- * Wishlist product card wrapper that fetches product data.
- * Uses React Query caching to avoid duplicate requests.
- */
 function WishlistProductCard({ productId }: { productId: string }) {
   const { data: product, isLoading } = useProduct(productId);
-
-  if (isLoading) {
-    return (
-      <div className="h-96 animate-pulse rounded-lg border border-kenz-border bg-kenz-surface/30" />
-    );
-  }
-
-  if (!product) {
-    return null;
-  }
-
-  return <ProductCard product={product} isWishlisted={true} />;
+  if (isLoading) return <div className="h-96 animate-pulse border border-white/5 bg-[#121115]" />;
+  if (!product) return null;
+  return <ProductCard product={product} isWishlisted />;
 }

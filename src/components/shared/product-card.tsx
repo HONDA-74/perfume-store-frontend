@@ -17,6 +17,7 @@ import { cn } from '@/lib/cn';
 import { mapProductForUI, type ProductUI } from '@/lib/adapters';
 import type { Product } from '@/types/product.types';
 import { useAddToCart } from '@/hooks/api/use-cart';
+import { useAllBrands } from '@/hooks/api/use-brands';
 import { useToggleWishlist, useIsInWishlist } from '@/hooks/api/use-wishlist';
 import { useAuthStore } from '@/stores/auth.store';
 import { Price } from './price';
@@ -39,6 +40,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const addToCart = useAddToCart();
+  const brands = useAllBrands();
   const { toggle: toggleWishlist, isLoading: isTogglingWishlist } = useToggleWishlist();
   
   // Use shared wishlist query - React Query caches this across all ProductCards
@@ -47,6 +49,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
 
   // Map product to UI format
   const productUI: ProductUI = React.useMemo(() => mapProductForUI(product), [product]);
+  const brandName = product.brand?.name ?? brands.data?.items.find((brand) => brand.id === product.brandId)?.name;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,7 +70,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
         quantity: 1,
       });
       toast.success('Added to cart');
-    } catch (error) {
+    } catch {
       toast.error('Failed to add to cart');
     } finally {
       setTimeout(() => setIsAdding(false), 1200);
@@ -85,7 +88,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
 
     try {
       await toggleWishlist(product.id);
-    } catch (error) {
+    } catch {
       toast.error('Failed to update wishlist');
     }
   };
@@ -175,9 +178,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-col gap-1">
             {/* Brand */}
-            <span className="truncate font-sans text-[10px] font-medium uppercase tracking-[0.15em] text-[#D4C3A3]/60">
-              {product.brand?.name || 'KENZ'}
-            </span>
+            {brandName && <span className="truncate font-sans text-[10px] font-medium uppercase tracking-[0.15em] text-[#D4C3A3]/60">{brandName}</span>}
 
             {/* Title */}
             <Link
@@ -193,7 +194,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
         <div className="flex items-center gap-3">
           <Rating value={product.ratingAverage} count={product.ratingCount} size="sm" />
           <span className="font-sans text-[9px] uppercase tracking-[0.1em] text-white/20">
-            {product.concentration.replaceAll('_', ' ')}
+            {product.concentration?.replaceAll('_', ' ') ?? ''}
           </span>
         </div>
 

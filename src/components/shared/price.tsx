@@ -39,15 +39,16 @@ export function Price({ price, discountPrice, size = 'md', className }: PricePro
   // If on sale, show discountPrice as current and price as original
   const currentPrice = isOnSale ? discountPrice : price;
   const originalPrice = isOnSale ? price : undefined;
+  const format = (value: number) => `$${new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value)}`;
 
   return (
     <div className={cn('flex items-baseline gap-2 font-sans', className)}>
       <span className={cn(sizes.price, 'font-medium text-gold')}>
-        ${currentPrice.toFixed(2)}
+        {format(currentPrice)}
       </span>
       {originalPrice !== undefined && (
         <span className={cn(sizes.original, 'text-muted-foreground/30 line-through')}>
-          ${originalPrice.toFixed(2)}
+          {format(originalPrice)}
         </span>
       )}
     </div>

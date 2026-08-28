@@ -1,47 +1,73 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
+import { Breadcrumb } from '@/components/shared/breadcrumb';
+import { EmptyState } from '@/components/shared/empty-state';
+import { PageLoader } from '@/components/shared/page-loader';
 import { useAllCategories } from '@/hooks/api/use-categories';
+import { useAllProducts } from '@/hooks/api/use-products';
+import type { Category } from '@/types';
+
+interface CollectionCardProps {
+  category: Category;
+  imageUrl?: string;
+  featured?: boolean;
+}
+
+function CollectionCard({ category, imageUrl, featured = false }: CollectionCardProps) {
+  return (
+    <Link
+      to={`/shop?categoryId=${category.id}`}
+      className={`group relative block overflow-hidden bg-[#121115] ${featured ? 'aspect-[4/3] sm:aspect-video' : 'aspect-[3/4]'}`}
+    >
+      {imageUrl ? (
+        <img src={imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
+      ) : (
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_25%,rgba(212,195,163,0.12),transparent_34%),linear-gradient(145deg,#19161a,#0d0c0f)]" />
+      )}
+      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(11,10,12,0.86)_0%,rgba(11,10,12,0.22)_62%,transparent_100%)]" />
+      <div className="absolute inset-0 border border-transparent transition-colors duration-300 group-hover:border-[#D4A017]/30" />
+      <div className={`absolute inset-0 flex flex-col justify-end ${featured ? 'p-7 sm:p-8 lg:p-12' : 'p-6'}`}>
+        {featured && <p className="mb-2 text-[9px] font-medium uppercase tracking-[0.2em] text-[#D4C3A3]/60 transition-colors group-hover:text-[#D4A017]">Featured Collection</p>}
+        <h2 className={`font-serif font-normal leading-[1.15] text-white/[0.88] transition-colors group-hover:text-white ${featured ? 'text-[clamp(1.75rem,3vw,2.75rem)]' : 'text-[clamp(1.1rem,1.8vw,1.4rem)]'}`}>{category.name}</h2>
+        <p className={`mt-2 max-w-2xl font-light text-white/45 ${featured ? 'mb-5 text-[13px]' : 'mb-3.5 line-clamp-2 text-[11px]'}`}>{category.description || `Explore our ${category.name.toLowerCase()} selection.`}</p>
+        <span className={`inline-flex items-center gap-2 text-[9px] font-medium uppercase tracking-[0.15em] text-[#D4A017] transition-all group-hover:gap-3 ${featured ? '' : 'opacity-0 group-hover:opacity-100'}`}>Explore <ArrowRight size={featured ? 12 : 10} /></span>
+      </div>
+    </Link>
+  );
+}
 
 export function CollectionsPage() {
   const categories = useAllCategories();
+  const products = useAllProducts();
+
+  if (categories.isLoading || products.isLoading) return <div className="min-h-screen bg-[#0B0A0C]"><PageLoader /></div>;
+  if (categories.isError || products.isError) return <div className="min-h-screen bg-[#0B0A0C] px-6 py-24"><EmptyState title="Failed to load collections" message="Please try again later" /></div>;
+
+  const items = categories.data?.items ?? [];
+  const imageByCategory = new Map<string, string>();
+  products.data?.items.forEach((product) => {
+    const image = product.images?.[0];
+    if (image && !imageByCategory.has(product.categoryId)) imageByCategory.set(product.categoryId, image);
+  });
+  const [featured, ...rest] = items;
 
   return (
-    <main className="min-h-screen bg-[#0B0A0C] px-5 pb-24 pt-24 text-[#F3F2F5] sm:px-8 lg:px-12 lg:pt-32">
-      <header className="mx-auto max-w-7xl border-b border-white/10 pb-12">
-        <p className="mb-5 text-[10px] font-medium uppercase tracking-[0.24em] text-[#D4C3A3]">Curated by character</p>
-        <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] tracking-[-0.04em] sm:text-7xl lg:text-8xl">The Collections</h1>
-        <p className="mt-7 max-w-xl text-sm font-light leading-7 text-white/50 sm:text-base">
-          Explore fragrance by concentration, composition, and mood. Every collection is drawn directly from the KENZ catalogue.
-        </p>
-      </header>
+    <main className="min-h-screen bg-[#0B0A0C] text-[#F3F2F5]">
+      <div className="mx-auto max-w-[1440px] px-5 py-10 sm:px-8 lg:px-12 lg:py-14">
+        <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Collections' }]} className="mb-8" />
+        <div className="mb-10">
+          <p className="mb-2 text-[9px] font-medium uppercase tracking-[0.22em] text-[#D4C3A3]/40">The Collections</p>
+          <h1 className="mb-2 font-serif text-[clamp(1.6rem,3vw,2.5rem)] font-normal text-white/[0.88]">Curated Worlds of Scent</h1>
+          <p className="max-w-[520px] text-xs font-light italic text-white/30">Each collection is a distinct olfactory world, composed with a single intent.</p>
+        </div>
 
-      <section className="mx-auto mt-10 grid max-w-7xl gap-px overflow-hidden border border-white/10 bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
-        {categories.isLoading ? Array.from({ length: 9 }).map((_, index) => (
-          <div key={index} className="h-64 animate-pulse bg-[#121013]" />
-        )) : categories.isError ? (
-          <div className="col-span-full bg-[#121013] px-6 py-20 text-center">
-            <p className="text-sm text-white/45">The collections could not be loaded.</p>
-            <button onClick={() => categories.refetch()} className="mt-6 border border-[#D4C3A3]/40 px-6 py-3 text-[10px] uppercase tracking-[0.18em] text-[#D4C3A3]">Try again</button>
-          </div>
-        ) : categories.data?.items.length ? categories.data.items.map((category, index) => (
-          <Link
-            key={category.id}
-            to={`/shop?categoryId=${category.id}`}
-            className="group relative flex min-h-64 flex-col justify-between overflow-hidden bg-[#121013] p-7 transition-colors hover:bg-[#181518]"
-          >
-            <span className="font-serif text-5xl text-white/[0.06]">{String(index + 1).padStart(2, '0')}</span>
-            <div>
-              <h2 className="font-serif text-3xl tracking-[-0.02em] text-white/90">{category.name}</h2>
-              <p className="mt-3 line-clamp-2 text-sm font-light leading-6 text-white/40">{category.description}</p>
-              <span className="mt-7 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#D4C3A3]">
-                Explore <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-              </span>
-            </div>
-          </Link>
-        )) : (
-          <p className="col-span-full bg-[#121013] px-6 py-20 text-center text-sm text-white/40">No collections are available yet.</p>
+        {!featured ? <EmptyState title="No collections available" message="Check back later for new collections" /> : (
+          <>
+            <div className="mb-5"><CollectionCard category={featured} imageUrl={featured.imageUrl || imageByCategory.get(featured.id)} featured /></div>
+            {!!rest.length && <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">{rest.map((category) => <CollectionCard key={category.id} category={category} imageUrl={category.imageUrl || imageByCategory.get(category.id)} />)}</div>}
+          </>
         )}
-      </section>
+      </div>
     </main>
   );
 }

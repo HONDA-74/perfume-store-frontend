@@ -1,75 +1,62 @@
-/**
- * Profile Page
- * 
- * NOTE: Backend has no PATCH /users/me endpoint for profile updates.
- * Displays user information as read-only until backend implements this feature.
- */
-
-import { Lock } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/api/use-auth';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { PageLoader } from '@/components/shared/page-loader';
-import { SectionHeader } from '@/components/shared/section-header';
+import { useCurrentUser } from '@/hooks/api/use-auth';
+import { useUpdateProfile } from '@/hooks/api/use-users';
+
+interface ProfileForm {
+  fullName: string;
+  email: string;
+  phone: string;
+}
 
 export function ProfilePage() {
   const { data: user, isLoading } = useCurrentUser();
+  const updateProfile = useUpdateProfile();
+  const [saved, setSaved] = useState(false);
+  const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm<ProfileForm>({ defaultValues: { fullName: '', email: '', phone: '' } });
 
-  if (isLoading) {
-    return <PageLoader />;
-  }
+  useEffect(() => {
+    if (user) reset({ fullName: user.fullName, email: user.email, phone: user.phone ?? '' });
+  }, [reset, user]);
+
+  if (isLoading) return <PageLoader />;
+
+  const submit = handleSubmit(async (values) => {
+    const updated = await updateProfile.mutateAsync(values);
+    reset({ fullName: updated.fullName, email: updated.email, phone: updated.phone ?? '' });
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 3000);
+  });
 
   return (
-    <div className="min-h-screen bg-kenz-bg">
-      <div className="container mx-auto max-w-2xl px-6 py-12">
-        <SectionHeader title="Profile" subtitle="Your account information" />
+    <div>
+      <header className="mb-8">
+        <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.2em] text-[#D4C3A3]/40">Account</p>
+        <h1 className="font-serif text-[clamp(1.5rem,2.5vw,2rem)] font-normal text-white/85">Profile</h1>
+        <p className="mt-1 text-xs font-light italic text-white/30">Your personal details, kept private.</p>
+      </header>
 
-        {/* Backend Limitation Notice */}
-        <div className="mt-8 rounded-lg border border-amber-500/30 bg-amber-500/10 p-6">
-          <div className="flex items-start gap-3">
-            <Lock size={20} className="mt-0.5 flex-shrink-0 text-amber-500" />
-            <div>
-              <h3 className="mb-2 font-sans text-sm font-medium uppercase tracking-wider text-amber-500">
-                Read-Only Mode
-              </h3>
-              <p className="text-sm text-foreground/70">
-                Profile editing requires backend API implementation.
-                Contact support to update your information.
-              </p>
-            </div>
-          </div>
+      <form onSubmit={submit} noValidate>
+        <h2 className="mb-4 border-b border-white/[0.05] pb-3 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/30">Personal Information</h2>
+        <div className="mb-6 grid grid-cols-1 gap-5 border border-white/[0.06] bg-[#121115] p-6 sm:grid-cols-2">
+          <Field label="Full Name" error={errors.fullName?.message}><input autoComplete="name" className={inputClass} {...register('fullName', { required: 'Full name is required.', minLength: { value: 2, message: 'Please enter your full name.' } })} /></Field>
+          <Field label="Email" error={errors.email?.message}><input type="email" autoComplete="email" className={inputClass} {...register('email', { required: 'Email is required.', pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please enter a valid email.' } })} /></Field>
+          <Field label="Phone"><input type="tel" autoComplete="tel" className={inputClass} {...register('phone')} /></Field>
+          <Field label="Membership"><input readOnly value={user?.role ?? ''} className={`${inputClass} cursor-not-allowed opacity-45`} /></Field>
         </div>
 
-        <div className="mt-8 space-y-6 rounded-lg border border-kenz-border bg-kenz-surface/30 p-8">
-          <div>
-            <label className="mb-2 block font-sans text-xs uppercase tracking-wider text-foreground/50">
-              Full Name
-            </label>
-            <p className="text-foreground">{user?.fullName || 'Not set'}</p>
-          </div>
-
-          <div>
-            <label className="mb-2 block font-sans text-xs uppercase tracking-wider text-foreground/50">
-              Email
-            </label>
-            <p className="text-foreground">{user?.email || 'Not set'}</p>
-          </div>
-
-          <div>
-            <label className="mb-2 block font-sans text-xs uppercase tracking-wider text-foreground/50">
-              Role
-            </label>
-            <p className="text-foreground">{user?.role || 'Not set'}</p>
-          </div>
-
-          <div>
-            <label className="mb-2 block font-sans text-xs uppercase tracking-wider text-foreground/50">
-              Member Since
-            </label>
-            <p className="text-foreground">
-              {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Not available'}
-            </p>
-          </div>
+        <div className={`mb-6 overflow-hidden transition-all duration-300 ${saved || updateProfile.isError ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'}`} aria-live="polite">
+          <div className={`border px-5 py-3 text-xs ${updateProfile.isError ? 'border-red-400/20 bg-red-400/[0.06] text-red-300/85' : 'border-emerald-300/20 bg-emerald-300/[0.06] text-emerald-200/85'}`}>{updateProfile.isError ? 'We could not save those changes. Please try again.' : 'Profile updated.'}</div>
         </div>
-      </div>
+        <div className="flex justify-end"><button type="submit" disabled={updateProfile.isPending || !isDirty} className="h-11 bg-[#D4A017] px-8 text-[10px] font-medium uppercase tracking-[0.12em] text-[#0B0A0C] transition-opacity disabled:cursor-not-allowed disabled:opacity-30">{updateProfile.isPending ? 'Saving…' : 'Save Changes'}</button></div>
+      </form>
     </div>
   );
+}
+
+const inputClass = 'block w-full border border-white/[0.08] bg-transparent px-3.5 py-2.5 text-[13px] font-light text-white/80 outline-none transition-colors focus:border-[#D4C3A3]/40';
+
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+  return <label className="block"><span className="mb-2 block text-[9px] font-medium uppercase tracking-[0.14em] text-white/30">{label}</span>{children}{error && <span className="mt-1 block text-[10px] text-red-300/85">{error}</span>}</label>;
 }

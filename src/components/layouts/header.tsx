@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Link, useLocation } from 'react-router';
 import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react';
 import { ROUTES } from '@/constants';

@@ -13,6 +13,7 @@
 
 import { apiClient } from '@/lib';
 import { normalizePaginatedResponse } from '@/services/api/pagination';
+import { PAGINATION_DEFAULTS } from '@/constants/app.constants';
 import type {
   ApiPaginatedResponse,
   ApiSuccessResponse,
@@ -35,6 +36,18 @@ export async function getProducts(
     { params }
   );
   return normalizePaginatedResponse(data);
+}
+
+/** Fetch the complete active catalogue in legal backend-sized pages. */
+export async function getAllProducts(): Promise<PaginatedData<Product>> {
+  const firstPage = await getProducts({ page: 1, limit: PAGINATION_DEFAULTS.maxLimit });
+  const remainingPages = firstPage.meta.totalPages > 1
+    ? await Promise.all(Array.from({ length: firstPage.meta.totalPages - 1 }, (_, index) =>
+      getProducts({ page: index + 2, limit: PAGINATION_DEFAULTS.maxLimit })
+    ))
+    : [];
+  const items = [firstPage, ...remainingPages].flatMap((result) => result.items);
+  return { items, meta: { page: 1, limit: items.length, totalItems: items.length, totalPages: 1 } };
 }
 
 /**

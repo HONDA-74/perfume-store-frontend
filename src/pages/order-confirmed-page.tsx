@@ -1,16 +1,10 @@
-/**
- * Order Confirmed Page
- * 
- * Order confirmation with order details.
- * Note: Depends on order creation which requires backend address API.
- */
-
-import { useParams, useNavigate } from 'react-router';
-import { CheckCircle } from 'lucide-react';
-import { useOrder } from '@/hooks/api/use-orders';
-import { Price } from '@/components/shared/price';
+import { ArrowRight, Check } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router';
+import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { EmptyState } from '@/components/shared/empty-state';
 import { PageLoader } from '@/components/shared/page-loader';
+import { Price } from '@/components/shared/price';
+import { useOrder } from '@/hooks/api/use-orders';
 import { ROUTES } from '@/constants';
 
 export function OrderConfirmedPage() {
@@ -18,99 +12,79 @@ export function OrderConfirmedPage() {
   const navigate = useNavigate();
   const { data: order, isLoading, error } = useOrder(orderId!);
 
-  if (isLoading) {
-    return <PageLoader />;
+  if (isLoading) return <PageLoader />;
+  if (error || !order) {
+    return <div className="min-h-[70vh] bg-[#0B0A0C] px-6 py-24"><EmptyState title="Order Not Found" message="We couldn't find this order." actionLabel="View Orders" onAction={() => navigate(ROUTES.account.orders)} /></div>;
   }
 
-  if (error || !order) {
-    return (
-      <div className="container mx-auto px-6 py-24">
-        <EmptyState
-          title="Order not found"
-          message="The order you're looking for doesn't exist"
-          actionLabel="View Orders"
-          onAction={() => navigate(ROUTES.account.orders)}
-        />
-      </div>
-    );
-  }
+  const formattedDate = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(order.placedAt));
 
   return (
-    <div className="min-h-screen bg-kenz-bg">
-      <div className="container mx-auto px-6 py-12">
-        <div className="mx-auto max-w-2xl">
-          {/* Success Message */}
-          <div className="mb-8 text-center">
-            <div className="mb-4 flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
-                <CheckCircle size={32} className="text-green-500" />
-              </div>
-            </div>
-            <h1 className="mb-2 font-serif text-3xl font-normal text-foreground">
-              Order Confirmed
-            </h1>
-            <p className="text-foreground/70">
-              Thank you for your purchase! Your order has been confirmed.
-            </p>
+    <main className="min-h-screen bg-[#0B0A0C]">
+      <header className="border-b border-white/5 bg-[#0D0C10]">
+        <div className="mx-auto max-w-[1440px] px-6 py-10 lg:px-12 lg:py-12">
+          <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Order Confirmed' }]} className="mb-6" />
+          <div className="mb-4 flex items-center gap-4">
+            <span className="flex h-8 w-8 items-center justify-center border border-kenz-gold/40 bg-kenz-gold/[0.08]"><Check size={14} className="text-kenz-gold" /></span>
+            <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#D4C3A3]/45">Order Confirmed</p>
           </div>
-
-          {/* Order Details */}
-          <div className="rounded-lg border border-kenz-border bg-kenz-surface/30 p-8">
-            <div className="mb-6 flex items-center justify-between border-b border-kenz-border pb-6">
-              <div>
-                <p className="text-sm text-foreground/50">Order Number</p>
-                <p className="mt-1 font-mono text-lg text-foreground">#{order.orderNumber}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-foreground/50">Date</p>
-                <p className="mt-1 text-foreground">
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-
-            {/* Order Items */}
-            <div className="mb-6">
-              <h2 className="mb-4 font-serif text-lg font-normal text-foreground">Items</h2>
-              <div className="space-y-4">
-                {order.items.map((item, index) => (
-                  <div key={`${item.productId}-${index}`} className="flex justify-between">
-                    <div>
-                      <p className="text-foreground">{item.nameSnapshot}</p>
-                      <p className="text-sm text-foreground/50">Quantity: {item.quantity}</p>
-                    </div>
-                    <Price price={item.lineTotal} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Total */}
-            <div className="flex justify-between border-t border-kenz-border pt-6">
-              <span className="font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-                Total
-              </span>
-              <Price price={order.total} className="text-xl font-medium" />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="mt-8 flex gap-4">
-            <button
-              onClick={() => navigate(ROUTES.account.orders)}
-              className="flex-1 rounded-md border border-kenz-border px-6 py-3 font-sans text-sm font-medium uppercase tracking-wider text-foreground transition-colors hover:border-kenz-gold hover:text-kenz-gold"
-            >
-              View Orders
-            </button>
-            <button
-              onClick={() => navigate(ROUTES.shop)}
-              className="flex-1 rounded-md bg-kenz-gold px-6 py-3 font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg transition-colors hover:bg-kenz-champagne"
-            >
-              Continue Shopping
-            </button>
-          </div>
+          <h1 className="font-serif text-[clamp(1.75rem,3.5vw,2.75rem)] font-normal leading-tight text-white/90">Thank you for choosing KENZ.</h1>
+          <p className="mt-3 max-w-[480px] text-[13px] font-light text-white/35">Your fragrance is being prepared with care. You can follow its progress from your account.</p>
         </div>
+      </header>
+
+      <div className="mx-auto grid max-w-[1440px] items-start gap-10 px-6 py-10 lg:grid-cols-[1fr_400px] lg:gap-16 lg:px-12 lg:py-14 xl:grid-cols-[1fr_440px]">
+        <section className="space-y-8">
+          <div className="flex flex-col gap-4 border border-white/[0.06] bg-[#121115] p-5 sm:flex-row sm:items-center">
+            <div className="flex-1"><Label>Order Number</Label><p className="font-mono text-base font-medium tracking-[0.06em] text-kenz-gold">{order.orderNumber}</p></div>
+            <div className="sm:text-right"><Label>Placed</Label><p className="text-xs font-light text-white/55">{formattedDate}</p></div>
+          </div>
+
+          <div>
+            <SectionLabel>Delivery To</SectionLabel>
+            <div className="space-y-1 border-l border-white/[0.06] pl-4 text-xs font-light leading-7 text-white/40">
+              <p className="text-[13px] font-normal text-white/75">{order.shippingAddress.fullName}</p>
+              <p>{order.shippingAddress.addressLine1}{order.shippingAddress.addressLine2 && `, ${order.shippingAddress.addressLine2}`}<br />{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}<br />{order.shippingAddress.country}</p>
+              <p>{order.shippingAddress.phone}</p>
+            </div>
+          </div>
+
+          <div>
+            <SectionLabel>Order Details</SectionLabel>
+            <div className="border-t border-white/5">
+              {order.items.map((item, index) => (
+                <div key={`${item.productId}-${index}`} className="flex gap-4 border-b border-white/5 py-5">
+                  <div className="flex h-20 w-16 flex-none items-center justify-center border border-white/5 bg-[#19181E] font-serif text-xl text-white/10">K</div>
+                  <div className="min-w-0 flex-1"><p className="font-serif text-sm text-white/80">{item.nameSnapshot}</p><p className="mt-1 text-[10px] font-light text-white/30">Quantity {item.quantity}</p></div>
+                  <Price price={item.lineTotal} className="flex-none text-[13px]" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <OrderTotals order={order} />
+
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+            <Link to={ROUTES.shop} className="flex h-12 flex-1 items-center justify-center gap-2 bg-kenz-gold text-[10px] font-semibold uppercase tracking-[0.15em] text-[#0B0A0C] transition-opacity hover:opacity-85">Continue Shopping <ArrowRight size={12} /></Link>
+            <Link to={ROUTES.account.orders} className="flex h-12 flex-1 items-center justify-center border border-white/10 text-[10px] uppercase tracking-[0.15em] text-white/40 transition-all hover:border-white/20 hover:text-white/70">View Your Orders</Link>
+          </div>
+        </section>
+
+        <aside className="border border-white/[0.06] bg-[#121115] lg:sticky lg:top-28">
+          <div className="border-b border-white/[0.06] px-5 py-4"><p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/30">Your Order</p></div>
+          <div className="space-y-4 px-5 py-4">
+            {order.items.map((item, index) => <div key={`${item.productId}-${index}`} className="flex items-center gap-3"><div className="flex h-[54px] w-11 flex-none items-center justify-center border border-white/5 bg-[#19181E] font-serif text-white/10">K</div><div className="min-w-0 flex-1"><p className="truncate font-serif text-xs text-white/70">{item.nameSnapshot}</p><p className="mt-0.5 text-[9px] font-light text-white/30">Qty {item.quantity}</p></div><Price price={item.lineTotal} className="text-[11px] text-white/50" /></div>)}
+          </div>
+          <div className="border-t border-white/5 px-5 pb-5 pt-4"><div className="flex items-center justify-between"><span className="text-[10px] font-medium uppercase tracking-[0.12em] text-white/65">Total</span><Price price={order.total} className="text-[15px]" /></div></div>
+        </aside>
       </div>
-    </div>
+    </main>
   );
 }
+
+function Label({ children }: { children: React.ReactNode }) { return <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.15em] text-white/30">{children}</p>; }
+function SectionLabel({ children }: { children: React.ReactNode }) { return <p className="mb-3.5 text-[9px] font-medium uppercase tracking-[0.2em] text-white/30">{children}</p>; }
+function OrderTotals({ order }: { order: { subtotal: number; discountTotal: number; shippingFee: number; total: number } }) {
+  return <div className="border-t border-white/[0.06] pt-4"><Total label="Subtotal" value={order.subtotal} /><Total label="Discount" value={-order.discountTotal} /><Total label="Shipping" value={order.shippingFee} /><div className="border-t border-white/5"><Total label="Total" value={order.total} total /></div></div>;
+}
+function Total({ label, value, total = false }: { label: string; value: number; total?: boolean }) { return <div className="flex items-center justify-between py-2.5"><span className={total ? 'text-[10px] font-medium uppercase tracking-[0.12em] text-white/65' : 'text-[11px] font-light text-white/35'}>{label}</span><Price price={value} className={total ? 'text-[15px]' : 'text-xs text-white/45'} /></div>; }

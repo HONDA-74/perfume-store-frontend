@@ -5,6 +5,7 @@ import { RootLayout, LandingLayout, RouteErrorBoundary } from '@/components/layo
 import { PageLoader } from '@/components/shared/page-loader';
 import { RoutePlaceholder } from './route-placeholder';
 import { AdminLayout } from '@/components/layouts/admin-layout';
+import { AccountLayout } from '@/components/layouts/account-layout';
 import { AdminRoute, GuestRoute, ProtectedRoute } from './route-guards';
 
 const HomePage = lazy(() => import('./home').then((module) => ({ default: module.HomePage })));
@@ -99,11 +100,17 @@ export const routeConfig: RouteObject[] = [
       { path: ROUTES.heritage.slice(1),       element: loadPage(<HeritagePage />) },
       { path: ROUTES.checkout.slice(1),       element: <ProtectedRoute>{loadPage(<CheckoutPage />)}</ProtectedRoute> },
       { path: ROUTES.orderSuccess.slice(1),   element: <ProtectedRoute>{loadPage(<OrderConfirmedPage />)}</ProtectedRoute> },
-      { path: ROUTES.account.root.slice(1),   element: <ProtectedRoute>{loadPage(<AccountDashboardPage />)}</ProtectedRoute> },
-      { path: ROUTES.account.orders.slice(1), element: <ProtectedRoute>{loadPage(<OrdersPage />)}</ProtectedRoute> },
-      { path: ROUTES.account.orderDetail.slice(1), element: <ProtectedRoute>{loadPage(<OrderDetailPage />)}</ProtectedRoute> },
-      { path: ROUTES.account.profile.slice(1), element: <ProtectedRoute>{loadPage(<ProfilePage />)}</ProtectedRoute> },
-      { path: ROUTES.account.addresses.slice(1), element: <ProtectedRoute>{loadPage(<AddressesPage />)}</ProtectedRoute> },
+      {
+        path: 'account',
+        element: <ProtectedRoute><AccountLayout /></ProtectedRoute>,
+        children: [
+          { index: true, element: loadPage(<AccountDashboardPage />) },
+          { path: 'orders', element: loadPage(<OrdersPage />) },
+          { path: 'orders/:orderId', element: loadPage(<OrderDetailPage />) },
+          { path: 'profile', element: loadPage(<ProfilePage />) },
+          { path: 'addresses', element: loadPage(<AddressesPage />) },
+        ],
+      },
       { path: ROUTES.scentMatchmaker.slice(1), element: loadPage(<ScentFinderPage />) },
       { path: ROUTES.notFound,                element: <RoutePlaceholder label="404 Not Found" /> },
     ],

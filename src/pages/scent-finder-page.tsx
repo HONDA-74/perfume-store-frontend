@@ -262,7 +262,7 @@ export function ScentFinderPage() {
       {!isResult ? (
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 pb-20">
           {/* Progress */}
-          <div className="mb-12">
+          <div className="mb-7">
             <div className="flex items-center gap-3 mb-3">
               <span style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: 400, color: 'hsl(43 82% 52%)', lineHeight: 1, minWidth: '3.5ch' }}>
                 {String(step + 1).padStart(2, '0')}

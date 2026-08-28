@@ -6,6 +6,7 @@
 
 import { useParams, useNavigate } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
+import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { useOrder, useCancelOrder } from '@/hooks/api/use-orders';
 import { Price } from '@/components/shared/price';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -23,7 +24,7 @@ export function OrderDetailPage() {
     if (!order || !window.confirm('Are you sure you want to cancel this order?')) return;
     try {
       await cancelOrder.mutateAsync(order.id);
-    } catch (err) {
+    } catch {
       alert('Failed to cancel order');
     }
   };
@@ -48,11 +49,12 @@ export function OrderDetailPage() {
   const canCancel = order.status === 'PENDING' || order.status === 'CONFIRMED';
 
   return (
-    <div className="min-h-screen bg-kenz-bg">
-      <div className="container mx-auto px-6 py-12">
+    <div>
+      <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Account', href: ROUTES.account.root }, { label: 'Orders', href: ROUTES.account.orders }, { label: order.orderNumber }]} className="mb-6" />
+      <div>
         <button
           onClick={() => navigate(-1)}
-          className="mb-6 flex items-center gap-2 text-sm text-foreground/70 transition-colors hover:text-foreground"
+          className="mb-6 flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-white/30 transition-colors hover:text-white/60"
         >
           <ArrowLeft size={16} />
           Back
@@ -60,14 +62,15 @@ export function OrderDetailPage() {
 
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="mb-2 font-mono text-2xl text-foreground">#{order.orderNumber}</h1>
-            <p className="text-foreground/60">Placed on {new Date(order.placedAt).toLocaleDateString()}</p>
+            <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.2em] text-[#D4C3A3]/40">Order</p>
+            <h1 className="font-serif text-[clamp(1.4rem,2.5vw,2rem)] font-normal text-white/85">{order.orderNumber}</h1>
+            <p className="mt-2 text-[11px] font-light text-white/30">Placed on {new Date(order.placedAt).toLocaleDateString()}</p>
           </div>
           {canCancel && (
             <button
               onClick={handleCancel}
               disabled={cancelOrder.isPending}
-              className="rounded-md border border-red-500 px-6 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+              className="border border-red-400/40 px-6 py-2 text-[10px] font-medium uppercase tracking-[0.1em] text-red-300/70 transition-colors hover:bg-red-500/10 disabled:opacity-50"
             >
               {cancelOrder.isPending ? 'Cancelling...' : 'Cancel Order'}
             </button>
@@ -77,14 +80,14 @@ export function OrderDetailPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             {/* Items */}
-            <div className="rounded-lg border border-kenz-border bg-kenz-surface/30 p-6">
-              <h2 className="mb-4 font-serif text-xl font-normal text-foreground">Items</h2>
+            <div className="border border-white/[0.06] bg-[#121115] p-6">
+              <h2 className="mb-4 text-[9px] font-medium uppercase tracking-[0.2em] text-white/30">Items Ordered</h2>
               <div className="space-y-4">
                 {order.items.map((item, index) => (
-                  <div key={`${item.productId}-${index}`} className="flex justify-between">
+                  <div key={`${item.productId}-${index}`} className="flex justify-between border-b border-white/5 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <p className="text-foreground">{item.nameSnapshot}</p>
-                      <p className="text-sm text-foreground/50">Quantity: {item.quantity}</p>
+                      <p className="font-serif text-sm text-white/80">{item.nameSnapshot}</p>
+                      <p className="mt-1 text-[10px] text-white/30">Quantity {item.quantity}</p>
                     </div>
                     <Price price={item.lineTotal} />
                   </div>
@@ -93,9 +96,9 @@ export function OrderDetailPage() {
             </div>
 
             {/* Shipping Address */}
-            <div className="rounded-lg border border-kenz-border bg-kenz-surface/30 p-6">
-              <h2 className="mb-4 font-serif text-xl font-normal text-foreground">Shipping Address</h2>
-              <div className="text-sm text-foreground/70">
+            <div className="border border-white/[0.06] bg-[#121115] p-6">
+              <h2 className="mb-4 text-[9px] font-medium uppercase tracking-[0.2em] text-white/30">Delivery Details</h2>
+              <div className="text-xs font-light leading-6 text-white/45">
                 <p>{order.shippingAddress.fullName}</p>
                 <p>{order.shippingAddress.addressLine1}</p>
                 {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
@@ -109,8 +112,8 @@ export function OrderDetailPage() {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               {/* Order Status */}
-              <div className="rounded-lg border border-kenz-border bg-kenz-surface/30 p-6">
-                <h2 className="mb-4 font-serif text-xl font-normal text-foreground">Status</h2>
+              <div className="border border-white/[0.06] bg-[#121115] p-6">
+                <h2 className="mb-4 text-[9px] font-medium uppercase tracking-[0.2em] text-white/30">Status</h2>
                 <div className="space-y-3">
                   <div>
                     <p className="mb-1 text-xs uppercase tracking-wider text-foreground/50">Order Status</p>
@@ -128,8 +131,8 @@ export function OrderDetailPage() {
               </div>
 
               {/* Order Summary */}
-              <div className="rounded-lg border border-kenz-border bg-kenz-surface/30 p-6">
-                <h2 className="mb-4 font-serif text-xl font-normal text-foreground">Summary</h2>
+              <div className="border border-white/[0.06] bg-[#121115] p-6">
+                <h2 className="mb-4 text-[9px] font-medium uppercase tracking-[0.2em] text-white/30">Order Total</h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-foreground/70">Subtotal</span>

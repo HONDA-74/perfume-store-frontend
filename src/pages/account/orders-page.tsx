@@ -1,81 +1,61 @@
-/**
- * Orders Page
- * 
- * List of user's orders with links to details.
- */
-
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
-import { Package } from 'lucide-react';
-import { useOrders } from '@/hooks/api/use-orders';
-import { Price } from '@/components/shared/price';
-import { EmptyState } from '@/components/shared/empty-state';
 import { PageLoader } from '@/components/shared/page-loader';
-import { SectionHeader } from '@/components/shared/section-header';
-import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/adapters/enum-adapter';
+import { Price } from '@/components/shared/price';
+import { useOrders } from '@/hooks/api/use-orders';
+import { getOrderStatusColor, getOrderStatusLabel } from '@/lib/adapters/enum-adapter';
 import { ROUTES } from '@/constants';
 
 export function OrdersPage() {
   const { data, isLoading, error } = useOrders();
 
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-6 py-24">
-        <EmptyState
-          title="Failed to load orders"
-          message="Please try again later"
-        />
-      </div>
-    );
-  }
-
-  if (!data?.items.length) {
-    return (
-      <div className="container mx-auto px-6 py-24">
-        <EmptyState
-          icon={<Package className="h-12 w-12" />}
-          title="No orders yet"
-          message="Start shopping to see your orders here"
-          actionLabel="Browse Products"
-          onAction={() => window.location.href = ROUTES.shop}
-        />
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoader />;
 
   return (
-    <div className="min-h-screen bg-kenz-bg">
-      <div className="container mx-auto px-6 py-12">
-        <SectionHeader title="My Orders" subtitle={`${data.meta.totalItems} orders`} />
+    <div>
+      <div className="mb-8">
+        <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.2em] text-[#D4C3A3]/40">Order History</p>
+        <h1 className="font-serif text-[clamp(1.5rem,2.5vw,2rem)] font-normal text-white/85">Your Orders</h1>
+        <p className="mt-1 text-xs font-light italic text-white/30">Your fragrance history, curated.</p>
+      </div>
 
-        <div className="mt-12 space-y-4">
+      {error ? (
+        <OrderMessage title="Unable to Load Orders" copy="Please refresh the page and try again." />
+      ) : !data?.items.length ? (
+        <OrderMessage title="No Orders Yet" copy="Your fragrance journey begins with a single choice." action />
+      ) : (
+        <div className="border border-white/[0.06] bg-[#121115] px-6">
           {data.items.map((order) => (
-            <Link
-              key={order.id}
-              to={`/account/orders/${order.id}`}
-              className="block rounded-lg border border-kenz-border bg-kenz-surface/30 p-6 transition-all hover:border-kenz-gold"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <p className="font-mono text-lg text-foreground">#{order.orderNumber}</p>
-                    <span className={`rounded-full border px-3 py-1 text-xs font-medium ${getOrderStatusColor(order.status)}`}>
-                      {getOrderStatusLabel(order.status)}
-                    </span>
+            <article key={order.id} className="border-b border-white/5 py-5 last:border-0">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="mb-2 flex flex-wrap items-center gap-3">
+                    <p className="font-mono text-[11px] font-medium tracking-[0.04em] text-white/70">{order.orderNumber}</p>
+                    <span className={`border px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.08em] ${getOrderStatusColor(order.status)}`}>{getOrderStatusLabel(order.status)}</span>
                   </div>
-                  <p className="mt-2 text-sm text-foreground/60">
-                    {new Date(order.placedAt).toLocaleDateString()} · {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
-                  </p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-light text-white/30">
+                    <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(order.placedAt))}</span>
+                    <span>{order.items.length} {order.items.length === 1 ? 'item' : 'items'}</span>
+                    <Price price={order.total} className="text-[10px]" />
+                  </div>
+                  <p className="mt-2 truncate font-serif text-sm text-white/45">{order.items.map((item) => item.nameSnapshot).join(' · ')}</p>
                 </div>
-                <Price price={order.total} className="text-xl font-medium" />
+                <Link to={`/account/orders/${order.id}`} className="flex flex-none items-center gap-1.5 text-[10px] text-white/30 transition-colors hover:text-white/60" aria-label={`View order ${order.orderNumber}`}>View <ArrowRight size={10} /></Link>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
-      </div>
+      )}
+    </div>
+  );
+}
+
+function OrderMessage({ title, copy, action = false }: { title: string; copy: string; action?: boolean }) {
+  return (
+    <div className="border border-white/5 bg-[#121115] p-14 text-center">
+      <p className="font-serif text-lg font-normal text-white/40">{title}</p>
+      <p className="mb-5 mt-2 text-[11px] font-light text-white/25">{copy}</p>
+      {action && <Link to={ROUTES.shop} className="inline-flex h-10 items-center gap-2 bg-kenz-gold px-6 text-[10px] font-medium uppercase tracking-[0.12em] text-[#0B0A0C] transition-opacity hover:opacity-80">Explore Fragrances</Link>}
     </div>
   );
 }

@@ -1,17 +1,10 @@
-/**
- * Cart Page
- * 
- * Full cart view with same state as CartDrawer (via useEnrichedCart).
- * Supports quantity updates, item removal, and checkout navigation.
- */
-
+import { ArrowRight, ShoppingBag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
-import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
-import { useEnrichedCart, useUpdateCartItem, useRemoveCartItem } from '@/hooks/api/use-cart';
-import { Price } from '@/components/shared/price';
-import { EmptyState } from '@/components/shared/empty-state';
+import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { PageLoader } from '@/components/shared/page-loader';
-import { SectionHeader } from '@/components/shared/section-header';
+import { Price } from '@/components/shared/price';
+import { useEnrichedCart, useRemoveCartItem, useUpdateCartItem } from '@/hooks/api/use-cart';
+import type { EnrichedCartItem } from '@/hooks/api/use-cart';
 import { ROUTES } from '@/constants';
 
 export function CartPage() {
@@ -20,189 +13,106 @@ export function CartPage() {
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
 
-  const handleUpdateQuantity = async (productId: string, quantity: number) => {
-    if (quantity < 1) return;
-    try {
-      await updateItem.mutateAsync({ productId, payload: { quantity } });
-    } catch (err) {
-      // Error handled by mutation
-    }
-  };
+  if (isLoading) return <PageLoader />;
 
-  const handleRemoveItem = async (productId: string) => {
-    try {
-      await removeItem.mutateAsync(productId);
-    } catch (err) {
-      // Error handled by mutation
-    }
-  };
-
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-6 py-24">
-        <EmptyState
-          title="Failed to load cart"
-          message="Please try again later"
-        />
-      </div>
-    );
-  }
-
-  if (!cart?.items.length) {
-    return (
-      <div className="container mx-auto px-6 py-24">
-        <EmptyState
-          icon={<ShoppingBag className="h-12 w-12" />}
-          title="Your cart is empty"
-          message="Discover our collection of exceptional fragrances"
-          actionLabel="Browse Products"
-          onAction={() => navigate(ROUTES.shop)}
-        />
-      </div>
-    );
-  }
-
-  const subtotal = cart.items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const itemCount = cart?.items.reduce((total, item) => total + item.quantity, 0) ?? 0;
+  const subtotal = cart?.items.reduce((total, item) => total + item.product.price * item.quantity, 0) ?? 0;
 
   return (
-    <div className="min-h-screen bg-kenz-bg">
-      <div className="container mx-auto px-6 py-12">
-        <SectionHeader title="Shopping Cart" subtitle={`${cart.items.length} ${cart.items.length === 1 ? 'item' : 'items'}`} />
+    <main className="min-h-screen bg-[#0B0A0C]">
+      <header className="border-b border-white/5 bg-[#0D0C10]">
+        <div className="mx-auto max-w-[1440px] px-6 py-10 lg:px-12 lg:py-14">
+          <Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Your Bag' }]} className="mb-6" />
+          <p className="mb-2 text-[9px] font-medium uppercase tracking-[0.2em] text-[#D4C3A3]/45">Your Bag</p>
+          <h1 className="font-serif text-[clamp(1.75rem,3vw,2.5rem)] font-normal text-white/85">Your Selected Fragrances</h1>
+          {itemCount > 0 && <p className="mt-3 text-[11px] font-light text-white/30">{itemCount} {itemCount === 1 ? 'item' : 'items'}</p>}
+        </div>
+      </header>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
-            {cart.items.map((item) => (
-              <div
-                key={item.productId}
-                className="flex gap-6 rounded-lg border border-kenz-border bg-kenz-surface/30 p-6"
-              >
-                {/* Image */}
-                <Link
-                  to={`/products/${item.product.slug}`}
-                  className="flex-shrink-0"
-                >
-                  <img
-                    src={item.product.images[0]}
-                    alt={item.product.name}
-                    className="h-32 w-24 rounded-md object-cover"
-                  />
-                </Link>
-
-                {/* Details */}
-                <div className="flex flex-1 flex-col">
-                  <Link
-                    to={`/products/${item.product.slug}`}
-                    className="font-serif text-lg text-foreground transition-colors hover:text-kenz-gold"
-                  >
-                    {item.product.name}
-                  </Link>
-                  <p className="mt-2 text-sm text-foreground/50">
-                    {item.product.brand?.name || 'Unknown Brand'} · {item.product.sizeMl}ml
-                  </p>
-
-                  <div className="mt-4 flex items-center gap-4">
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
-                        disabled={item.quantity <= 1 || updateItem.isPending}
-                        className="flex h-8 w-8 items-center justify-center rounded border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30"
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <span className="w-12 text-center text-sm text-foreground">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
-                        disabled={updateItem.isPending || item.quantity >= item.product.stockQuantity}
-                        className="flex h-8 w-8 items-center justify-center rounded border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30"
-                        aria-label="Increase quantity"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </div>
-
-                    {/* Remove */}
-                    <button
-                      onClick={() => handleRemoveItem(item.productId)}
-                      disabled={removeItem.isPending}
-                      className="ml-auto text-foreground/50 transition-colors hover:text-red-500 disabled:opacity-30"
-                      aria-label="Remove item"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="flex-shrink-0 text-right">
-                  <Price
-                    price={item.product.price * item.quantity}
-                    className="text-lg font-medium"
-                  />
-                  {item.quantity > 1 && (
-                    <p className="mt-1 text-xs text-foreground/50">
-                      ${item.product.price.toFixed(2)} each
-                    </p>
-                  )}
-                </div>
+      <div className="mx-auto max-w-[1440px] px-6 py-10 lg:px-12 lg:py-12">
+        {error ? (
+          <CartMessage title="Unable to Load Your Bag" description="Please refresh the page and try again." onAction={() => navigate(ROUTES.shop)} />
+        ) : !cart?.items.length ? (
+          <CartMessage icon={<ShoppingBag size={36} strokeWidth={1} />} title="Your Bag is Empty" description="Discover exceptional fragrances selected for the modern collector." onAction={() => navigate(ROUTES.shop)} />
+        ) : (
+          <div className="grid items-start gap-8 lg:grid-cols-[1fr_380px] lg:gap-16 xl:grid-cols-[1fr_420px]">
+            <section>
+              <div className="mb-6 flex items-center justify-between">
+                <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/30">Items</p>
+                <Link to={ROUTES.shop} className="text-[9px] uppercase tracking-[0.12em] text-white/25 transition-colors hover:text-white/50">Continue Shopping</Link>
               </div>
-            ))}
+              <div className="border-t border-white/[0.06]">
+                {cart.items.map((item) => (
+                  <CartItemRow key={item.productId} item={item} pending={updateItem.isPending || removeItem.isPending} onQuantity={(quantity) => updateItem.mutate({ productId: item.productId, payload: { quantity } })} onRemove={() => removeItem.mutate(item.productId)} />
+                ))}
+              </div>
+            </section>
+
+            <aside className="border border-white/[0.06] bg-[#121115] lg:sticky lg:top-28">
+              <div className="border-b border-white/[0.06] px-6 py-5"><p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/40">Order Summary</p></div>
+              <div className="px-6 py-4">
+                <SummaryRow label="Subtotal"><Price price={subtotal} /></SummaryRow>
+                <Divider />
+                <SummaryRow label="Shipping"><span className="text-[#D4C3A3]/70">Complimentary</span></SummaryRow>
+                <Divider />
+                <SummaryRow label="Total" total><Price price={subtotal} /></SummaryRow>
+              </div>
+              <div className="space-y-3 px-6 pb-6 pt-2">
+                <p className="text-center text-[9px] font-light tracking-[0.02em] text-white/25">Complimentary shipping included on all orders</p>
+                <Link to={ROUTES.checkout} className="flex h-12 w-full items-center justify-center gap-2 bg-kenz-gold text-[10px] font-semibold uppercase tracking-[0.15em] text-[#0B0A0C] transition-opacity hover:opacity-85">Proceed to Checkout <ArrowRight size={13} /></Link>
+                <Link to={ROUTES.shop} className="flex h-11 w-full items-center justify-center border border-white/10 text-[10px] uppercase tracking-[0.12em] text-white/35 transition-all hover:border-white/20 hover:text-white/60">Continue Shopping</Link>
+              </div>
+            </aside>
           </div>
+        )}
+      </div>
+    </main>
+  );
+}
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 rounded-lg border border-kenz-border bg-kenz-surface/30 p-6">
-              <h2 className="mb-6 font-serif text-xl font-normal text-foreground">
-                Order Summary
-              </h2>
+function CartMessage({ icon, title, description, onAction }: { icon?: React.ReactNode; title: string; description: string; onAction: () => void }) {
+  return (
+    <div className="flex min-h-[50vh] flex-col items-center justify-center px-6 text-center">
+      {icon && <div className="mb-6 text-white/25">{icon}</div>}
+      <h2 className="font-serif text-xl font-normal text-white/55">{title}</h2>
+      <p className="mt-3 max-w-md text-[12px] font-light leading-6 text-white/30">{description}</p>
+      <button type="button" onClick={onAction} className="mt-7 h-11 bg-kenz-gold px-8 text-[10px] font-medium uppercase tracking-[0.15em] text-[#0B0A0C] transition-opacity hover:opacity-80">Explore Fragrances</button>
+    </div>
+  );
+}
 
-              <div className="space-y-4 border-b border-kenz-border pb-6">
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground/70">Subtotal</span>
-                  <Price price={subtotal} />
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground/70">Shipping</span>
-                  <span className="text-foreground/70">Calculated at checkout</span>
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-between">
-                <span className="font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-                  Total
-                </span>
-                <Price price={subtotal} className="text-xl font-medium" />
-              </div>
-
-              <button
-                onClick={() => navigate(ROUTES.checkout)}
-                className="mt-8 flex w-full items-center justify-center gap-2 rounded-md bg-kenz-gold px-6 py-3 font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg transition-colors hover:bg-kenz-champagne"
-              >
-                Proceed to Checkout
-                <ArrowRight size={16} />
-              </button>
-
-              <Link
-                to={ROUTES.shop}
-                className="mt-4 block text-center text-sm text-foreground/70 transition-colors hover:text-foreground"
-              >
-                Continue Shopping
-              </Link>
+function CartItemRow({ item, pending, onQuantity, onRemove }: { item: EnrichedCartItem; pending: boolean; onQuantity: (quantity: number) => void; onRemove: () => void }) {
+  const { product, quantity } = item;
+  return (
+    <article className="border-b border-white/5 py-6">
+      <div className="flex gap-5">
+        <Link to={`/products/${product.slug}`} className="h-[110px] w-[88px] flex-none overflow-hidden border border-white/5 bg-[#19181E] transition-opacity hover:opacity-80">
+          {product.images[0] && <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" loading="lazy" />}
+        </Link>
+        <div className="flex min-w-0 flex-1 flex-col justify-between">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="mb-1 text-[9px] font-medium uppercase tracking-[0.15em] text-[#D4C3A3]/50">{product.brand?.name ?? 'KENZ'}</p>
+              <Link to={`/products/${product.slug}`} className="font-serif text-base font-normal text-white/85 transition-colors hover:text-white">{product.name}</Link>
+              <p className="mt-1 text-[10px] font-light text-white/30">{product.concentration} · {product.sizeMl}ml</p>
             </div>
+            <button type="button" onClick={onRemove} disabled={pending} className="mt-0.5 flex-none text-[9px] uppercase tracking-[0.1em] text-white/20 transition-colors hover:text-white/50 disabled:opacity-30">Remove</button>
+          </div>
+          <div className="mt-4 flex items-center justify-between">
+            <div className="inline-flex h-[34px] items-center overflow-hidden border border-white/10">
+              <button type="button" onClick={() => onQuantity(quantity - 1)} disabled={quantity <= 1 || pending} className="h-full w-9 text-base font-light text-white/40 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-30" aria-label="Decrease quantity">−</button>
+              <span className="flex h-full w-8 items-center justify-center border-x border-white/10 text-xs text-white/80">{quantity}</span>
+              <button type="button" onClick={() => onQuantity(quantity + 1)} disabled={quantity >= product.stockQuantity || pending} className="h-full w-9 text-base font-light text-white/40 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-30" aria-label="Increase quantity">+</button>
+            </div>
+            <Price price={product.price * quantity} className="text-[13px]" />
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
+}
+
+function Divider() { return <div className="border-t border-white/5" />; }
+function SummaryRow({ label, total = false, children }: { label: string; total?: boolean; children: React.ReactNode }) {
+  return <div className="flex items-center justify-between py-3"><span className={total ? 'text-[10px] font-medium uppercase tracking-[0.15em] text-white/70' : 'text-[11px] font-light text-white/40'}>{label}</span><span className={total ? 'text-[13px] font-medium text-kenz-gold' : 'text-[12px] font-light text-white/50'}>{children}</span></div>;
 }
