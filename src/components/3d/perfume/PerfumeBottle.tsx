@@ -7,13 +7,21 @@ import type { MotionValue } from 'framer-motion';
 interface PerfumeBottleProps {
   scrollProgress: MotionValue<number>;
   reducedMotion?: boolean;
+  compact?: boolean;
 }
 
 interface PerfumeModel {
-  nodes: Record<'Bottle_Glass' | 'Bottle_Liquid' | 'Bottle_Metal' | 'Bottle_Atomizer' | 'Bottle_Cap', THREE.Mesh>;
+  nodes: Record<
+    'Bottle_Glass' | 'Bottle_Liquid' | 'Bottle_Metal' | 'Bottle_Atomizer' | 'Bottle_Cap',
+    THREE.Mesh
+  >;
 }
 
-export function PerfumeBottle({ scrollProgress, reducedMotion = false }: PerfumeBottleProps) {
+export function PerfumeBottle({
+  scrollProgress,
+  reducedMotion = false,
+  compact = false,
+}: PerfumeBottleProps) {
   const groupRef = useRef<THREE.Group>(null);
 
   // Load the prepared GLB asset
@@ -26,8 +34,8 @@ export function PerfumeBottle({ scrollProgress, reducedMotion = false }: Perfume
         color: new THREE.Color('#ffffff'), // Base bright to allow transmission
         metalness: 0.05,
         roughness: 0.1,
-        transmission: 1.0,     
-        thickness: 1.5,        
+        transmission: 1.0,
+        thickness: 1.5,
         ior: 1.5,
         attenuationColor: new THREE.Color('#0a0a0a'), // Deep smoky tint
         attenuationDistance: 1.0,
@@ -40,7 +48,7 @@ export function PerfumeBottle({ scrollProgress, reducedMotion = false }: Perfume
         roughness: 0.25,
         transmission: 0.95,
         thickness: 0.8,
-        ior: 1.33,             
+        ior: 1.33,
         attenuationColor: new THREE.Color('#3a0205'), // Deepens the red internally
         attenuationDistance: 0.5,
         transparent: true,
@@ -48,7 +56,7 @@ export function PerfumeBottle({ scrollProgress, reducedMotion = false }: Perfume
       metal: new THREE.MeshStandardMaterial({
         color: new THREE.Color('#d4c39e'), // Elegant champagne gold
         metalness: 1.0,
-        roughness: 0.35,       
+        roughness: 0.35,
       }),
       cap: new THREE.MeshStandardMaterial({
         color: new THREE.Color('#141414'), // Near-black
@@ -87,26 +95,42 @@ export function PerfumeBottle({ scrollProgress, reducedMotion = false }: Perfume
       // STORYTELLING: Existing wheel behavior
       // Remap 0.3-1.0 to 0-1 for existing animation
       const storyP = (p - 0.3) / 0.7;
-      
+
       // Strong three-quarter angle (-1.0 rad) -> near front (0.1 rad)
       targetRotY = THREE.MathUtils.lerp(-1.0, 0.1, storyP);
-      
+
       // Scale grows from 0.9 to 1.2
       targetScale = THREE.MathUtils.lerp(0.9, 1.2, storyP);
-      
+
       // Position shifts slightly up as it gets closer
       scrollYOffset = THREE.MathUtils.lerp(-0.3, 0.15, storyP);
     }
 
     // Subtle continuous float (breathing)
     const floatOffset = reducedMotion ? 0 : Math.sin(state.clock.elapsedTime * 1.2) * 0.04;
-    const targetY = scrollYOffset + floatOffset;
+    const responsiveScale = compact ? 0.82 : 1;
+    const targetY = scrollYOffset + floatOffset + (compact ? -0.08 : 0);
 
     // Use smooth damping for luxurious, weighty movement
-    groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotY, 4, delta);
-    groupRef.current.position.y = THREE.MathUtils.damp(groupRef.current.position.y, targetY, 4, delta);
-    
-    const s = THREE.MathUtils.damp(groupRef.current.scale.x, targetScale, 4, delta);
+    groupRef.current.rotation.y = THREE.MathUtils.damp(
+      groupRef.current.rotation.y,
+      targetRotY,
+      4,
+      delta,
+    );
+    groupRef.current.position.y = THREE.MathUtils.damp(
+      groupRef.current.position.y,
+      targetY,
+      4,
+      delta,
+    );
+
+    const s = THREE.MathUtils.damp(
+      groupRef.current.scale.x,
+      targetScale * responsiveScale,
+      4,
+      delta,
+    );
     groupRef.current.scale.set(s, s, s);
   });
 
@@ -116,29 +140,20 @@ export function PerfumeBottle({ scrollProgress, reducedMotion = false }: Perfume
         The nodes were explicitly named during the GLB preparation phase.
         We apply our custom R3F materials to each part.
       */}
-      <mesh
-        geometry={nodes.Bottle_Glass.geometry}
-        material={materials.glass}
-      />
-      <mesh
-        geometry={nodes.Bottle_Liquid.geometry}
-        material={materials.liquid}
-      />
-      <mesh
-        geometry={nodes.Bottle_Metal.geometry}
-        material={materials.metal}
-      />
+      <mesh geometry={nodes.Bottle_Glass.geometry} material={materials.glass} />
+      <mesh geometry={nodes.Bottle_Liquid.geometry} material={materials.liquid} />
+      <mesh geometry={nodes.Bottle_Metal.geometry} material={materials.metal} />
       <mesh
         geometry={nodes.Bottle_Atomizer.geometry}
         material={materials.metal} // Using the same champagne metal for atomizer
       />
-      
+
       {/* The cap retained its local pivot at T=[0, 2.3851, 0] during preparation, 
           so we must re-apply its translation here so it sits on top of the bottle. */}
       <mesh
         geometry={nodes.Bottle_Cap.geometry}
         material={materials.cap}
-        position={[0, 2.3851, 0]} 
+        position={[0, 2.3851, 0]}
       />
     </group>
   );

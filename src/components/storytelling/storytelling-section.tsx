@@ -1,11 +1,5 @@
 import { useRef } from 'react';
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useInView,
-  type MotionValue,
-} from 'framer-motion';
+import { motion, useScroll, useTransform, useInView, type MotionValue } from 'framer-motion';
 import { Link } from 'react-router';
 import { ROUTES } from '@/constants';
 import { BlurText } from '@/components/hero/BlurText';
@@ -26,19 +20,22 @@ const STORY_SCENES = [
   {
     eyebrow: 'THE OPENING',
     headline: 'First impressions become instinct.',
-    supporting: 'Bright, unexpected, fleeting — the opening is the first glimpse of what lies beneath.',
+    supporting:
+      'Bright, unexpected, fleeting — the opening is the first glimpse of what lies beneath.',
     scene: 2,
   },
   {
     eyebrow: 'THE HEART',
     headline: 'Then, the fragrance unfolds.',
-    supporting: 'Layer by layer, its character emerges, becoming something felt rather than simply remembered.',
+    supporting:
+      'Layer by layer, its character emerges, becoming something felt rather than simply remembered.',
     scene: 3,
   },
   {
     eyebrow: 'YOUR SIGNATURE',
     headline: 'Some scents begin to feel like you.',
-    supporting: 'Shaped by your taste, your mood, and the moments that make the fragrance unmistakably yours.',
+    supporting:
+      'Shaped by your taste, your mood, and the moments that make the fragrance unmistakably yours.',
     scene: 4,
   },
   {
@@ -92,7 +89,7 @@ function GoldRule({ className = '' }: { className?: string }) {
       initial={{ scaleX: 0, opacity: 0 }}
       animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
       transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-      className={`origin-center h-px ${className}`}
+      className={`h-px origin-center ${className}`}
       style={{ background: 'hsl(43 82% 52% / 0.28)' }}
     />
   );
@@ -156,16 +153,8 @@ function StorySceneCard({
   peak,
   exit,
 }: StorySceneCardProps) {
-  const opacity = useTransform(
-    scrollProgress,
-    [enter, peak, exit - 0.06, exit],
-    [0, 1, 1, 0],
-  );
-  const blurPx = useTransform(
-    scrollProgress,
-    [enter, peak, exit - 0.06, exit],
-    [10, 0, 0, 8],
-  );
+  const opacity = useTransform(scrollProgress, [enter, peak, exit - 0.06, exit], [0, 1, 1, 0]);
+  const blurPx = useTransform(scrollProgress, [enter, peak, exit - 0.06, exit], [10, 0, 0, 8]);
   const y = useTransform(scrollProgress, [enter, peak], [20, 0]);
   const blurFilter = useTransform(blurPx, (v) => `blur(${v}px)`);
 
@@ -174,10 +163,7 @@ function StorySceneCard({
       style={{ opacity, y }}
       className="absolute inset-0 flex items-center justify-center px-6"
     >
-      <motion.div
-        style={{ filter: blurFilter }}
-        className="text-center"
-      >
+      <motion.div style={{ filter: blurFilter }} className="text-center">
         {/* Eyebrow */}
         <div style={{ marginBottom: 'clamp(1rem, 2vw, 1.5rem)' }}>
           <span
@@ -210,7 +196,7 @@ function StorySceneCard({
 
         {/* Supporting text */}
         <p
-          className="font-sans mx-auto"
+          className="mx-auto font-sans"
           style={{
             fontSize: 'clamp(0.9rem, 1.5vw, 1.05rem)',
             lineHeight: 1.65,
@@ -234,12 +220,7 @@ function StoryDot({ progress }: { progress: MotionValue<number> }) {
   const bg = useTransform(
     progress,
     [0, 0.35, 0.65, 1],
-    [
-      'hsl(0 0% 40% / 0.35)',
-      'hsl(43 82% 68%)',
-      'hsl(43 82% 68%)',
-      'hsl(0 0% 40% / 0.35)',
-    ],
+    ['hsl(0 0% 40% / 0.35)', 'hsl(43 82% 68%)', 'hsl(43 82% 68%)', 'hsl(0 0% 40% / 0.35)'],
   );
   return (
     <motion.div
@@ -268,7 +249,11 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
   const bottleOpacity = useTransform(scrollProgress, [0, 0.03, 0.85, 1], [0, 1, 1, 0.35]);
 
   // Ambient glow intensity that evolves with scroll
-  const glowOpacity = useTransform(scrollProgress, [0, 0.25, 0.5, 0.75, 1], [0.35, 0.4, 0.38, 0.35, 0.25]);
+  const glowOpacity = useTransform(
+    scrollProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.35, 0.4, 0.38, 0.35, 0.25],
+  );
 
   // Subtle atmospheric depth - very restrained spotlight effect
   const atmosphereOpacity = useTransform(scrollProgress, [0, 0.15, 0.85, 1], [0, 0.25, 0.25, 0.15]);
@@ -278,7 +263,7 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
   const bottleX = useTransform(
     scrollProgress,
     [0, 0.2, 0.3, 1],
-    ['50%', '50%', '70%', '70%'] // Center during intro, move to right after
+    ['50%', '50%', '70%', '70%'], // Center during intro, move to right after
   );
 
   // Mobile: always centered
@@ -287,20 +272,33 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
   const containerWidth = useTransform(
     scrollProgress,
     [0, 0.2, 0.3, 1],
-    ['min(600px, 85vw)', 'min(600px, 85vw)', 'min(500px, 45vw)', 'min(500px, 45vw)']
+    ['min(600px, 85vw)', 'min(600px, 85vw)', 'min(500px, 45vw)', 'min(500px, 45vw)'],
   );
+
+  // Keep the single WebGL scene centered for the intro, then move it into
+  // a dedicated lower zone before mobile story copy becomes visible.
+  const compactTop = useTransform(scrollProgress, [0, 0.12, 0.22, 1], ['50%', '50%', '73%', '73%']);
 
   return (
     <motion.div
       style={{ opacity: bottleOpacity }}
-      className="absolute inset-0 flex items-center pointer-events-none"
+      className="pointer-events-none absolute inset-0 flex items-center"
       aria-hidden="true"
     >
       {/* A single scene instance adapts its frame without remounting WebGL at breakpoints. */}
       <motion.div
-        style={isDesktop
-          ? { x: '-50%', left: bottleX, width: containerWidth }
-          : { width: 'min(85vw, 450px)', marginLeft: 'auto', marginRight: 'auto' }}
+        style={
+          isDesktop
+            ? { x: '-50%', left: bottleX, width: containerWidth }
+            : {
+                position: 'absolute',
+                left: '50%',
+                top: compactTop,
+                x: '-50%',
+                y: '-50%',
+                width: 'min(68vw, 19rem)',
+              }
+        }
         className="relative"
       >
         <motion.div
@@ -326,7 +324,10 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
 
         <div
           className="relative block select-none"
-          style={{ width: '100%', height: isDesktop ? '70vh' : '65vh' }}
+          style={{
+            width: '100%',
+            height: isDesktop ? '70vh' : 'clamp(17rem, 42svh, 25rem)',
+          }}
         >
           <PerfumeScene scrollProgress={scrollProgress} />
         </div>
@@ -359,10 +360,7 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
   return (
     <>
       {/* Scene 1 atmosphere — cool, crisp */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{ opacity: atm1Opacity }}
-      >
+      <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: atm1Opacity }}>
         <div
           className="absolute inset-0"
           style={{
@@ -385,10 +383,7 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
       </motion.div>
 
       {/* Scene 2 atmosphere — warm, amber opening */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{ opacity: atm2Opacity }}
-      >
+      <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: atm2Opacity }}>
         <div
           className="absolute inset-0"
           style={{
@@ -411,10 +406,7 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
       </motion.div>
 
       {/* Scene 3 atmosphere — deeper warmth, heart */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{ opacity: atm3Opacity }}
-      >
+      <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: atm3Opacity }}>
         <div
           className="absolute inset-0"
           style={{
@@ -437,10 +429,7 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
       </motion.div>
 
       {/* Scene 4 atmosphere — personal connection, soft violet */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{ opacity: atm4Opacity }}
-      >
+      <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: atm4Opacity }}>
         <div
           className="absolute inset-0"
           style={{
@@ -463,10 +452,7 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
       </motion.div>
 
       {/* Scene 5 atmosphere — deep violet, intimate memory */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{ opacity: atm5Opacity }}
-      >
+      <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: atm5Opacity }}>
         <div
           className="absolute inset-0"
           style={{
@@ -506,7 +492,7 @@ function BottleIntroScreen({ overallProgress }: { overallProgress: MotionValue<n
   return (
     <motion.div
       style={{ opacity }}
-      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+      className="pointer-events-none absolute inset-0 flex items-center justify-center"
     >
       {/* Centered bottle container - PerfumeScene handled by parent */}
       <div
@@ -531,7 +517,7 @@ function BottleIntroScreen({ overallProgress }: { overallProgress: MotionValue<n
 
       {/* Scroll indicator */}
       <div
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-12 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
         aria-hidden="true"
       >
         <span
@@ -626,7 +612,7 @@ function ScrollStorySequence() {
 
         {/* Subtle noise grain overlay */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="pointer-events-none absolute inset-0"
           style={{
             opacity: 0.028,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
@@ -641,7 +627,7 @@ function ScrollStorySequence() {
         <motion.div style={{ opacity: storyUIOpacity }} className="absolute inset-0">
           {/* Gold progress line */}
           <div
-            className="absolute top-0 left-0 right-0 h-px"
+            className="absolute top-0 right-0 left-0 h-px"
             style={{ background: 'hsl(43 82% 52% / 0.12)' }}
           />
           <motion.div
@@ -650,24 +636,18 @@ function ScrollStorySequence() {
           />
 
           {/* ── Main composition ─────────────────────────────────────── */}
-          <div className="relative h-full flex items-center">
+          <div className="relative h-full">
             {/* Desktop: two-column. Mobile: stacked (text above bottle). */}
-            <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-0 lg:justify-between">
+            <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center px-5 sm:px-8 lg:flex-row lg:justify-between lg:gap-0 lg:px-12">
               {/* ── LEFT — text scenes ─────────────────────────── */}
-              <div
-                className="relative order-1 lg:order-1 lg:w-[45%]"
-                style={{
-                  height: 'clamp(16rem, 35vh, 22rem)',
-                  maxWidth: '32rem',
-                }}
-              >
+              <div className="relative order-1 mt-[clamp(4.25rem,9svh,6rem)] h-[clamp(15rem,36svh,19rem)] w-full max-w-[32rem] lg:mt-0 lg:h-[clamp(16rem,35vh,22rem)] lg:w-[45%]">
                 {STORY_SCENES.map((scene, i) => (
                   <StorySceneCard
                     key={scene.scene}
                     eyebrow={scene.eyebrow}
                     headline={scene.headline}
                     supporting={scene.supporting}
-                    scrollProgress={sceneProgress[i]}
+                    scrollProgress={storyProgress}
                     enter={progressValues[i].enter}
                     peak={progressValues[i].peak}
                     exit={progressValues[i].exit}
@@ -676,14 +656,14 @@ function ScrollStorySequence() {
               </div>
 
               {/* ── RIGHT — animated bottle (placeholder, actual bottle is absolute) ─────────────────────────── */}
-              <div className="order-2 lg:order-2 lg:w-[55%] flex items-center justify-center">
+              <div className="order-2 flex flex-1 items-center justify-center lg:w-[55%] lg:flex-none">
                 {/* Bottle is rendered absolutely to allow smooth transition from center */}
               </div>
             </div>
 
             {/* Progress dots — centered bottom */}
             <div
-              className="absolute bottom-9 left-1/2 -translate-x-1/2 flex gap-2.5"
+              className="absolute bottom-9 left-1/2 flex -translate-x-1/2 gap-2.5"
               aria-hidden="true"
             >
               {sceneProgress.map((p, i) => (
@@ -693,7 +673,7 @@ function ScrollStorySequence() {
 
             {/* Scroll hint — visible before first scene peaks */}
             <div
-              className="absolute bottom-8 right-8 hidden lg:flex flex-col items-center gap-2"
+              className="absolute right-8 bottom-8 hidden flex-col items-center gap-2 lg:flex"
               aria-hidden="true"
             >
               <span
@@ -719,7 +699,7 @@ function ScrollStorySequence() {
         </motion.div>
 
         {/* ── SINGLE BOTTLE INSTANCE — transitions from center to right ─────────────── */}
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="pointer-events-none absolute inset-0">
           <BottleVisual scrollProgress={scrollYProgress} />
         </div>
       </div>
@@ -742,15 +722,16 @@ function IntroScene() {
     >
       {/* Faint ambient glow */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 55% 50% at 50% 50%, hsl(43 40% 10% / 0.2) 0%, transparent 70%)',
+          background:
+            'radial-gradient(ellipse 55% 50% at 50% 50%, hsl(43 40% 10% / 0.2) 0%, transparent 70%)',
         }}
       />
 
       {/* Subtle grain */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           opacity: 0.025,
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
@@ -759,10 +740,7 @@ function IntroScene() {
       />
 
       {/* Content */}
-      <div
-        className="relative mx-auto text-center px-6"
-        style={{ maxWidth: '50rem' }}
-      >
+      <div className="relative mx-auto px-6 text-center" style={{ maxWidth: '50rem' }}>
         {/* Eyebrow */}
         <InViewBlock delay={0}>
           <div style={{ marginBottom: '2.25rem' }}>
@@ -792,7 +770,7 @@ function IntroScene() {
         {/* Gold rule */}
         <InViewBlock delay={0.22}>
           <div style={{ marginBottom: '2rem' }}>
-            <GoldRule className="max-w-xs mx-auto" />
+            <GoldRule className="mx-auto max-w-xs" />
           </div>
         </InViewBlock>
 
@@ -804,21 +782,23 @@ function IntroScene() {
             direction="bottom"
             delay={55}
             stepDuration={0.5}
-            className="font-sans leading-relaxed text-center"
-            style={{
-              fontSize: 'clamp(1rem, 1.8vw, 1.15rem)',
-              color: 'hsl(0 0% 80% / 0.7)',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              gap: '0.28em',
-            } as React.CSSProperties}
+            className="text-center font-sans leading-relaxed"
+            style={
+              {
+                fontSize: 'clamp(1rem, 1.8vw, 1.15rem)',
+                color: 'hsl(0 0% 80% / 0.7)',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: '0.28em',
+              } as React.CSSProperties
+            }
           />
         </InViewBlock>
 
         {/* Scroll nudge */}
         <InViewBlock delay={0.7}>
           <div
-            className="flex flex-col items-center gap-2 mx-auto"
+            className="mx-auto flex flex-col items-center gap-2"
             style={{ marginTop: '4rem', opacity: 0.5 }}
             aria-hidden="true"
           >
@@ -859,16 +839,14 @@ function ClosingScene() {
     >
       {/* Faint warm vignette */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 60% 55% at 50% 45%, hsl(43 30% 8% / 0.4) 0%, transparent 70%)',
+          background:
+            'radial-gradient(ellipse 60% 55% at 50% 45%, hsl(43 30% 8% / 0.4) 0%, transparent 70%)',
         }}
       />
 
-      <div
-        className="relative mx-auto text-center px-6"
-        style={{ maxWidth: '44rem' }}
-      >
+      <div className="relative mx-auto px-6 text-center" style={{ maxWidth: '44rem' }}>
         {/* Closing eyebrow */}
         <InViewBlock delay={0}>
           <div style={{ marginBottom: '2rem' }}>
@@ -891,16 +869,14 @@ function ClosingScene() {
           >
             A fragrance doesn&rsquo;t define you.
             <br />
-            <span style={{ color: 'hsl(43 82% 68%)' }}>
-              It reveals something about you.
-            </span>
+            <span style={{ color: 'hsl(43 82% 68%)' }}>It reveals something about you.</span>
           </h2>
         </InViewBlock>
 
         {/* Gold rule */}
         <InViewBlock delay={0.22}>
           <div style={{ marginBottom: '2rem' }}>
-            <GoldRule className="max-w-40 mx-auto" />
+            <GoldRule className="mx-auto max-w-40" />
           </div>
         </InViewBlock>
 
@@ -924,7 +900,7 @@ function ClosingScene() {
           <Link
             to={ROUTES.scentMatchmaker}
             id="story-cta"
-            className="inline-flex items-center gap-2.5 font-sans font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+            className="group focus-visible:ring-primary-400 inline-flex items-center gap-2.5 font-sans font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 focus-visible:outline-none"
             style={{
               fontSize: '0.8125rem',
               letterSpacing: '0.08em',
@@ -965,7 +941,7 @@ function ClosingScene() {
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="group-hover:translate-x-1 transition-transform duration-300"
+              className="transition-transform duration-300 group-hover:translate-x-1"
             >
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
@@ -982,10 +958,7 @@ function ClosingScene() {
 
 export function StorytellingSection() {
   return (
-    <section
-      id="storytelling"
-      aria-label="The Language of Scent — brand story"
-    >
+    <section id="storytelling" aria-label="The Language of Scent — brand story">
       {/* ── Scene 0: Intro — full viewport ──────────────────────── */}
       <IntroScene />
 
