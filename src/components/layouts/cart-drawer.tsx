@@ -1,6 +1,6 @@
 /**
  * CartDrawer Component
- * 
+ *
  * Slide-out cart drawer integrated with real backend cart state.
  * Uses React Query for cart operations - shares state with /cart page.
  */
@@ -48,7 +48,7 @@ export function CartDrawer() {
     if (quantity < 1) return;
     try {
       await updateItem.mutateAsync({ productId, payload: { quantity } });
-    } catch (err) {
+    } catch {
       // Error handled by mutation
     }
   };
@@ -56,16 +56,15 @@ export function CartDrawer() {
   const handleRemoveItem = async (productId: string) => {
     try {
       await removeItem.mutateAsync(productId);
-    } catch (err) {
+    } catch {
       // Error handled by mutation
     }
   };
 
   if (!isCartDrawerOpen) return null;
 
-  const subtotal = cart?.items.reduce((sum, item) => 
-    sum + (item.product.price * item.quantity), 0
-  ) ?? 0;
+  const subtotal =
+    cart?.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0) ?? 0;
 
   return (
     <>
@@ -77,22 +76,20 @@ export function CartDrawer() {
 
       {/* Drawer */}
       <aside
-        className="fixed right-0 top-0 z-[101] flex h-full w-full max-w-md flex-col bg-kenz-bg shadow-2xl"
+        className="bg-kenz-bg fixed top-0 right-0 z-[101] flex h-full w-full max-w-md flex-col shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-kenz-border px-6 py-4">
+        <div className="border-kenz-border flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-3">
             <ShoppingBag size={20} className="text-kenz-gold" />
-            <h2 className="font-serif text-lg font-normal text-foreground">
-              Shopping Cart
-            </h2>
+            <h2 className="text-foreground font-serif text-lg font-normal">Shopping Cart</h2>
           </div>
           <button
             onClick={closeCartDrawer}
-            className="text-foreground/70 transition-colors hover:text-foreground"
+            className="text-foreground/70 hover:text-foreground transition-colors"
             aria-label="Close cart"
           >
             <X size={20} />
@@ -131,7 +128,7 @@ export function CartDrawer() {
               {cart.items.map((item) => (
                 <div
                   key={item.productId}
-                  className="flex gap-4 rounded-lg border border-kenz-border bg-kenz-surface/30 p-4"
+                  className="border-kenz-border bg-kenz-surface/30 flex gap-4 rounded-lg border p-4"
                 >
                   {/* Image */}
                   <Link
@@ -151,11 +148,11 @@ export function CartDrawer() {
                     <Link
                       to={`/products/${item.product.slug}`}
                       onClick={closeCartDrawer}
-                      className="font-serif text-sm text-foreground transition-colors hover:text-kenz-gold"
+                      className="text-foreground hover:text-kenz-gold font-serif text-sm transition-colors"
                     >
                       {item.product.name}
                     </Link>
-                    <p className="mt-1 text-xs text-foreground/50">
+                    <p className="text-foreground/50 mt-1 text-xs">
                       {item.product.brand?.name || 'Unknown'} · {item.product.sizeMl}ml
                     </p>
 
@@ -165,18 +162,18 @@ export function CartDrawer() {
                         <button
                           onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
                           disabled={item.quantity <= 1 || updateItem.isPending}
-                          className="flex h-7 w-7 items-center justify-center rounded border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30"
+                          className="border-kenz-border text-foreground/70 hover:border-kenz-gold hover:text-kenz-gold flex h-7 w-7 items-center justify-center rounded border transition-colors disabled:opacity-30"
                           aria-label="Decrease quantity"
                         >
                           <Minus size={14} />
                         </button>
-                        <span className="w-8 text-center text-sm text-foreground">
+                        <span className="text-foreground w-8 text-center text-sm">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                           disabled={updateItem.isPending}
-                          className="flex h-7 w-7 items-center justify-center rounded border border-kenz-border text-foreground/70 transition-colors hover:border-kenz-gold hover:text-kenz-gold disabled:opacity-30"
+                          className="border-kenz-border text-foreground/70 hover:border-kenz-gold hover:text-kenz-gold flex h-7 w-7 items-center justify-center rounded border transition-colors disabled:opacity-30"
                           aria-label="Increase quantity"
                         >
                           <Plus size={14} />
@@ -207,22 +204,22 @@ export function CartDrawer() {
 
         {/* Footer */}
         {cart?.items.length ? (
-          <div className="border-t border-kenz-border p-6">
+          <div className="border-kenz-border border-t p-6">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm text-foreground/70">Subtotal</span>
+              <span className="text-foreground/70 text-sm">Subtotal</span>
               <Price price={subtotal} className="text-lg font-medium" />
             </div>
             <Link
               to={ROUTES.checkout}
               onClick={closeCartDrawer}
-              className="block w-full rounded-md bg-kenz-gold px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg transition-colors hover:bg-kenz-champagne"
+              className="bg-kenz-gold text-kenz-bg hover:bg-kenz-champagne block w-full rounded-md px-6 py-3 text-center font-sans text-sm font-medium tracking-wider uppercase transition-colors"
             >
               Checkout
             </Link>
             <Link
               to={ROUTES.cart}
               onClick={closeCartDrawer}
-              className="mt-3 block w-full rounded-md border border-kenz-border px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-foreground transition-colors hover:border-kenz-gold hover:text-kenz-gold"
+              className="border-kenz-border text-foreground hover:border-kenz-gold hover:text-kenz-gold mt-3 block w-full rounded-md border px-6 py-3 text-center font-sans text-sm font-medium tracking-wider uppercase transition-colors"
             >
               View Cart
             </Link>

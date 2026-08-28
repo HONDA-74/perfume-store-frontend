@@ -8,8 +8,7 @@ export interface PriceSummaryItem {
   emphasized?: boolean;
 }
 
-export interface PriceSummaryProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface PriceSummaryProps extends React.HTMLAttributes<HTMLDivElement> {
   items: PriceSummaryItem[];
   totalLabel?: string;
   totalAmount: number;
@@ -34,10 +33,13 @@ const PriceSummary = React.forwardRef<HTMLDivElement, PriceSummaryProps>(
     },
     ref,
   ) => {
+    const formatCurrency = (amount: number) =>
+      new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
+
     return (
       <div
         ref={ref}
-        className={cn('space-y-3 rounded-lg bg-kenz-surface p-4', className)}
+        className={cn('bg-kenz-surface space-y-3 rounded-lg p-4', className)}
         {...props}
       >
         {/* Line Items */}
@@ -46,13 +48,18 @@ const PriceSummary = React.forwardRef<HTMLDivElement, PriceSummaryProps>(
             <span
               className={cn(
                 'text-body-sm',
-                item.emphasized ? 'font-semibold text-foreground' : 'text-muted-foreground',
+                item.emphasized ? 'text-foreground font-semibold' : 'text-muted-foreground',
               )}
             >
               {item.label}
             </span>
-            <span className={cn('font-sans text-sm', item.emphasized ? 'font-semibold text-foreground' : 'text-foreground/80')}>
-              ${item.amount.toFixed(2)}
+            <span
+              className={cn(
+                'font-sans text-sm',
+                item.emphasized ? 'text-foreground font-semibold' : 'text-foreground/80',
+              )}
+            >
+              {formatCurrency(item.amount)}
             </span>
           </div>
         ))}
@@ -61,8 +68,10 @@ const PriceSummary = React.forwardRef<HTMLDivElement, PriceSummaryProps>(
 
         {/* Total */}
         <div className="flex items-center justify-between">
-          <span className="font-serif text-h4 font-bold text-foreground">{totalLabel}</span>
-          <span className="font-serif text-h4 font-bold text-kenz-gold">${totalAmount.toFixed(2)}</span>
+          <span className="text-h4 text-foreground font-serif font-bold">{totalLabel}</span>
+          <span className="text-h4 text-kenz-gold font-serif font-bold">
+            {formatCurrency(totalAmount)}
+          </span>
         </div>
       </div>
     );
