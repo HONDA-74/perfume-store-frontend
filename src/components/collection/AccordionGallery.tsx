@@ -231,6 +231,8 @@ export const AccordionGallery = ({
               panelRefs.current[i] = el;
             }}
             className={`ag-panel${isActive ? ' ag-panel--active' : ''}`}
+            data-cursor={item.link ? 'view' : 'interactive'}
+            data-cursor-label={item.link ? 'VIEW' : undefined}
             style={{ borderRadius: `${radius}px` }}
             to={item.link || '#'}
             onClick={(e: React.MouseEvent) => handleClick(i, e)}

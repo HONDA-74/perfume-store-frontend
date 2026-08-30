@@ -1,0 +1,157 @@
+.kenz-cursor {
+  pointer-events: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2147483646;
+  display: none;
+  opacity: 0;
+  contain: strict;
+  will-change: transform;
+}
+
+.kenz-cursor--ring {
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  transition: opacity 140ms ease;
+}
+
+.kenz-cursor__ring {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--kenz-champagne) 68%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--kenz-gold) 7%, transparent);
+  transition:
+    transform 220ms var(--ease-standard),
+    border-color 180ms ease,
+    opacity 180ms ease;
+}
+
+.kenz-cursor__ring::after {
+  content: var(--cursor-label, '');
+  color: var(--kenz-champagne);
+  font-family: var(--font-sans);
+  font-size: 5.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  opacity: 0;
+  transform: translateX(0.08em);
+  transition: opacity 140ms ease;
+}
+
+.kenz-cursor--dot {
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+  border-radius: 999px;
+  background: var(--kenz-gold);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--kenz-gold) 24%, transparent);
+  transition:
+    opacity 100ms ease,
+    scale 100ms ease,
+    background-color 140ms ease;
+}
+
+.kenz-cursor[data-visible='true'] {
+  opacity: 1;
+}
+
+.kenz-cursor--ring[data-state='interactive'] .kenz-cursor__ring {
+  transform: scale(1.57);
+  border-color: color-mix(in srgb, var(--kenz-gold) 76%, transparent);
+}
+
+.kenz-cursor--ring[data-state='view'] .kenz-cursor__ring {
+  transform: scale(1.64);
+  border-color: color-mix(in srgb, var(--kenz-champagne) 82%, transparent);
+  background: color-mix(in srgb, var(--kenz-bg) 20%, transparent);
+}
+
+.kenz-cursor--ring[data-state='view'] .kenz-cursor__ring::after {
+  opacity: 0.86;
+}
+
+.kenz-cursor--dot[data-state='view'] {
+  opacity: 0;
+}
+
+.kenz-cursor--ring[data-state='disabled'] .kenz-cursor__ring {
+  transform: scale(0.93);
+  border-color: color-mix(in srgb, var(--kenz-champagne) 28%, transparent);
+  opacity: 0.58;
+}
+
+.kenz-cursor--dot[data-state='disabled'] {
+  background: color-mix(in srgb, var(--kenz-champagne) 48%, transparent);
+}
+
+.kenz-cursor--ring[data-pressed='true'] .kenz-cursor__ring {
+  transform: scale(0.78);
+  transition-duration: 80ms;
+}
+
+.kenz-cursor--ring[data-state='interactive'][data-pressed='true'] .kenz-cursor__ring {
+  transform: scale(1.28);
+}
+
+.kenz-cursor--ring[data-state='view'][data-pressed='true'] .kenz-cursor__ring {
+  transform: scale(1.38);
+}
+
+.kenz-cursor--dot[data-pressed='true'] {
+  scale: 0.66;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html.kenz-custom-cursor-active,
+  html.kenz-custom-cursor-active body,
+  html.kenz-custom-cursor-active body * {
+    cursor: none !important;
+  }
+
+  html.kenz-custom-cursor-active .kenz-cursor {
+    display: block;
+  }
+
+  html.kenz-custom-cursor-active input:not([type='button']):not([type='submit']):not([type='reset']):not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']),
+  html.kenz-custom-cursor-active textarea,
+  html.kenz-custom-cursor-active [contenteditable='true'],
+  html.kenz-custom-cursor-active p,
+  html.kenz-custom-cursor-active h1,
+  html.kenz-custom-cursor-active h2,
+  html.kenz-custom-cursor-active h3,
+  html.kenz-custom-cursor-active h4,
+  html.kenz-custom-cursor-active h5,
+  html.kenz-custom-cursor-active h6,
+  html.kenz-custom-cursor-active blockquote,
+  html.kenz-custom-cursor-active pre,
+  html.kenz-custom-cursor-active code,
+  html.kenz-custom-cursor-active [data-selectable-text] {
+    cursor: text !important;
+  }
+
+  html.kenz-custom-cursor-active select,
+  html.kenz-custom-cursor-active [data-native-cursor] {
+    cursor: auto !important;
+  }
+
+  html.kenz-custom-cursor-active input[type='range'],
+  html.kenz-custom-cursor-active [role='slider'] {
+    cursor: ew-resize !important;
+  }
+
+  html.kenz-custom-cursor-active [draggable='true'] {
+    cursor: grab !important;
+  }
+
+  html.kenz-custom-cursor-active :disabled,
+  html.kenz-custom-cursor-active [aria-disabled='true'],
+  html.kenz-custom-cursor-active [data-disabled] {
+    cursor: none !important;
+  }
+}

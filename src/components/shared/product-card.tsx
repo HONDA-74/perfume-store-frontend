@@ -101,6 +101,8 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
     >
       <Link
         to={`/products/${product.slug}`}
+        data-cursor="view"
+        data-cursor-label="VIEW"
         className="relative block overflow-hidden border border-border bg-kenz-surface"
         style={{ aspectRatio: '3/4' }}
       >

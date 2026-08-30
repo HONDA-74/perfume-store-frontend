@@ -19,6 +19,8 @@ function CollectionCard({ category, imageUrl, featured = false }: CollectionCard
   return (
     <Link
       to={`/shop?categoryId=${category.id}`}
+      data-cursor="view"
+      data-cursor-label="VIEW"
       className={`group relative block overflow-hidden bg-[#121115] ${featured ? 'aspect-[4/3] sm:aspect-video' : 'aspect-[3/4]'}`}
     >
       {showImage ? (
