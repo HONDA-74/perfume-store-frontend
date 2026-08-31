@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import './AccordionGallery.css';
 
 interface GalleryItem {
@@ -55,6 +56,7 @@ export const AccordionGallery = ({
   grayscale = true,
   className = ''
 }: AccordionGalleryProps) => {
+  const { t } = useTranslation();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const panelRefs = useRef<(HTMLElement | null)[]>([]);
   const mediaRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -261,7 +263,7 @@ export const AccordionGallery = ({
                   {(item.description || item.link) && (
                     <div className="ag-panel__details" ref={(el) => { detailRefs.current[i] = el; }}>
                       {item.description && <p className="ag-panel__description">{item.description}</p>}
-                      {item.link && <span className="ag-panel__cta">DISCOVER <span className="ag-panel__cta-arrow">→</span></span>}
+                      {item.link && <span className="ag-panel__cta">{t('landing.discover')} <span className="ag-panel__cta-arrow">→</span></span>}
                     </div>
                   )}
                 </div>

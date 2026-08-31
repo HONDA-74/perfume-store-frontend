@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/shared/empty-state';
 import { PageLoader } from '@/components/shared/page-loader';
 import { useAllCategories } from '@/hooks/api/use-categories';
 import type { Category } from '@/types';
+import { useTranslation } from 'react-i18next';
 
 interface CollectionCardProps {
   category: Category;
@@ -14,6 +15,7 @@ interface CollectionCardProps {
 }
 
 function CollectionCard({ category, imageUrl, featured = false }: CollectionCardProps) {
+  const { t } = useTranslation();
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = Boolean(imageUrl) && !imageFailed;
   return (
@@ -40,7 +42,7 @@ function CollectionCard({ category, imageUrl, featured = false }: CollectionCard
       >
         {featured && (
           <p className="mb-2 text-[9px] font-medium tracking-[0.2em] text-[#D4C3A3]/60 uppercase transition-colors group-hover:text-[#D4A017]">
-            Featured Collection
+            {t('collections.featured')}
           </p>
         )}
         <h2
@@ -51,12 +53,12 @@ function CollectionCard({ category, imageUrl, featured = false }: CollectionCard
         <p
           className={`mt-2 max-w-2xl font-light text-white/45 ${featured ? 'mb-5 text-[13px]' : 'mb-3.5 line-clamp-2 text-[11px]'}`}
         >
-          {category.description || `Explore our ${category.name.toLowerCase()} selection.`}
+          {category.description || category.name}
         </p>
         <span
           className={`inline-flex items-center gap-2 text-[9px] font-medium tracking-[0.15em] text-[#D4A017] uppercase transition-all group-hover:gap-3 ${featured ? '' : 'opacity-0 group-hover:opacity-100'}`}
         >
-          Explore <ArrowRight size={featured ? 12 : 10} />
+          {t('collections.explore')} <ArrowRight size={featured ? 12 : 10} className="directional-icon" />
         </span>
       </div>
     </Link>
@@ -64,6 +66,7 @@ function CollectionCard({ category, imageUrl, featured = false }: CollectionCard
 }
 
 export function CollectionsPage() {
+  const { t } = useTranslation();
   const categories = useAllCategories();
 
   if (categories.isLoading)
@@ -75,7 +78,7 @@ export function CollectionsPage() {
   if (categories.isError)
     return (
       <div className="min-h-screen bg-[#0B0A0C] px-6 py-24">
-        <EmptyState title="Failed to load collections" message="Please try again later" />
+        <EmptyState title={t('collections.error')} message={t('common.retry')} />
       </div>
     );
 
@@ -86,25 +89,25 @@ export function CollectionsPage() {
     <main className="min-h-screen bg-[#0B0A0C] text-[#F3F2F5]">
       <div className="mx-auto max-w-[1440px] px-5 py-10 sm:px-8 lg:px-12 lg:py-14">
         <Breadcrumb
-          items={[{ label: 'Home', href: '/' }, { label: 'Collections' }]}
+          items={[{ label: 'KENZ', href: '/' }, { label: t('collections.title') }]}
           className="mb-8"
         />
         <div className="mb-10">
           <p className="mb-2 text-[9px] font-medium tracking-[0.22em] text-[#D4C3A3]/40 uppercase">
-            The Collections
+            {t('collections.eyebrow')}
           </p>
           <h1 className="mb-2 font-serif text-[clamp(1.6rem,3vw,2.5rem)] font-normal text-white/[0.88]">
-            Curated Worlds of Scent
+            {t('collections.title')}
           </h1>
           <p className="max-w-[520px] text-xs font-light text-white/30 italic">
-            Each collection is a distinct olfactory world, composed with a single intent.
+            {t('collections.description')}
           </p>
         </div>
 
         {!featured ? (
           <EmptyState
-            title="No collections available"
-            message="Check back later for new collections"
+            title={t('collections.empty')}
+            message={t('collections.description')}
           />
         ) : (
           <>

@@ -3,6 +3,29 @@
 @import './tokens.css';
 @import './fonts.css';
 
+html[dir='rtl'] body {
+  font-family: Tahoma, Arial, var(--font-sans);
+}
+
+.directional-icon {
+  transition: transform 150ms ease;
+}
+
+html[dir='rtl'] .directional-icon {
+  transform: scaleX(-1);
+}
+
+html[dir='rtl'] input[type='email'],
+html[dir='rtl'] input[type='password'],
+html[dir='rtl'] input[inputmode='numeric'] {
+  direction: ltr;
+  text-align: start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .directional-icon { transition: none; }
+}
+
 /**
  * Tailwind v4 is CSS-first: `@theme` maps our design tokens (tokens.css)
  * into Tailwind's utility namespace, so `bg-primary-500`, `text-neutral-900`,

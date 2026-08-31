@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { X, Search, Loader2 } from 'lucide-react';
 import { useUIStore } from '@/stores/ui.store';
 import { useProducts } from '@/hooks/api/use-products';
@@ -16,6 +17,7 @@ import { EmptyState } from '@/components/shared/empty-state';
 const DEBOUNCE_MS = 300;
 
 export function SearchOverlay() {
+  const { t } = useTranslation();
   const { isSearchOpen, closeSearch } = useUIStore();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [debouncedQuery, setDebouncedQuery] = React.useState('');
@@ -89,21 +91,21 @@ export function SearchOverlay() {
             <div className="relative flex-1">
               <Search
                 size={20}
-                className="absolute left-0 top-1/2 -translate-y-1/2 text-foreground/50"
+                className="absolute start-0 top-1/2 -translate-y-1/2 text-foreground/50"
               />
               <input
                 ref={inputRef}
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search fragrances, brands..."
-                className="w-full border-0 bg-transparent py-2 pl-8 pr-4 font-sans text-base text-foreground placeholder:text-foreground/40 focus:outline-none"
-                aria-label="Search products"
+                placeholder={t('search.placeholder')}
+                className="w-full border-0 bg-transparent py-2 ps-8 pe-4 font-sans text-base text-foreground placeholder:text-foreground/40 focus:outline-none"
+                aria-label={t('search.title')}
               />
               {(isLoading || isFetching) && (
                 <Loader2
                   size={18}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 animate-spin text-kenz-gold"
+                  className="absolute end-0 top-1/2 -translate-y-1/2 animate-spin text-kenz-gold"
                 />
               )}
             </div>
@@ -112,7 +114,7 @@ export function SearchOverlay() {
             <button
               onClick={closeSearch}
               className="text-foreground/70 transition-colors hover:text-foreground"
-              aria-label="Close search"
+              aria-label={t('common.close')}
             >
               <X size={24} />
             </button>
@@ -126,7 +128,7 @@ export function SearchOverlay() {
           {!showResults ? (
             <div className="flex h-64 items-center justify-center">
               <p className="text-sm text-foreground/50">
-                Start typing to search products
+                {t('search.start')}
               </p>
             </div>
           ) : isLoading ? (
@@ -137,14 +139,14 @@ export function SearchOverlay() {
             <div className="flex h-64 items-center justify-center">
               <EmptyState
                 icon={<Search className="h-8 w-8" />}
-                title="No results found"
-                message={`No products match "${debouncedQuery}"`}
+                title={t('search.noResults')}
+                message={t('search.noResultsDescription', { query: debouncedQuery })}
               />
             </div>
           ) : (
             <>
               <p className="mb-6 text-sm text-foreground/70">
-                Found {data.meta.totalItems} {data.meta.totalItems === 1 ? 'result' : 'results'}
+                {t('search.resultsCount', { count: data.meta.totalItems })}
               </p>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {data.items.map((product) => (

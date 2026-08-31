@@ -5,46 +5,19 @@ import { ROUTES } from '@/constants';
 import { BlurText } from '@/components/hero/BlurText';
 import { PerfumeScene } from '@/components/3d/perfume';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useTranslation } from 'react-i18next';
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * CONSTANTS — 5-scene narrative structure
  * ═════════════════════════════════════════════════════════════════════════ */
 
-const STORY_SCENES = [
-  {
-    eyebrow: 'THE FIRST NOTE',
-    headline: 'It begins with a single note.',
-    supporting: 'Carefully chosen to draw you closer, before you even know why.',
-    scene: 1,
-  },
-  {
-    eyebrow: 'THE OPENING',
-    headline: 'First impressions become instinct.',
-    supporting:
-      'Bright, unexpected, fleeting — the opening is the first glimpse of what lies beneath.',
-    scene: 2,
-  },
-  {
-    eyebrow: 'THE HEART',
-    headline: 'Then, the fragrance unfolds.',
-    supporting:
-      'Layer by layer, its character emerges, becoming something felt rather than simply remembered.',
-    scene: 3,
-  },
-  {
-    eyebrow: 'YOUR SIGNATURE',
-    headline: 'Some scents begin to feel like you.',
-    supporting:
-      'Shaped by your taste, your mood, and the moments that make the fragrance unmistakably yours.',
-    scene: 4,
-  },
-  {
-    eyebrow: 'WHAT REMAINS',
-    headline: 'And eventually, it becomes a memory.',
-    supporting: 'A quiet trace that lingers beyond the moment — connected to who you are.',
-    scene: 5,
-  },
-] as const;
+/* STORY_SCENES is now built inside the component so it can be translated. */
+type StoryScene = {
+  eyebrow: string;
+  headline: string;
+  supporting: string;
+  scene: number;
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * UTILITY HOOKS / COMPONENTS
@@ -245,6 +218,9 @@ function StoryDot({ progress }: { progress: MotionValue<number> }) {
 
 function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const { i18n } = useTranslation();
+  const isRTL = i18n.dir() === 'rtl';
+
   // Opacity — fade in after brief moment, stay visible throughout
   const bottleOpacity = useTransform(scrollProgress, [0, 0.03, 0.85, 1], [0, 1, 1, 0.35]);
 
@@ -258,17 +234,19 @@ function BottleVisual({ scrollProgress }: { scrollProgress: MotionValue<number> 
   // Subtle atmospheric depth - very restrained spotlight effect
   const atmosphereOpacity = useTransform(scrollProgress, [0, 0.15, 0.85, 1], [0, 0.25, 0.25, 0.15]);
 
-  // Position transition: centered (intro) → right side (storytelling)
-  // Desktop positioning
+  // Position transition: centered (intro) → side (storytelling)
+  // LTR: move to the right side (70%).
+  // RTL: mirror to the left side (30%) so bottle doesn't overlap the Arabic text area.
+  const storyPosition = isRTL ? '30%' : '70%';
   const bottleX = useTransform(
     scrollProgress,
     [0, 0.2, 0.3, 1],
-    ['50%', '50%', '70%', '70%'], // Center during intro, move to right after
+    ['50%', '50%', storyPosition, storyPosition], // Center during intro, move to correct side after
   );
 
   // Mobile: always centered
 
-  // Container width transition: wide when centered, narrower when on right
+  // Container width transition: wide when centered, narrower when on side
   const containerWidth = useTransform(
     scrollProgress,
     [0, 0.2, 0.3, 1],
@@ -486,6 +464,7 @@ function SceneAtmosphere({ scrollProgress }: { scrollProgress: MotionValue<numbe
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function BottleIntroScreen({ overallProgress }: { overallProgress: MotionValue<number> }) {
+  const { t } = useTranslation();
   // Fade out intro content as we transition to storytelling
   const opacity = useTransform(overallProgress, [0, 0.12, 0.2], [1, 1, 0]);
 
@@ -528,7 +507,7 @@ function BottleIntroScreen({ overallProgress }: { overallProgress: MotionValue<n
             color: 'hsl(0 0% 74% / 0.4)',
           }}
         >
-          Scroll
+          {t('landing.scroll')}
         </span>
         <div
           style={{
@@ -554,7 +533,17 @@ function BottleIntroScreen({ overallProgress }: { overallProgress: MotionValue<n
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function ScrollStorySequence() {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Build translated scenes inside the component
+  const STORY_SCENES: StoryScene[] = [
+    { eyebrow: t('landing.scenes.s1eyebrow'), headline: t('landing.scenes.s1headline'), supporting: t('landing.scenes.s1supporting'), scene: 1 },
+    { eyebrow: t('landing.scenes.s2eyebrow'), headline: t('landing.scenes.s2headline'), supporting: t('landing.scenes.s2supporting'), scene: 2 },
+    { eyebrow: t('landing.scenes.s3eyebrow'), headline: t('landing.scenes.s3headline'), supporting: t('landing.scenes.s3supporting'), scene: 3 },
+    { eyebrow: t('landing.scenes.s4eyebrow'), headline: t('landing.scenes.s4headline'), supporting: t('landing.scenes.s4supporting'), scene: 4 },
+    { eyebrow: t('landing.scenes.s5eyebrow'), headline: t('landing.scenes.s5headline'), supporting: t('landing.scenes.s5supporting'), scene: 5 },
+  ];
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -685,7 +674,7 @@ function ScrollStorySequence() {
                   writingMode: 'vertical-rl',
                 }}
               >
-                Scroll
+                {t('landing.scroll')}
               </span>
               <div
                 style={{
@@ -699,7 +688,8 @@ function ScrollStorySequence() {
         </motion.div>
 
         {/* ── SINGLE BOTTLE INSTANCE — transitions from center to right ─────────────── */}
-        <div className="pointer-events-none absolute inset-0">
+        {/* dir="ltr" pins the 3D canvas coordinate system regardless of page RTL direction */}
+        <div className="pointer-events-none absolute inset-0" dir="ltr">
           <BottleVisual scrollProgress={scrollYProgress} />
         </div>
       </div>
@@ -712,6 +702,7 @@ function ScrollStorySequence() {
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function IntroScene() {
+  const { t } = useTranslation();
   return (
     <div
       className="relative flex items-center justify-center overflow-hidden"
@@ -744,7 +735,7 @@ function IntroScene() {
         {/* Eyebrow */}
         <InViewBlock delay={0}>
           <div style={{ marginBottom: '2.25rem' }}>
-            <Eyebrow>The Language of Scent</Eyebrow>
+            <Eyebrow>{t('landing.intro.eyebrow')}</Eyebrow>
           </div>
         </InViewBlock>
 
@@ -761,9 +752,9 @@ function IntroScene() {
               marginBottom: '2rem',
             }}
           >
-            Some moments are remembered
+            {t('landing.intro.headline1')}
             <br />
-            before they are understood.
+            {t('landing.intro.headline2')}
           </h2>
         </InViewBlock>
 
@@ -777,7 +768,7 @@ function IntroScene() {
         {/* BlurText supporting copy */}
         <InViewBlock delay={0.3}>
           <BlurText
-            text="A fragrance is more than a collection of notes. It is an atmosphere, a feeling, a memory — captured in a bottle."
+            text={t('landing.intro.body')}
             animateBy="words"
             direction="bottom"
             delay={55}
@@ -829,6 +820,7 @@ function IntroScene() {
  * ═════════════════════════════════════════════════════════════════════════ */
 
 function ClosingScene() {
+  const { t } = useTranslation();
   return (
     <div
       className="relative flex items-center justify-center overflow-hidden"
@@ -850,7 +842,7 @@ function ClosingScene() {
         {/* Closing eyebrow */}
         <InViewBlock delay={0}>
           <div style={{ marginBottom: '2rem' }}>
-            <Eyebrow>A Fragrance is a Statement</Eyebrow>
+            <Eyebrow>{t('landing.closing.eyebrow')}</Eyebrow>
           </div>
         </InViewBlock>
 
@@ -867,9 +859,9 @@ function ClosingScene() {
               marginBottom: '1.5rem',
             }}
           >
-            A fragrance doesn&rsquo;t define you.
+            {t('landing.closing.headline1')}
             <br />
-            <span style={{ color: 'hsl(43 82% 68%)' }}>It reveals something about you.</span>
+            <span style={{ color: 'hsl(43 82% 68%)' }}>{t('landing.closing.headline2')}</span>
           </h2>
         </InViewBlock>
 
@@ -891,7 +883,7 @@ function ClosingScene() {
               letterSpacing: '0.01em',
             }}
           >
-            Discover the scent that speaks your language.
+            {t('landing.closing.body')}
           </p>
         </InViewBlock>
 
@@ -930,7 +922,7 @@ function ClosingScene() {
               (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
             }}
           >
-            Find Your Signature
+            {t('landing.closing.cta')}
             <svg
               aria-hidden="true"
               width="14"

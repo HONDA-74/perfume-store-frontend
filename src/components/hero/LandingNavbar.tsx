@@ -3,13 +3,15 @@ import { Link } from 'react-router';
 import { ROUTES } from '@/constants';
 import { cn } from '@/lib';
 import { useAuthStore } from '@/stores/auth.store';
+import { useTranslation } from 'react-i18next';
+import { LanguageToggle } from '@/components/ui/language-toggle';
 
 /** Navigation links for the Landing Page only. No utility icons. */
 const NAV_LINKS = [
-  { label: 'Collections', href: '/collections' },
-  { label: 'Perfumes',    href: ROUTES.shop },
-  { label: 'Heritage',    href: '/heritage' },
-  { label: 'Scent Finder', href: ROUTES.scentMatchmaker },
+  { key: 'nav.collections', href: '/collections' },
+  { key: 'nav.shop', href: ROUTES.shop },
+  { key: 'nav.heritage', href: '/heritage' },
+  { key: 'nav.scentFinder', href: ROUTES.scentMatchmaker },
 ] as const;
 
 /**
@@ -25,6 +27,7 @@ const NAV_LINKS = [
  * Global Header (src/components/layouts/header.tsx) is NOT modified.
  */
 export function LandingNavbar() {
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -55,8 +58,8 @@ export function LandingNavbar() {
   return (
     <header
       role="banner"
-      aria-label="Landing page navigation"
-      className="absolute top-0 left-0 right-0 z-navbar px-4 sm:px-6 lg:px-8"
+      aria-label={t('nav.primary')}
+      className="absolute inset-x-0 top-0 z-navbar px-4 sm:px-6 lg:px-8"
       style={{
         paddingTop: '1.25rem',
         animation: 'landing-nav-enter 1s cubic-bezier(0.16, 1, 0.3, 1) both',
@@ -89,7 +92,7 @@ export function LandingNavbar() {
           {/* Left — Desktop nav links */}
           <nav
             className="hidden lg:flex items-center gap-7"
-            aria-label="Primary navigation"
+            aria-label={t('nav.primary')}
           >
             {NAV_LINKS.slice(0, 2).map((link) => (
               <Link
@@ -108,7 +111,7 @@ export function LandingNavbar() {
                   (e.currentTarget as HTMLElement).style.color = 'hsl(0 0% 74% / 0.75)';
                 }}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
           </nav>
@@ -118,7 +121,7 @@ export function LandingNavbar() {
             <Link
               to="/"
               className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-1 focus-visible:rounded-sm"
-              aria-label="KENZ — Home"
+              aria-label={t('common.brandHome')}
             >
               <span
                 className="font-serif font-semibold text-2xl"
@@ -136,7 +139,7 @@ export function LandingNavbar() {
           {/* Right — Desktop nav links */}
           <nav
             className="hidden lg:flex items-center gap-7"
-            aria-label="Secondary navigation"
+            aria-label={t('nav.primary')}
           >
             {NAV_LINKS.slice(2).map((link) => (
               <Link
@@ -155,18 +158,19 @@ export function LandingNavbar() {
                   (e.currentTarget as HTMLElement).style.color = 'hsl(0 0% 74% / 0.75)';
                 }}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
             <span aria-hidden="true" className="h-4 w-px bg-white/10" />
+            <LanguageToggle />
             {isAuthenticated ? (
               <Link to={ROUTES.account.root} className="border border-[hsl(43_82%_65%/0.35)] px-4 py-2 font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-[hsl(43_82%_70%)] transition hover:bg-[hsl(43_82%_52%/0.1)]">
-                Account
+                {t('nav.account')}
               </Link>
             ) : (
               <>
-                <Link to={ROUTES.auth.login} className="font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-white/65 transition hover:text-white">Sign In</Link>
-                <Link to={ROUTES.auth.register} className="border border-[hsl(43_82%_65%/0.35)] px-4 py-2 font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-[hsl(43_82%_70%)] transition hover:bg-[hsl(43_82%_52%/0.1)]">Sign Up</Link>
+                <Link to={ROUTES.auth.login} className="font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-white/65 transition hover:text-white">{t('nav.signIn')}</Link>
+                <Link to={ROUTES.auth.register} className="border border-[hsl(43_82%_65%/0.35)] px-4 py-2 font-sans text-[0.65rem] font-medium uppercase tracking-[0.14em] text-[hsl(43_82%_70%)] transition hover:bg-[hsl(43_82%_52%/0.1)]">{t('nav.signUp')}</Link>
               </>
             )}
           </nav>
@@ -175,7 +179,7 @@ export function LandingNavbar() {
           <button
             type="button"
             className="lg:hidden flex items-center justify-center w-8 h-8 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
             style={{ color: 'hsl(0 0% 74%)' }}
@@ -197,7 +201,7 @@ export function LandingNavbar() {
         {/* ── Mobile drawer ───────────────────────────────────────────── */}
         {mobileOpen && (
           <nav
-            aria-label="Mobile navigation"
+            aria-label={t('nav.mobileNavigation')}
             className="lg:hidden border-t"
             style={{ borderColor: 'hsl(43 82% 52% / 0.12)' }}
           >
@@ -220,19 +224,20 @@ export function LandingNavbar() {
                     (e.currentTarget as HTMLElement).style.color = 'hsl(0 0% 74% / 0.8)';
                   }}
                 >
-                  {link.label}
+                  {t(link.key)}
                 </Link>
               ))}
               <div className="mt-3 grid grid-cols-2 gap-3 pt-3">
                 {isAuthenticated ? (
-                  <Link to={ROUTES.account.root} onClick={closeMobile} className="col-span-2 flex min-h-12 items-center justify-center border border-[hsl(43_82%_65%/0.35)] font-sans text-[0.72rem] font-medium uppercase tracking-[0.15em] text-[hsl(43_82%_70%)]">Account</Link>
+                  <Link to={ROUTES.account.root} onClick={closeMobile} className="col-span-2 flex min-h-12 items-center justify-center border border-[hsl(43_82%_65%/0.35)] font-sans text-[0.72rem] font-medium uppercase tracking-[0.15em] text-[hsl(43_82%_70%)]">{t('nav.account')}</Link>
                 ) : (
                   <>
-                    <Link to={ROUTES.auth.login} onClick={closeMobile} className="flex min-h-12 items-center justify-center border border-white/10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.15em] text-white/70">Sign In</Link>
-                    <Link to={ROUTES.auth.register} onClick={closeMobile} className="flex min-h-12 items-center justify-center bg-[hsl(43_82%_52%)] font-sans text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#0B0A0C]">Sign Up</Link>
+                    <Link to={ROUTES.auth.login} onClick={closeMobile} className="flex min-h-12 items-center justify-center border border-white/10 font-sans text-[0.72rem] font-medium uppercase tracking-[0.15em] text-white/70">{t('nav.signIn')}</Link>
+                    <Link to={ROUTES.auth.register} onClick={closeMobile} className="flex min-h-12 items-center justify-center bg-[hsl(43_82%_52%)] font-sans text-[0.72rem] font-semibold uppercase tracking-[0.15em] text-[#0B0A0C]">{t('nav.signUp')}</Link>
                   </>
                 )}
               </div>
+              <LanguageToggle showLabel className="mt-3 w-full" />
             </div>
           </nav>
         )}

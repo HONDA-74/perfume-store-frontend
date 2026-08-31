@@ -4,8 +4,10 @@ import { AccordionGallery } from './AccordionGallery';
 import { useProducts } from '@/hooks/api/use-products';
 import { Link } from 'react-router';
 import { ROUTES } from '@/constants';
+import { useTranslation } from 'react-i18next';
 
 export function CollectionSection() {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-10% 0px' });
 
@@ -22,7 +24,7 @@ export function CollectionSection() {
   return (
     <section 
       className="relative w-full overflow-hidden bg-[#0B0A0C] py-24 md:py-32 lg:py-40"
-      aria-label="The Collection"
+      aria-label={t('landing.collectionEyebrow')}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-12">
         <motion.div
@@ -30,7 +32,7 @@ export function CollectionSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-16 md:mb-24 text-center md:text-left flex flex-col md:flex-row items-center md:items-end justify-between gap-8"
+          className="mb-16 md:mb-24 text-center md:text-start flex flex-col md:flex-row items-center md:items-end justify-between gap-8"
         >
           <div className="max-w-2xl">
             <span
@@ -51,7 +53,7 @@ export function CollectionSection() {
                   background: 'hsl(43 82% 65% / 0.3)',
                 }}
               />
-              THE COLLECTION
+              {t('landing.collectionEyebrow')}
               <span
                 aria-hidden="true"
                 className="md:hidden"
@@ -71,11 +73,11 @@ export function CollectionSection() {
                 letterSpacing: '-0.02em',
               }}
             >
-              A Study in Scent.
+              {t('landing.collectionTitle')}
             </h2>
           </div>
           
-          <div className="max-w-md md:text-right">
+          <div className="max-w-md md:text-end">
             <p 
               className="font-sans text-[hsl(0,0%,82%)]/65"
               style={{
@@ -84,7 +86,7 @@ export function CollectionSection() {
                 letterSpacing: '0.01em',
               }}
             >
-              Discover the compositions that define our collection — from dark woods and warm amber to luminous florals and modern oud.
+              {t('landing.collectionDescription')}
             </p>
           </div>
         </motion.div>
@@ -96,13 +98,13 @@ export function CollectionSection() {
           className="w-full"
         >
           {products.isLoading ? (
-            <div className="flex h-[550px] items-center justify-center border border-white/[0.06] text-xs uppercase tracking-[0.18em] text-white/30" role="status">Curating the collection…</div>
+            <div className="flex h-[550px] items-center justify-center border border-white/[0.06] text-xs uppercase tracking-[0.18em] text-white/30" role="status">{t('collections.loading')}</div>
           ) : products.isError ? (
-            <div className="flex h-[420px] flex-col items-center justify-center gap-5 border border-white/[0.06] text-center text-white/45"><p>We couldn't load the collection.</p><button onClick={() => products.refetch()} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">Try Again</button></div>
+            <div className="flex h-[420px] flex-col items-center justify-center gap-5 border border-white/[0.06] text-center text-white/45"><p>{t('collections.error')}</p><button onClick={() => products.refetch()} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">{t('common.retry')}</button></div>
           ) : galleryItems.length ? (
             <AccordionGallery items={galleryItems} height={550} defaultIndex={0} tilt={6} parallax={0.3} />
           ) : (
-            <div className="flex h-[420px] flex-col items-center justify-center gap-5 border border-white/[0.06] text-center text-white/45"><p>No featured fragrances are available yet.</p><Link to={ROUTES.shop} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">Explore the Shop</Link></div>
+            <div className="flex h-[420px] flex-col items-center justify-center gap-5 border border-white/[0.06] text-center text-white/45"><p>{t('collections.empty')}</p><Link to={ROUTES.shop} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">{t('landing.explore')}</Link></div>
           )}
         </motion.div>
       </div>

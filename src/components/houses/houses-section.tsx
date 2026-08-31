@@ -3,8 +3,10 @@ import { useInView, motion } from 'framer-motion';
 import { Link } from 'react-router';
 import { LogoLoop } from './LogoLoop';
 import { useAllBrands } from '@/hooks/api/use-brands';
+import { useTranslation } from 'react-i18next';
 
 export function HousesSection() {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-10% 0px' });
 
@@ -14,7 +16,7 @@ export function HousesSection() {
       <Link 
         to={`/brands/${brand.slug}`}
         className="font-serif uppercase tracking-widest text-3xl md:text-5xl lg:text-6xl text-center px-4 md:px-8 hover:text-[hsl(43,82%,65%)] transition-colors duration-300"
-        aria-label={`Explore ${brand.name}`}
+        aria-label={`${t('brands.explore')} ${brand.name}`}
       >
         {brand.name}
       </Link>
@@ -26,7 +28,7 @@ export function HousesSection() {
     <section 
       id="the-houses"
       className="relative w-full overflow-hidden bg-[#0B0A0C] py-24 md:py-32"
-      aria-label="The Houses"
+      aria-label={t('landing.housesEyebrow')}
     >
       {/* Top Border Rule */}
       <div 
@@ -60,7 +62,7 @@ export function HousesSection() {
                 background: 'hsl(43 82% 65% / 0.3)',
               }}
             />
-            THE HOUSES
+            {t('landing.housesEyebrow')}
             <span
               aria-hidden="true"
               style={{
@@ -79,7 +81,7 @@ export function HousesSection() {
               letterSpacing: '-0.02em',
             }}
           >
-            The Houses Behind the Scent.
+            {t('landing.housesTitle')}
           </h2>
           
           <p 
@@ -91,25 +93,33 @@ export function HousesSection() {
               maxWidth: '42ch',
             }}
           >
-            Explore the houses behind some of the world's most distinctive fragrances.
+            {t('landing.housesDescription')}
           </p>
         </motion.div>
       </div>
 
+      {/*
+        dir="ltr" pins the marquee to left-to-right scroll direction in every language.
+        RTL on the html element would flip the flex layout of logoloop__track and reverse
+        the perceived direction of the animation. By explicitly setting dir="ltr" here we
+        isolate the marquee without touching the global document direction.
+        Brand names inside still render normally — only the track scroll direction is locked.
+      */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="w-full relative"
+        dir="ltr"
       >
         {brands.isLoading ? (
-          <p className="py-12 text-center text-xs uppercase tracking-[0.18em] text-white/30" role="status">Discovering our houses…</p>
+          <p className="py-12 text-center text-xs uppercase tracking-[0.18em] text-white/30" role="status">{t('brands.loading')}</p>
         ) : brands.isError ? (
-          <div className="flex justify-center py-10"><button onClick={() => brands.refetch()} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">Try Again</button></div>
+          <div className="flex justify-center py-10"><button onClick={() => brands.refetch()} className="border border-[#D4C3A3]/35 px-6 py-3 text-[10px] uppercase tracking-[0.15em] text-[#D4C3A3]">{t('common.retry')}</button></div>
         ) : logoItems.length ? (
           <LogoLoop logos={logoItems} speed={40} gap={12} fadeOut={true} pauseOnHover={true} logoHeight={70} />
         ) : (
-          <p className="py-12 text-center text-sm text-white/40">No fragrance houses are available yet.</p>
+          <p className="py-12 text-center text-sm text-white/40">{t('brands.empty')}</p>
         )}
       </motion.div>
     </section>

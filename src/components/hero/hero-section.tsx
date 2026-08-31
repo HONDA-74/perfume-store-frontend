@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/constants';
 import { Container } from '@/components/shared';
 import { cn } from '@/lib';
@@ -24,10 +25,11 @@ const LiquidEther = lazy(() => import('./LiquidEther'));
  * BlurText is reused exactly as implemented, not recreated.
  */
 export function HeroSection() {
+  const { t } = useTranslation();
   return (
     <section
       id="hero"
-      aria-label="Hero — KENZ Luxury Perfume"
+      aria-label={t('hero.label')}
       className="relative min-h-svh flex flex-col overflow-hidden"
     >
       {/* ── Liquid Ether WebGL background ─────────────────────────────── */}
@@ -127,7 +129,7 @@ export function HeroSection() {
                     background: 'hsl(43 82% 65% / 0.45)',
                   }}
                 />
-                The Art of Perfumery
+                {t('hero.eyebrow')}
                 <span
                   aria-hidden="true"
                   style={{
@@ -160,7 +162,7 @@ export function HeroSection() {
                   fontWeight: 700,
                 }}
               >
-                Your Signature.
+                {t('hero.title')}
               </span>
 
               {/* Line 2 — champagne gold accent */}
@@ -172,7 +174,7 @@ export function HeroSection() {
                   fontWeight: 700,
                 }}
               >
-                Reimagined.
+                {t('hero.accent')}
               </span>
             </h1>
 
@@ -185,7 +187,7 @@ export function HeroSection() {
               }}
             >
               <BlurText
-                text="Discover fragrances curated around your taste, your mood, and the moments that define you."
+                text={t('hero.description')}
                 animateBy="words"
                 direction="bottom"
                 delay={55}
@@ -242,7 +244,7 @@ export function HeroSection() {
                 onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.97)'; }}
                 onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
               >
-                Explore the Collection
+                {t('landing.explore')}
               </Link>
 
               {/* Secondary — ghost gold */}
@@ -279,7 +281,7 @@ export function HeroSection() {
                 onMouseDown={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(0.97)'; }}
                 onMouseUp={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
               >
-                <span>Find Your Signature</span>
+                <span>{t('landing.findScent')}</span>
                 <svg
                   aria-hidden="true"
                   width="13"
@@ -290,7 +292,7 @@ export function HeroSection() {
                   strokeWidth={2}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="group-hover:translate-x-1 transition-transform duration-300"
+                  className="directional-icon group-hover:translate-x-1 transition-transform duration-300"
                 >
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
@@ -314,7 +316,7 @@ export function HeroSection() {
           className="font-sans uppercase"
           style={{ fontSize: '0.6rem', letterSpacing: '0.2em', color: 'hsl(0 0% 74% / 0.4)' }}
         >
-          Scroll
+          {t('hero.scroll')}
         </span>
         <div
           style={{

@@ -28,6 +28,8 @@ const AddressesPage = lazy(() => import('@/pages/account/addresses-page').then((
 const ScentFinderPage = lazy(() => import('@/pages/scent-finder-page').then((module) => ({ default: module.ScentFinderPage })));
 const LoginPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.LoginPage })));
 const RegisterPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.RegisterPage })));
+const ForgotPasswordPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.ResetPasswordPage })));
 const AdminLoginPage = lazy(() => import('@/pages/auth-pages').then((module) => ({ default: module.AdminLoginPage })));
 const AdminDashboardPage = lazy(() => import('@/pages/admin/admin-dashboard-page').then((module) => ({ default: module.AdminDashboardPage })));
 const AdminProductsPage = lazy(() => import('@/pages/admin/admin-products-page').then((module) => ({ default: module.AdminProductsPage })));
@@ -66,6 +68,16 @@ export const routeConfig: RouteObject[] = [
   {
     path: '/auth/register',
     element: <GuestRoute>{loadPage(<RegisterPage />)}</GuestRoute>,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: ROUTES.auth.forgotPassword,
+    element: <GuestRoute>{loadPage(<ForgotPasswordPage />)}</GuestRoute>,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: ROUTES.auth.resetPassword,
+    element: <GuestRoute>{loadPage(<ResetPasswordPage />)}</GuestRoute>,
     errorElement: <RouteErrorBoundary />,
   },
   {

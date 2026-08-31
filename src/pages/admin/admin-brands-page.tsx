@@ -3,12 +3,14 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit, Trash2, AlertCircle, X, Save } from 'lucide-react';
 import { useAllBrands, useCreateBrand, useUpdateBrand, useDeleteBrand } from '@/hooks/api/use-brands';
 import { PageLoader } from '@/components/shared/page-loader';
 import type { CreateBrandDto, Brand } from '@/types';
 
 export function AdminBrandsPage() {
+  const { t } = useTranslation();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [formData, setFormData] = useState<CreateBrandDto>({ name: '', description: '', logoUrl: '', countryOfOrigin: '' });
@@ -52,7 +54,7 @@ export function AdminBrandsPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Delete this brand? This action cannot be undone.')) {
+    if (confirm(t('admin.deleteConfirm'))) {
       deleteMutation.mutate(id);
     }
   };
@@ -65,13 +67,13 @@ export function AdminBrandsPage() {
   return (
     <div className="p-8" style={{ background: '#0B0A0C', minHeight: '100%' }}>
       <div className="flex justify-between items-center mb-8">
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: '2rem', color: 'rgba(243,242,245,0.9)' }}>Brands</h1>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: '2rem', color: 'rgba(243,242,245,0.9)' }}>{t('admin.manageBrands')}</h1>
         <button
           onClick={() => { setIsFormOpen(true); setEditingBrand(null); setFormData({ name: '', description: '', logoUrl: '', countryOfOrigin: '' }); }}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded hover:opacity-85 transition-opacity"
           style={{ background: 'hsl(43 82% 52%)', color: '#0B0A0C', fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 500 }}
         >
-          <Plus size={16} /> Add Brand
+          <Plus size={16} /> {t('admin.addBrand')}
         </button>
       </div>
 
@@ -81,13 +83,13 @@ export function AdminBrandsPage() {
           <div className="w-full max-w-lg p-6 border rounded" style={{ background: '#121115', borderColor: 'rgba(255,255,255,0.1)' }}>
             <div className="flex justify-between items-center mb-4">
               <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: 'rgba(243,242,245,0.9)' }}>
-                {editingBrand ? 'Edit Brand' : 'Create Brand'}
+                {editingBrand ? t('common.edit') : t('admin.addBrand')}
               </h2>
-              <button onClick={() => setIsFormOpen(false)}><X size={20} style={{ color: 'rgba(243,242,245,0.5)' }} /></button>
+              <button aria-label={t('common.close')} onClick={() => setIsFormOpen(false)}><X size={20} style={{ color: 'rgba(243,242,245,0.5)' }} /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block mb-2" style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'rgba(243,242,245,0.6)' }}>Name *</label>
+                <label className="block mb-2" style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', color: 'rgba(243,242,245,0.6)' }}>{t('admin.name')} *</label>
                 <input required value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full px-4 py-2 border rounded bg-transparent outline-none" style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(243,242,245,0.9)', fontFamily: 'var(--font-sans)', fontSize: '13px' }} />
               </div>
               <div>
@@ -106,15 +108,15 @@ export function AdminBrandsPage() {
                 <div className="p-3 border rounded flex items-start gap-2" style={{ background: 'rgba(244,67,54,0.05)', borderColor: 'rgba(244,67,54,0.2)' }}>
                   <AlertCircle size={14} style={{ color: 'rgb(244,67,54)' }} />
                   <p style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', color: 'rgb(244,67,54)' }}>
-                    {mutation.error instanceof Error ? mutation.error.message : 'An error occurred.'}
+                    {t('common.error')}
                   </p>
                 </div>
               )}
               <div className="flex gap-3">
                 <button type="submit" disabled={mutation.isPending} className="inline-flex items-center gap-2 px-5 py-2 rounded hover:opacity-85 transition-opacity disabled:opacity-50" style={{ background: 'hsl(43 82% 52%)', color: '#0B0A0C', fontFamily: 'var(--font-sans)', fontSize: '13px', fontWeight: 500 }}>
-                  <Save size={16} /> {mutation.isPending ? 'Saving...' : 'Save'}
+                  <Save size={16} /> {mutation.isPending ? t('admin.saving') : t('common.save')}
                 </button>
-                <button type="button" onClick={() => setIsFormOpen(false)} className="px-5 py-2 border rounded hover:bg-white/5 transition-colors" style={{ borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(243,242,245,0.6)', fontFamily: 'var(--font-sans)', fontSize: '13px' }}>Cancel</button>
+                <button type="button" onClick={() => setIsFormOpen(false)} className="px-5 py-2 border rounded hover:bg-white/5 transition-colors" style={{ borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(243,242,245,0.6)', fontFamily: 'var(--font-sans)', fontSize: '13px' }}>{t('common.cancel')}</button>
               </div>
             </form>
           </div>
@@ -124,16 +126,16 @@ export function AdminBrandsPage() {
       {/* List */}
       {brands.length === 0 ? (
         <div className="p-12 border rounded text-center" style={{ background: '#121115', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(243,242,245,0.4)' }}>No brands yet.</p>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', color: 'rgba(243,242,245,0.4)' }}>{t('brands.empty')}</p>
         </div>
       ) : (
         <div className="border rounded overflow-hidden" style={{ background: '#121115', borderColor: 'rgba(255,255,255,0.06)' }}>
           <table className="w-full">
             <thead style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
               <tr>
-                <th className="text-left px-6 py-3" style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(243,242,245,0.4)' }}>Name</th>
+                <th className="text-start px-6 py-3" style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(243,242,245,0.4)' }}>{t('admin.name')}</th>
                 <th className="text-left px-6 py-3" style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(243,242,245,0.4)' }}>Country</th>
-                <th className="text-right px-6 py-3" style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(243,242,245,0.4)' }}>Actions</th>
+                <th className="text-end px-6 py-3" style={{ fontFamily: 'var(--font-sans)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'rgba(243,242,245,0.4)' }}>{t('admin.actions')}</th>
               </tr>
             </thead>
             <tbody>

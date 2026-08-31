@@ -12,6 +12,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { mapProductForUI, type ProductUI } from '@/lib/adapters';
@@ -35,6 +36,7 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product, className, isWishlisted: isWishlistedProp }: ProductCardProps) {
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = React.useState(false);
   const [isAdding, setIsAdding] = React.useState(false);
 
@@ -58,7 +60,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
     if (isAdding || !productUI.inStock) return;
 
     if (!isAuthenticated) {
-      toast.error('Please sign in to add items to cart');
+      toast.error(t('catalog.signInCart'));
       return;
     }
 
@@ -69,9 +71,9 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
         productId: product.id,
         quantity: 1,
       });
-      toast.success('Added to cart');
+      toast.success(t('catalog.addedToCart'));
     } catch {
-      toast.error('Failed to add to cart');
+      toast.error(t('catalog.cartFailed'));
     } finally {
       setTimeout(() => setIsAdding(false), 1200);
     }
@@ -82,14 +84,14 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error('Please sign in to save to wishlist');
+      toast.error(t('catalog.signInWishlist'));
       return;
     }
 
     try {
       await toggleWishlist(product.id);
     } catch {
-      toast.error('Failed to update wishlist');
+      toast.error(t('catalog.wishlistFailed'));
     }
   };
 
@@ -121,7 +123,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
 
         {/* Badge */}
         {productUI.badge && (
-          <div className="absolute left-3 top-3">
+          <div className="absolute start-3 top-3">
             <ProductBadge badge={productUI.badge} />
           </div>
         )}
@@ -130,12 +132,12 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
         <button
           onClick={handleWishlistToggle}
           disabled={isTogglingWishlist || !isAuthenticated}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center transition-all duration-300"
+          className="absolute end-3 top-3 flex h-8 w-8 items-center justify-center transition-all duration-300"
           style={{
             opacity: isHovered || isWishlisted ? 1 : 0,
             transform: isHovered || isWishlisted ? 'translateY(0)' : 'translateY(-4px)',
           }}
-          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-label={isWishlisted ? t('catalog.removeWishlist') : t('catalog.addWishlist')}
         >
           <Heart
             size={15}
@@ -150,7 +152,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
           <button
             onClick={handleAddToCart}
             disabled={addToCart.isPending || isAdding}
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 py-3 transition-all duration-500 ease-kenz glass-dark"
+            className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 py-3 transition-all duration-500 ease-kenz glass-dark"
             style={{
               opacity: isHovered ? 1 : 0,
               transform: isHovered ? 'translateY(0)' : 'translateY(100%)',
@@ -158,7 +160,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
           >
             <ShoppingBag size={12} />
             <span className="text-caption-kenz font-sans font-medium uppercase tracking-[0.12em] text-foreground/85">
-              {isAdding ? 'ADDED' : 'ADD TO BAG'}
+              {isAdding ? t('catalog.added') : t('catalog.addToBag')}
             </span>
           </button>
         )}
@@ -167,7 +169,7 @@ export function ProductCard({ product, className, isWishlisted: isWishlistedProp
         {!productUI.inStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-kenz-bg/60">
             <span className="text-caption-kenz font-sans font-medium uppercase tracking-[0.15em] text-foreground/40">
-              Out of Stock
+              {t('catalog.outOfStock')}
             </span>
           </div>
         )}

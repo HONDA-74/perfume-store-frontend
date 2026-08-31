@@ -10,6 +10,8 @@ import * as authApi from '@/services/api/auth';
 import type {
   LoginCredentials,
   RegisterData,
+  RequestPasswordResetData,
+  ConfirmPasswordResetData,
 } from '@/types';
 
 /**
@@ -108,4 +110,12 @@ export function useLogout() {
       queryClient.clear();
     },
   });
+}
+
+export function useRequestPasswordReset() {
+  return useMutation({ mutationFn: (payload: RequestPasswordResetData) => authApi.requestPasswordReset(payload) });
+}
+
+export function useConfirmPasswordReset() {
+  return useMutation({ mutationFn: (payload: ConfirmPasswordResetData) => authApi.confirmPasswordReset(payload) });
 }

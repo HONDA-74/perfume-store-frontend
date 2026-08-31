@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Breadcrumb } from '@/components/shared/breadcrumb';
 import { EmptyState } from '@/components/shared/empty-state';
@@ -20,6 +21,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useUIStore } from '@/stores/ui.store';
 
 export function ProductDetailPage() {
+  const { t } = useTranslation();
   const { slug = '' } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const product = useProduct(slug);
@@ -38,9 +40,9 @@ export function ProductDetailPage() {
     return (
       <div className="mx-auto max-w-[1440px] px-6 py-24">
         <EmptyState
-          title="Product not found"
-          message="The fragrance you're looking for is unavailable."
-          actionLabel="Back to Shop"
+          title={t('product.notFound')}
+          message={t('product.unavailable')}
+          actionLabel={t('product.backShop')}
           onAction={() => navigate(ROUTES.shop)}
         />
       </div>
@@ -51,7 +53,7 @@ export function ProductDetailPage() {
   const isOutOfStock = item.stockQuantity < 1;
   const add = async () => {
     if (!authenticated) {
-      toast.error('Please sign in to add items to your bag');
+      toast.error(t('catalog.signInCart'));
       navigate(ROUTES.auth.login);
       return;
     }
@@ -60,7 +62,7 @@ export function ProductDetailPage() {
   };
   const toggle = async () => {
     if (!authenticated) {
-      toast.error('Please sign in to save fragrances');
+      toast.error(t('catalog.signInWishlist'));
       navigate(ROUTES.auth.login);
       return;
     }
@@ -72,8 +74,8 @@ export function ProductDetailPage() {
       <div className="mx-auto max-w-[1440px] px-5 py-10 sm:px-8 lg:px-12">
         <Breadcrumb
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Shop', href: ROUTES.shop },
+            { label: 'KENZ', href: '/' },
+            { label: t('nav.shop'), href: ROUTES.shop },
             ...(brand.data ? [{ label: brand.data.name, href: `/brands/${brand.data.slug}` }] : []),
             { label: item.name },
           ]}
@@ -101,7 +103,7 @@ export function ProductDetailPage() {
                 className="h-full w-full object-cover"
               />
               {badge && (
-                <div className="absolute top-4 left-4">
+                <div className="absolute start-4 top-4">
                   <ProductBadge badge={badge} />
                 </div>
               )}
@@ -139,7 +141,7 @@ export function ProductDetailPage() {
 
             <div className="mt-7">
               <p className="mb-3 text-[9px] font-medium tracking-[0.15em] text-white/35 uppercase">
-                Size
+                {t('product.size')}
               </p>
               <span className="inline-flex h-10 items-center border border-[#D4A017] px-5 text-[10px] font-medium tracking-[0.1em] text-[#D4A017] uppercase">
                 {item.sizeMl}ml
@@ -147,7 +149,7 @@ export function ProductDetailPage() {
             </div>
             <div className="mt-7">
               <p className="mb-3 text-[9px] font-medium tracking-[0.15em] text-white/35 uppercase">
-                Quantity
+                {t('product.quantity')}
               </p>
               <div className="inline-flex h-9 w-auto overflow-hidden border border-white/[0.08]">
                 <button
@@ -155,7 +157,7 @@ export function ProductDetailPage() {
                   onClick={() => setQuantity((value) => Math.max(1, value - 1))}
                   disabled={quantity <= 1}
                   className="flex h-full w-11 items-center justify-center text-white/35 transition-colors hover:bg-white/[0.03] hover:text-white/65 disabled:cursor-not-allowed disabled:text-white/15"
-                  aria-label="Decrease quantity"
+                  aria-label={t('product.decrease')}
                 >
                   −
                 </button>
@@ -170,7 +172,7 @@ export function ProductDetailPage() {
                   onClick={() => setQuantity((value) => Math.min(item.stockQuantity, value + 1))}
                   disabled={isOutOfStock || quantity >= item.stockQuantity}
                   className="flex h-full w-11 items-center justify-center text-white/40 transition-colors hover:bg-white/[0.03] hover:text-white/70 disabled:cursor-not-allowed disabled:text-white/15"
-                  aria-label="Increase quantity"
+                  aria-label={t('product.increase')}
                 >
                   +
                 </button>
@@ -178,7 +180,7 @@ export function ProductDetailPage() {
             </div>
             {item.stockQuantity > 0 && item.stockQuantity <= 5 && (
               <p className="mt-3 text-[10px] text-[#D4C3A3]/60">
-                Only {item.stockQuantity} left in stock
+                {t('product.lowStock', { count: item.stockQuantity })}
               </p>
             )}
             <button
@@ -187,7 +189,7 @@ export function ProductDetailPage() {
               className="mt-8 flex h-[52px] w-full items-center justify-center gap-2.5 bg-[#D4A017] text-[10px] font-semibold tracking-[0.18em] text-[#0B0A0C] uppercase transition-opacity hover:opacity-90 disabled:opacity-35"
             >
               <ShoppingBag size={13} />
-              {isOutOfStock ? 'Out of Stock' : addToCart.isPending ? 'Adding…' : 'Add to Bag'}
+              {isOutOfStock ? t('catalog.outOfStock') : addToCart.isPending ? t('catalog.adding') : t('catalog.addToBag')}
             </button>
             <button
               onClick={toggle}
@@ -198,10 +200,10 @@ export function ProductDetailPage() {
                 fill={wishlisted ? 'currentColor' : 'none'}
                 className={wishlisted ? 'text-[#D4A017]' : ''}
               />
-              {wishlisted ? 'Saved to Wishlist' : 'Save to Wishlist'}
+              {wishlisted ? t('catalog.savedWishlist') : t('catalog.saveWishlist')}
             </button>
             <p className="mt-10 text-[9px] font-light text-white/20">
-              Complimentary shipping on qualifying orders. Discreet packaging.
+              {t('product.shipping')}
             </p>
           </section>
         </div>
@@ -209,12 +211,12 @@ export function ProductDetailPage() {
         {!!(item.notes?.top?.length || item.notes?.middle?.length || item.notes?.base?.length) && (
           <section className="mt-12 border-t border-white/[0.06] pt-14">
             <h2 className="mb-10 font-serif text-[clamp(1.8rem,3vw,2.4rem)] text-white/85">
-              The Composition
+               {t('product.notes')}
             </h2>
             <div className="grid gap-8 sm:grid-cols-3">
-              <NoteGroup label="Top Notes" notes={item.notes?.top} />
-              <NoteGroup label="Heart Notes" notes={item.notes?.middle} />
-              <NoteGroup label="Base Notes" notes={item.notes?.base} />
+              <NoteGroup label={t('product.topNotes')} notes={item.notes?.top} />
+              <NoteGroup label={t('product.heartNotes')} notes={item.notes?.middle} />
+              <NoteGroup label={t('product.baseNotes')} notes={item.notes?.base} />
             </div>
           </section>
         )}

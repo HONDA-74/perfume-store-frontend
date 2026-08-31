@@ -19,6 +19,9 @@ import type {
   User,
   RefreshTokenRequest,
   RefreshTokenResponse,
+  RequestPasswordResetData,
+  ConfirmPasswordResetData,
+  AuthMessageResponse,
 } from '@/types';
 
 /**
@@ -69,5 +72,15 @@ export async function refreshToken(
  */
 export async function getCurrentUser(): Promise<User> {
   const { data } = await apiClient.get<ApiSuccessResponse<User>>('/auth/me');
+  return data.data;
+}
+
+export async function requestPasswordReset(payload: RequestPasswordResetData): Promise<AuthMessageResponse> {
+  const { data } = await apiClient.post<ApiSuccessResponse<AuthMessageResponse>>('/auth/password-reset/request', payload);
+  return data.data;
+}
+
+export async function confirmPasswordReset(payload: ConfirmPasswordResetData): Promise<AuthMessageResponse> {
+  const { data } = await apiClient.post<ApiSuccessResponse<AuthMessageResponse>>('/auth/password-reset/confirm', payload);
   return data.data;
 }

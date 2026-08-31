@@ -5,14 +5,18 @@
  */
 
 import * as React from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { X, User, Heart, ShoppingBag, Sparkles, LogOut } from 'lucide-react';
 import { useUIStore } from '@/stores/ui.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { ROUTES } from '@/constants';
 import { useLogout } from '@/hooks/api/use-auth';
+import { LanguageToggle } from '@/components/ui/language-toggle';
 
 export function MobileNav() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { isMobileNavOpen, closeMobileNav } = useUIStore();
   const authStore = useAuthStore();
   const isAuthenticated = authStore.isAuthenticated();
@@ -47,6 +51,7 @@ export function MobileNav() {
   const handleLogout = async () => {
     await logout.mutateAsync();
     closeMobileNav();
+    navigate(ROUTES.home, { replace: true });
   };
 
   return (
@@ -59,10 +64,10 @@ export function MobileNav() {
 
       {/* Drawer */}
       <aside
-        className="fixed left-0 top-0 z-[101] flex h-full w-full max-w-sm flex-col bg-kenz-bg shadow-2xl"
+        className="fixed start-0 top-0 z-[101] flex h-full w-full max-w-sm flex-col bg-kenz-bg shadow-2xl"
         role="dialog"
         aria-modal="true"
-        aria-label="Mobile navigation"
+        aria-label={t('nav.mobileNavigation')}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-kenz-border px-6 py-4">
@@ -76,7 +81,7 @@ export function MobileNav() {
           <button
             onClick={closeMobileNav}
             className="text-foreground/70 transition-colors hover:text-foreground"
-            aria-label="Close menu"
+            aria-label={t('nav.closeMenu')}
           >
             <X size={20} />
           </button>
@@ -106,21 +111,21 @@ export function MobileNav() {
               onClick={closeMobileNav}
               className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
             >
-              Shop
+              {t('nav.shop')}
             </Link>
             <Link
               to={ROUTES.brands}
               onClick={closeMobileNav}
               className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
             >
-              Brands
+              {t('nav.brands')}
             </Link>
             <Link
               to={ROUTES.collections}
               onClick={closeMobileNav}
               className="block rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
             >
-              Collections
+              {t('nav.collections')}
             </Link>
             <Link
               to={ROUTES.scentMatchmaker}
@@ -128,7 +133,7 @@ export function MobileNav() {
               className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
             >
               <Sparkles size={16} />
-              Scent Finder
+              {t('nav.scentFinder')}
             </Link>
           </nav>
 
@@ -141,7 +146,7 @@ export function MobileNav() {
                 className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
               >
                 <User size={16} />
-                My Account
+                {t('nav.myAccount')}
               </Link>
               <Link
                 to={ROUTES.wishlist}
@@ -149,7 +154,7 @@ export function MobileNav() {
                 className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
               >
                 <Heart size={16} />
-                Wishlist
+                {t('nav.wishlist')}
               </Link>
               <Link
                 to={ROUTES.cart}
@@ -157,14 +162,14 @@ export function MobileNav() {
                 className="flex items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
               >
                 <ShoppingBag size={16} />
-                Cart
+                {t('nav.cart')}
               </Link>
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2 rounded-md px-4 py-3 font-sans text-sm uppercase tracking-wider text-foreground/70 transition-colors hover:bg-kenz-surface/50 hover:text-foreground"
               >
                 <LogOut size={16} />
-                Sign Out
+                {t('nav.signOut')}
               </button>
             </div>
           )}
@@ -177,17 +182,18 @@ export function MobileNav() {
                 onClick={closeMobileNav}
                 className="block w-full rounded-md bg-kenz-gold px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-kenz-bg transition-colors hover:bg-kenz-champagne"
               >
-                Sign In
+                {t('nav.signIn')}
               </Link>
               <Link
                 to={ROUTES.auth.register}
                 onClick={closeMobileNav}
                 className="block w-full rounded-md border border-kenz-border px-6 py-3 text-center font-sans text-sm font-medium uppercase tracking-wider text-foreground transition-colors hover:border-kenz-gold hover:text-kenz-gold"
               >
-                Create Account
+                {t('auth.createTitle')}
               </Link>
             </div>
           )}
+          <div className="mt-6 border-t border-kenz-border pt-6"><LanguageToggle showLabel className="w-full" /></div>
         </div>
       </aside>
     </>

@@ -61,6 +61,21 @@ export interface RegisterData {
   fullName: string;
 }
 
+export interface RequestPasswordResetData {
+  email: string;
+  locale?: 'en' | 'ar';
+}
+
+export interface ConfirmPasswordResetData {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface AuthMessageResponse {
+  message: string;
+}
+
 /**
  * Combined auth response from login/register.
  * Backend returns: { accessToken, refreshToken, user }

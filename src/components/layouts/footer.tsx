@@ -5,9 +5,11 @@
  */
 
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/constants';
 
 export function Footer() {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -23,14 +25,14 @@ export function Footer() {
               KENZ
             </Link>
             <p className="mt-4 text-sm text-foreground/60">
-              Curating exceptional fragrances for the discerning connoisseur.
+              {t('footer.description')}
             </p>
           </div>
 
           {/* Shop */}
           <div>
             <h3 className="mb-4 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-              Shop
+              {t('nav.shop')}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -38,7 +40,7 @@ export function Footer() {
                   to={ROUTES.shop}
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  All Products
+                  {t('common.viewAll')}
                 </Link>
               </li>
               <li>
@@ -46,7 +48,7 @@ export function Footer() {
                   to="/brands"
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Brands
+                  {t('nav.brands')}
                 </Link>
               </li>
               <li>
@@ -54,7 +56,7 @@ export function Footer() {
                   to="/collections"
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Collections
+                  {t('nav.collections')}
                 </Link>
               </li>
               <li>
@@ -62,7 +64,7 @@ export function Footer() {
                   to={ROUTES.scentMatchmaker}
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Scent Finder
+                  {t('nav.scentFinder')}
                 </Link>
               </li>
             </ul>
@@ -71,7 +73,7 @@ export function Footer() {
           {/* Customer Care */}
           <div>
             <h3 className="mb-4 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-              Customer Care
+              {t('footer.service')}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -79,7 +81,7 @@ export function Footer() {
                   to={ROUTES.account.root}
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  My Account
+                  {t('nav.myAccount')}
                 </Link>
               </li>
               <li>
@@ -87,7 +89,7 @@ export function Footer() {
                   to={ROUTES.account.orders}
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Order History
+                  {t('account.orderHistory')}
                 </Link>
               </li>
               <li>
@@ -95,7 +97,7 @@ export function Footer() {
                   to={ROUTES.wishlist}
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Wishlist
+                  {t('nav.wishlist')}
                 </Link>
               </li>
               <li>
@@ -103,7 +105,7 @@ export function Footer() {
                   to="/contact"
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Contact Us
+                  {t('footer.service')}
                 </Link>
               </li>
             </ul>
@@ -112,7 +114,7 @@ export function Footer() {
           {/* Information */}
           <div>
             <h3 className="mb-4 font-sans text-sm font-medium uppercase tracking-wider text-foreground">
-              Information
+              {t('footer.explore')}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -120,7 +122,7 @@ export function Footer() {
                   to="/about"
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  About Us
+                  {t('nav.heritage')}
                 </Link>
               </li>
               <li>
@@ -128,7 +130,7 @@ export function Footer() {
                   to="/shipping"
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Shipping & Returns
+                  {t('cart.shipping')}
                 </Link>
               </li>
               <li>
@@ -136,7 +138,7 @@ export function Footer() {
                   to="/privacy"
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Privacy Policy
+                  {t('footer.account')}
                 </Link>
               </li>
               <li>
@@ -144,7 +146,7 @@ export function Footer() {
                   to="/terms"
                   className="text-sm text-foreground/60 transition-colors hover:text-kenz-gold"
                 >
-                  Terms of Service
+                  {t('checkout.payment')}
                 </Link>
               </li>
             </ul>
@@ -153,7 +155,7 @@ export function Footer() {
 
         <div className="mt-12 border-t border-kenz-border pt-8 text-center">
           <p className="text-sm text-foreground/50">
-            © {currentYear} KENZ. All rights reserved.
+            © {currentYear} KENZ. {t('footer.rights')}
           </p>
         </div>
       </div>

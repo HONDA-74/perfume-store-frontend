@@ -4,6 +4,7 @@
  */
 
 import { Package, Tag, FolderOpen, ShoppingCart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useProducts } from '@/hooks/api/use-products';
 import { useBrands } from '@/hooks/api/use-brands';
 import { useCategories } from '@/hooks/api/use-categories';
@@ -17,6 +18,7 @@ interface StatCard {
 }
 
 export function AdminDashboardPage() {
+  const { t } = useTranslation();
   const productsQuery = useProducts({ limit: 1 });
   const brandsQuery = useBrands({ limit: 1 });
   const categoriesQuery = useCategories({ limit: 1 });
@@ -31,22 +33,22 @@ export function AdminDashboardPage() {
 
   const stats: StatCard[] = [
     {
-      label: 'Total Products',
+      label: t('admin.totalProducts'),
       value: productsQuery.data?.meta.totalItems ?? 0,
       icon: Package,
     },
     {
-      label: 'Total Brands',
+      label: t('admin.totalBrands'),
       value: brandsQuery.data?.meta.totalItems ?? 0,
       icon: Tag,
     },
     {
-      label: 'Total Categories',
+      label: t('catalog.category'),
       value: categoriesQuery.data?.meta.totalItems ?? 0,
       icon: FolderOpen,
     },
     {
-      label: 'Total Orders',
+      label: t('account.totalOrders'),
       value: ordersQuery.data?.meta.totalItems ?? 0,
       icon: ShoppingCart,
     },
@@ -56,10 +58,10 @@ export function AdminDashboardPage() {
     <div className="p-8" style={{ background: '#0B0A0C', minHeight: '100%' }}>
       <div className="mb-8">
         <h1 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, fontSize: '2rem', color: 'rgba(243,242,245,0.9)', marginBottom: '6px' }}>
-          Dashboard
+          {t('admin.title')}
         </h1>
         <p style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', fontWeight: 300, color: 'rgba(243,242,245,0.35)' }}>
-          Overview of your store
+          {t('admin.welcome')}
         </p>
       </div>
 
@@ -90,7 +92,7 @@ export function AdminDashboardPage() {
 
       <div className="mt-8 p-6 border rounded" style={{ background: '#121115', borderColor: 'rgba(255,255,255,0.06)' }}>
         <p style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 300, color: 'rgba(243,242,245,0.4)', fontStyle: 'italic' }}>
-          Note: Dashboard displays derived metrics from paginated API responses. Advanced analytics (revenue charts, growth metrics, conversion rates) require dedicated backend analytics endpoints.
+          {t('admin.welcome')}
         </p>
       </div>
     </div>

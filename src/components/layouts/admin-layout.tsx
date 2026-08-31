@@ -15,14 +15,17 @@ import {
 import { useAuthStore } from '@/stores/auth.store';
 import { ROUTES } from '@/constants/routes.constants';
 import { useLogout } from '@/hooks/api/use-auth';
+import { useTranslation } from 'react-i18next';
+import { LanguageToggle } from '@/components/ui/language-toggle';
 
 const adminNav = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: ROUTES.admin.root },
-  { label: 'Products', icon: Package, path: ROUTES.admin.products },
-  { label: 'Brands', icon: Tag, path: ROUTES.admin.brands },
+  { key: 'admin.dashboard', icon: LayoutDashboard, path: ROUTES.admin.root },
+  { key: 'admin.products', icon: Package, path: ROUTES.admin.products },
+  { key: 'admin.brands', icon: Tag, path: ROUTES.admin.brands },
 ];
 
 export function AdminLayout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
@@ -36,7 +39,7 @@ export function AdminLayout() {
   return (
     <div className="flex h-screen" style={{ background: '#0B0A0C' }}>
       {/* Sidebar */}
-      <aside className="w-64 border-r flex flex-col" style={{ borderColor: 'rgba(255,255,255,0.06)', background: '#0F0E10' }}>
+      <aside className="flex w-64 flex-col border-e" style={{ borderColor: 'rgba(255,255,255,0.06)', background: '#0F0E10' }}>
         {/* Logo */}
         <div className="p-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <Link to={ROUTES.home}>
@@ -44,7 +47,7 @@ export function AdminLayout() {
               KENZ
             </p>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: '9px', fontWeight: 300, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(212,195,163,0.4)', marginTop: '2px' }}>
-              Admin
+              {t('nav.admin')}
             </p>
           </Link>
         </div>
@@ -68,9 +71,9 @@ export function AdminLayout() {
               >
                 <Icon size={18} />
                 <span style={{ fontFamily: 'var(--font-sans)', fontSize: '13px', fontWeight: 400 }}>
-                  {item.label}
+                  {t(item.key)}
                 </span>
-                {isActive && <ChevronRight size={14} className="ml-auto" />}
+                {isActive && <ChevronRight size={14} className="directional-icon ms-auto" />}
               </Link>
             );
           })}
@@ -83,7 +86,7 @@ export function AdminLayout() {
               {user?.fullName || user?.email}
             </p>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: '10px', fontWeight: 300, color: 'rgba(243,242,245,0.3)', marginTop: '2px' }}>
-              Administrator
+              {t('nav.admin')}
             </p>
           </div>
           <button
@@ -92,8 +95,9 @@ export function AdminLayout() {
             style={{ fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 300, color: 'rgba(243,242,245,0.4)' }}
           >
             <LogOut size={14} />
-            Logout
+            {t('admin.signOut')}
           </button>
+          <LanguageToggle showLabel className="mt-2 w-full" />
         </div>
       </aside>
 
