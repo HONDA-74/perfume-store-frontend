@@ -84,6 +84,9 @@ export function LandingNavbar() {
           boxShadow: scrolled
             ? '0 8px 32px hsl(0 0% 0% / 0.35), inset 0 1px 0 hsl(0 0% 100% / 0.04)'
             : '0 4px 24px hsl(0 0% 0% / 0.25), inset 0 1px 0 hsl(0 0% 100% / 0.04)',
+          /* Lift the pill above hero & page content when mobile menu is open */
+          position: 'relative',
+          zIndex: mobileOpen ? 9999 : undefined,
         }}
       >
         {/* ── Inner row ───────────────────────────────────────────────── */}
@@ -205,7 +208,14 @@ export function LandingNavbar() {
             className="lg:hidden border-t"
             style={{ borderColor: 'hsl(43 82% 52% / 0.12)' }}
           >
-            <div className="flex flex-col py-3 px-5">
+            {/* Fully opaque background so page content cannot bleed through */}
+            <div
+              className="flex flex-col py-3 px-5"
+              style={{
+                background: 'hsl(0 0% 5%)',
+                borderRadius: '0 0 10px 10px',
+              }}
+            >
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
